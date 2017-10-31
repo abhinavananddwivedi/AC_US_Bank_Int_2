@@ -1,0 +1,45 @@
+---
+title: "US Bank Integration 2.0"
+output: pdf_document
+documentclass: article
+geometry: margin = 1.5in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+```
+
+This is the restarting of the US bank integration project with better quality data compiled from WRDS. 
+
+### Directory Management
+
+First we need to be able to navigate the directory where data are stored.
+
+```{r directory_management}
+
+data_folder_path <- "../Data_Bank_Int/"
+file_path <- paste0(data_folder_path, "SICCD_6000_6999_20171031.csv")
+
+```
+
+### Tidy Reading
+
+After navigating to the relevant folder, one needs to be able to read the data file, stored in this case, with a `.csv` extension.
+
+```{r reading_data, warning = F}
+
+data <- readr::read_csv(file_path, 
+                        na = c("", "NA", "NaN", "C", "B"), 
+                        col_types = 
+                          cols(`Cumulative Factor to Adjust Shares/Vol` = col_double(),
+                               `Cumulative Factor to Adjust Prices` = col_double(),
+                               `Factor to Adjust Price` = col_double(),
+                               `Factor to Adjust Shares` = col_double(),
+                               `CUSIP Header` = col_character(),
+                               CUSIP = col_character()
+                               ))
+
+```
