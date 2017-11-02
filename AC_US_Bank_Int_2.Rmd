@@ -103,8 +103,8 @@ First we need to be able to navigate to the directory where data are stored.
 ```{r directory_management}
 
 data_folder_path <- "../Data_Bank_Int/"
-file_path <- paste0(data_folder_path, "SICCD_6000_6999_20171031.csv")
-
+#file_path <- paste0(data_folder_path, "SICCD_6000_6999_20171031.csv")
+file_path <- paste0(data_folder_path, "SICCD_6020_6021_6022_6029_20171102.csv")
 ```
 
 ### Tidy Reading
@@ -114,14 +114,15 @@ After navigating to the relevant folder, one needs to be able to read the data f
 ```{r reading_data, warning = F}
 
 data <- readr::read_csv(file_path, 
-                        na = c("", "NA", "NaN", "C", "B"), 
+                        na = c("", "NA", "NaN", "C", "B", "A", "S", "T"), 
                         col_types = 
                           cols(`Cumulative Factor to Adjust Shares/Vol` = col_double(),
                                `Cumulative Factor to Adjust Prices` = col_double(),
                                `Factor to Adjust Price` = col_double(),
                                `Factor to Adjust Shares` = col_double(),
                                `CUSIP Header` = col_character(),
-                               CUSIP = col_character()
+                               CUSIP = col_character(),
+                               `Delisting Price` = col_double()
                                )
                         )
 
