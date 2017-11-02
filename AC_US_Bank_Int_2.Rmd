@@ -4,6 +4,7 @@ output: pdf_document
 documentclass: article
 geometry: margin = 1.5in
 bibliography: Working_Paper.bib
+linkcolor: blue
 ---
 
 ```{r setup, include=FALSE}
@@ -17,9 +18,9 @@ library(xml2)
 This is the restarting of the US bank integration project with better quality data compiled from WRDS. 
 
 
-### Standard Industrial Classification Code
+## Standard Industrial Classification Code
 
-We include a short description of SIC codes and what they stand for. The following code scrapes the SIC code tables from the corresponding Wikipedia page.
+We include a short description of SIC codes and what they stand for. The following code scrapes the SIC code tables from the corresponding Wikipedia page. The full list can be found on the link: <http://www.ehso.com/siccodes.php>
 
 ```{r SIC_Codes_Industries}
 
@@ -27,7 +28,8 @@ url_SIC <- "https://en.wikipedia.org/wiki/Standard_Industrial_Classification"
 webpage <- xml2::read_html(url_SIC)
 SIC_tables <- rvest::html_nodes(webpage, "table")
 table_1 <- rvest::html_table(SIC_tables[2], fill = F)
-knitr::kable(table_1[[1]], caption = "SIC codes for industries")  
+knitr::kable(table_1[[1]], caption = "SIC codes for industries. 
+             The acronym NEC stands for 'not elsewhere classified'")  
 ```
 
 As is clearly visible, the banking and finance industry is found between the SIC codes 6000 to 6799. Hence in order to collect information on banks, we need to focus on this particular subset. In the following set of codes, we display only the finance industry subgroups in the above range.
@@ -39,6 +41,46 @@ table_2_fin <- table_2[[1]] %>% dplyr::filter(`SIC Code` %in% sic_fin)
 knitr::kable(table_2_fin, caption = "SIC codes for finance and 
              related industry groups")
 ```
+
+Further, we extract the relevant portion of the SIC table from the full list to focus on the banking and finance industry:
+
+|SIC Code     | Industry                |
+|:------------|:------------------------|
+|60           |DEPOSITORY INSTITUTIONS  |
+| 601         |CENTRAL RESERVE DEPOSITORY INSTITUTIONS|
+|   6011      |FEDERAL RESERVE BANKS |
+|   6019      |CENTRAL RESERVE DEPOSITORY INSTITUTIONS, NEC|
+| 602         |COMMERCIAL BANKS |
+|   6021      |NATIONAL COMMERCIAL BANKS |
+|   6022      |STATE COMMERCIAL BANKS |
+|   6029      |COMMERCIAL BANKS, NEC|
+| 603         |SAVINGS INSTITUTIONS |
+|   6035      |SAVINGS INSTITUTIONS, FEDERALLY CHARTERED|
+|   6036      |SAVINGS INSTITUTIONS, NOT FEDERALLY CHARTERED|
+| 606         |CREDIT UNIONS |
+|   6061      |CREDIT UNIONS, FEDERALLY CHARTERED |
+|   6062      |CREDIT UNIONS, NOT FEDERALLY CHARTERED |
+| 608         |FOREIGN BANKING AND BRANCHES AND AGENCIES OF FOREIGN BANKS |
+|   6081      |BRANCHES AND AGENCIES OF FOREIGN BANKS |
+|   6082      |FOREIGN TRADE AND INTERNATIONAL BANKING INSTITUTIONS |
+| 609         |FUNCTIONS RELATED TO DEPOSITORY BANKING |
+|   6091      |NONDEPOSIT TRUST FACILITIES |
+|   6099      |FUNCTIONS RELATED TO DEPOSITORY BANKING, NEC|
+|61           |NONDEPOSITORY CREDIT INSTITUTIONS |
+| 611         |FEDERAL AND FEDERALLY-SPONSORED CREDIT AGENCIES |
+|   6111      |FEDERAL AND FEDERALLY-SPONSORED CREDIT AGENCIES |
+| 614         |PERSONAL CREDIT INSTITUTIONS |
+|   6141      |PERSONAL CREDIT INSTITUTIONS |
+| 615         |BUSINESS CREDIT INSTITUTIONS |
+|   6153      |SHORT-TERM BUSINESS CREDIT INSTITUTIONS, EXCEPT AGRICULTURAL |
+|   6159      |MISCELLANEOUS BUSINESS CREDIT INSTITUTIONS |
+| 616         |MORTGAGE BANKERS AND BROKERS |
+|   6162      |MORTGAGE BANKERS AND LOAN CORRESPONDENTS |
+|   6163      |LOAN BROKERS |
+|67           |HOLDING AND OTHER INVESTMENT OFFICES |
+| 671         |HOLDING OFFICES |
+|   6712      |OFFICES OF BANK HOLDING COMPANIES |
+|   6719      |OFFICES OF HOLDING COMPANIES, NEC|
 
 We follow @Fahlenbrach_et_al:2016 in constructing our sample of US banks. We quote them (p. 6):
 
@@ -52,9 +94,11 @@ Additionally we also seek guidance from the sample construction in @Adrian_Brunn
 >real estate companies correspond to SIC codes 65–6, and broker-dealers are SIC code 67 (except for
 >the bank holding companies, 6712).
 
+Since our sample and definition of the US banking system follows the discussion in @Fahlenbrach_et_al:2016 more closely, we try to construct our sample as close to theirs as we can.
+
 ### Directory Management
 
-First we need to be able to navigate the directory where data are stored.
+First we need to be able to navigate to the directory where data are stored.
 
 ```{r directory_management}
 
