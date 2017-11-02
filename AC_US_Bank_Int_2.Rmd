@@ -40,11 +40,17 @@ knitr::kable(table_2_fin, caption = "SIC codes for finance and
              related industry groups")
 ```
 
-We follow @Fahlenbrach_et_al:2016 in constructing our sample of US banks. We quote them:
+We follow @Fahlenbrach_et_al:2016 in constructing our sample of US banks. We quote them (p. 6):
 
 >We construct our sample as follows. We search the CRSP database for all firms that have an SIC code
 >between 6020 and 6079 (Commercial Banks, Savings Institutions, and Credit Unions) or from 6710
 >through 6712 (Offices of Bank Holding Companies) at some point in the firm’s history.
+
+Additionally we also seek guidance from the sample construction in @Adrian_Brunnermeier:2016:
+
+>Banks correspond to SIC codes 60, 61, and 6712; insurance companies correspond to SIC codes 63–64, 
+>real estate companies correspond to SIC codes 65–6, and broker-dealers are SIC code 67 (except for
+>the bank holding companies, 6712).
 
 ### Directory Management
 
@@ -77,3 +83,7 @@ data <- readr::read_csv(file_path,
 
 bank_name <- data %>% dplyr::distinct(`Company Name`)
 ```
+
+
+
+# References
