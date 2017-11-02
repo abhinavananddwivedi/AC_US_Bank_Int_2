@@ -10,9 +10,24 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rmarkdown)
 library(knitr)
+library(xml2)
 ```
 
 This is the restarting of the US bank integration project with better quality data compiled from WRDS. 
+
+
+### Standard Industrial Classification Code
+
+We include a short description of SIC codes and what they stand for.
+
+```{r SIC_Codes}
+
+url_SIC <- "https://en.wikipedia.org/wiki/Standard_Industrial_Classification"
+webpage <- xml2::read_html(url_SIC)
+SIC_tables <- rvest::html_nodes(webpage, "table")
+table_1 <- rvest::html_table(SIC_tables[2], fill = F)
+knitr::kable(table_1[[1]])  
+```
 
 ### Directory Management
 
@@ -40,6 +55,8 @@ data <- readr::read_csv(file_path,
                                `Factor to Adjust Shares` = col_double(),
                                `CUSIP Header` = col_character(),
                                CUSIP = col_character()
-                               ))
+                               )
+                        )
 
+bank_name <- data %>% dplyr::distinct(`Company Name`)
 ```
