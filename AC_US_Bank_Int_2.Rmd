@@ -3,6 +3,7 @@ title: "US Bank Integration 2.0"
 output: pdf_document
 documentclass: article
 geometry: margin = 1.5in
+bibliography: Working_Paper.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -18,16 +19,32 @@ This is the restarting of the US bank integration project with better quality da
 
 ### Standard Industrial Classification Code
 
-We include a short description of SIC codes and what they stand for.
+We include a short description of SIC codes and what they stand for. The following code scrapes the SIC code tables from the corresponding Wikipedia page.
 
-```{r SIC_Codes}
+```{r SIC_Codes_Industries}
 
 url_SIC <- "https://en.wikipedia.org/wiki/Standard_Industrial_Classification"
 webpage <- xml2::read_html(url_SIC)
 SIC_tables <- rvest::html_nodes(webpage, "table")
 table_1 <- rvest::html_table(SIC_tables[2], fill = F)
-knitr::kable(table_1[[1]])  
+knitr::kable(table_1[[1]], caption = "SIC codes for industries")  
 ```
+
+As is clearly visible, the banking and finance industry is found between the SIC codes 6000 to 6799. Hence in order to collect information on banks, we need to focus on this particular subset. In the following set of codes, we display only the finance industry subgroups in the above range.
+
+```{r SIC_Codes_Finance}
+table_2 <- rvest::html_table(SIC_tables[3], fill = F)
+sic_fin <- seq(6000, 6799)
+table_2_fin <- table_2[[1]] %>% dplyr::filter(`SIC Code` %in% sic_fin)
+knitr::kable(table_2_fin, caption = "SIC codes for finance and 
+             related industry groups")
+```
+
+We follow @Fahlenbrach_et_al:2016 in constructing our sample of US banks. We quote them:
+
+>We construct our sample as follows. We search the CRSP database for all firms that have an SIC code
+>between 6020 and 6079 (Commercial Banks, Savings Institutions, and Credit Unions) or from 6710
+>through 6712 (Offices of Bank Holding Companies) at some point in the firm’s history.
 
 ### Directory Management
 
