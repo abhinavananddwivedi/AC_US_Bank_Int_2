@@ -104,27 +104,17 @@ First we need to be able to navigate to the directory where data are stored.
 
 data_folder_path <- "../Data_Bank_Int/"
 file_path <- paste0(data_folder_path, "SICCD_6020-6079_6710-6712_20171105.dta")
-#file_path <- paste0(data_folder_path, "SICCD_6020_6021_6022_6029_20171102.dta")
 ```
+
+The relevant file here is a Stata file with extension `.dta`. There is a special reason for choosing the Stata file format instead of the usual Excel or `.csv` format preferred for doing data analysis in `R`. This is so since the file containing daily stock prices of all banks in the US is very large and its number of rows exceeds the maximum row limit in Excel, which is around 1 million. Hence if one were to download and read the data via Excel, only the first one million or so rows will be displayed and stored.[^1]
+
+[^1]: A previous difficulty encountered in this project was that the list of banks corresponding to SIC codes between 6000-6799 did not include the G-SIBs. However, the reason for that mystery was the lack of rows from 1-2 million being displayed/stored in Excel due to its size limitation.
 
 ### Tidy Reading
 
-After navigating to the relevant folder, one needs to be able to read the data file, stored in this case, with a `.csv` extension.
+After navigating to the relevant folder, one needs to be able to read the data file, stored in this case, with a `.dta` extension. 
 
 ```{r reading_data, warning = F}
-
-# data <- readr::read_csv(file_path, 
-#                         na = c("", "NA", "NaN", "C", "B", "A", "S", "T"), 
-#                         col_types = 
-#                           cols(`Cumulative Factor to Adjust Shares/Vol` = col_double(),
-#                                `Cumulative Factor to Adjust Prices` = col_double(),
-#                                `Factor to Adjust Price` = col_double(),
-#                                `Factor to Adjust Shares` = col_double(),
-#                                `CUSIP Header` = col_character(),
-#                                CUSIP = col_character(),
-#                                `Delisting Price` = col_double()
-#                                )
-#                         )
 
 data <- haven::read_dta(file_path)
 
