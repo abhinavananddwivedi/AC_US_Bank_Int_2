@@ -103,7 +103,7 @@ First we need to be able to navigate to the directory where data are stored.
 ```{r directory_management}
 
 data_folder_path <- "../Data_Bank_Int/"
-file_path <- paste0(data_folder_path, "SICCD_6000_6799_20171105.dta")
+file_path <- paste0(data_folder_path, "SICCD_6020-6079_6710-6712_20171105.dta")
 #file_path <- paste0(data_folder_path, "SICCD_6020_6021_6022_6029_20171102.dta")
 ```
 
