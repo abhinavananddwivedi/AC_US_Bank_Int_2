@@ -15,7 +15,6 @@ file_name <- "SICCD_6020-6079_6710-6712_20171105.dta"
 file_path <- paste0(data_folder_path, file_name)
 
 # Read .dta file for US banks
-
 data_US <- haven::read_dta(file_path)
 
 #bank_name <- data %>% dplyr::distinct(comnam)
