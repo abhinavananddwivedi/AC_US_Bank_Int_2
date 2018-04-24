@@ -56,9 +56,19 @@ qtr_grid <- qtr_min:qtr_max
 
 data_list_US <- rep(list(NULL), num_bank_US)
 
-for (i in seq_along(1:num_bank_US))
+#these banks have inconsistent, duplicated data, ignore them
+ind_bank_ignore <- c(57, 99, 128, 210, 217, 335, 388,
+                     509, 559, 589, 597, 626, 934,
+                     1051, 1300, 1361, 1679, 1691) 
+
+ind_bank_use <- setdiff((1:num_bank_US), ind_bank_ignore)
+
+#for (i in seq_along(1:num_bank_US) & !(i %in% ind_bank_ignore))
+for (i in ind_bank_use)
 {
-  temp <- data_US_bank %>% dplyr::filter(comnam == name_bank_US[i])
+  temp <- data_US_bank %>% 
+    dplyr::filter(comnam == name_bank_US[i]) %>%
+    dplyr::distinct(.) #delete duplicate entries
   
   ### Quarterization of returns
   for (j in seq_along(years))
@@ -86,13 +96,76 @@ for (i in seq_along(1:num_bank_US))
   }
   
   data_list_US[[i]] <- temp
+  
+  ### List format to Data Matrix format conversion (for covariance matrices) ###
+  
+  # The following set of lines constructs a data matrix with banks as columns and
+  # rows as daily returns
+  if (i == 1) #for the first bank
+  {
+    temp_df <- data_list_US[[i]] %>% 
+      dplyr::select(date, comnam, ret, qtr_num) %>%
+      tidyr::spread(., comnam, ret)
+  } else if (i >= 2) #for the other banks
+  {
+    temp_t <- data_list_US[[i]] %>% 
+      dplyr::select(date, comnam, ret, qtr_num) %>%
+      tidyr::spread(., comnam, ret)
+    
+    # Join to earlier frames repeatedly to get the full data matrix
+    temp_df <- dplyr::full_join(temp_df, temp_t, by = c('date', 'qtr_num'))
+  }
+  
 }
 
 names(data_list_US) <- name_bank_US
 
 data_list_US_df <- dplyr::bind_rows(data_list_US)
 
+#####################################################################################
+### Quarterly covariance matrices and their eigenvector computation #################
+#####################################################################################
 
-######################################################################################
+list_ret_banks <- list()
+list_cov <- list()
+list_eig_vec <- list()
+list_eig_val <- list()
+pc_out_of_sample <- list()
+var_share <- rep(list(NULL), qtr_max)
+
+source('func_NA_killer.R', echo = F)
+
+for (k in qtr_grid)
+{
+  # Isolate return matrix for that quarter
+  temp_mat_q <- temp_df %>% 
+    dplyr::filter(qtr_num == qtr_grid[k]) %>%
+    dplyr::select(-c(date, qtr_num)) 
+  
+  temp_q <- func_NA_killer(temp_mat_q) #kill the full NA columns and rows
+  
+  # Store quarterly bank returns for quarterly regressions
+  list_ret_banks[[k]] <- temp_q
+  
+  # Compute covariance matrices 
+  list_cov[[k]] <- temp_q %>% 
+    as.data.frame(.) %>% 
+    cov(., use = "complete.obs")
+  
+  # Compute eigenvectors (already sorted top to bottom by default)
+  list_eig_vec[[k]] <- eigen(list_cov[[k]], symmetric = T)$vectors
+  
+  # Compute eigenvalues (already sorted top to bottom by default)
+  list_eig_val[[k]] <- eigen(list_cov[[k]], symmetric = T)$values
+  
+  # Variance contribution of first eigenvector is \lambda_1/(sum over \lambda)
+  var_share[[k]] <- cumsum(list_eig_val[[k]])/sum(list_eig_val[[k]]) 
+  names(var_share[[k]]) <- paste0("Lambda_", 1:ncol(list_eig_vec[[k]])) 
+  
+}
+
+
+
+#####################################################################################
 time_stop <- Sys.time()
 #(time_stop - time_start)
