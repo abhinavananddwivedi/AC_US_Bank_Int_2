@@ -40,6 +40,30 @@ name_bank_few <- name_bank_full[data_few_ind]
 data_US_bank <- data_US %>% 
   dplyr::filter(., comnam %in% name_bank_few == 0)
 
+## Some summary statistics for bank returns ##
+
+# Sample stats according to SICCD (industry classification)
+summ_stat_siccd <- data_US_bank %>% 
+  dplyr::group_by(siccd) %>% 
+  dplyr::summarise(., 'minimum' = min(ret, na.rm = T), 
+                   'maximum' = max(ret, na.rm = T), 
+                   'avg' = mean(ret, na.rm = T), 
+                   'med' = median(ret, na.rm = T), 
+                   'std_dev' = sd(ret, na.rm = T), 
+                   'iqr' = IQR(ret, na.rm = T)
+                   )
+
+# Sample stats according to comnam (bank name)
+summ_stat_comnam <- data_US_bank %>% 
+  dplyr::group_by(comnam) %>% 
+  dplyr::summarise(., 'minimum' = min(ret, na.rm = T), 
+                   'maximum' = max(ret, na.rm = T), 
+                   'avg' = mean(ret, na.rm = T), 
+                   'med' = median(ret, na.rm = T), 
+                   'std_dev' = sd(ret, na.rm = T), 
+                   'iqr' = IQR(ret, na.rm = T)
+                   )
+
 ### Main script starts here onwards ##################################################
 
 name_bank_US <- setdiff(name_bank_full, name_bank_few)
@@ -56,14 +80,13 @@ qtr_grid <- qtr_min:qtr_max
 
 data_list_US <- rep(list(NULL), num_bank_US)
 
-#these banks have inconsistent, duplicated data, ignore them
+#these banks have inconsistent, duplicated data: ignore them
 ind_bank_ignore <- c(57, 99, 128, 210, 217, 335, 388,
                      509, 559, 589, 597, 626, 934,
                      1051, 1300, 1361, 1679, 1691) 
 
 ind_bank_use <- setdiff((1:num_bank_US), ind_bank_ignore)
 
-#for (i in seq_along(1:num_bank_US) & !(i %in% ind_bank_ignore))
 for (i in ind_bank_use)
 {
   temp <- data_US_bank %>% 
@@ -126,11 +149,11 @@ data_list_US_df <- dplyr::bind_rows(data_list_US)
 ### Quarterly covariance matrices and their eigenvector computation #################
 #####################################################################################
 
-list_ret_banks <- list()
-list_cov <- list()
-list_eig_vec <- list()
-list_eig_val <- list()
-pc_out_of_sample <- list()
+list_ret_banks <- rep(list(NULL), qtr_max)
+list_cov <- rep(list(NULL), qtr_max)
+list_eig_vec <- rep(list(NULL), qtr_max)
+list_eig_val <- rep(list(NULL), qtr_max)
+pc_out_of_sample <- rep(list(NULL), qtr_max)
 var_share <- rep(list(NULL), qtr_max)
 
 source('func_NA_killer.R', echo = F)
