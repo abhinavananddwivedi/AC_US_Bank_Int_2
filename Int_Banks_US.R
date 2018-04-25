@@ -167,6 +167,30 @@ for (k in qtr_grid)
   
   temp_q <- func_NA_killer(temp_mat_q) #kill the full NA columns and rows
   
+  ### Further Cleaning---Partial NA filling for covariance matrices ###
+  
+  # The number of NAs in each column is reported by the following line
+  num_NA_col <- colSums(is.na(temp_q[, which(colSums(is.na(temp_q)) > 0)]) > 0)
+  num_obs <- nrow(temp_q)
+  num_miss_obs <- num_obs - num_NA_col
+  
+  temp_q[ , which(num_miss_obs >= num_obs/2)] <- NA
+  
+  temp_q <- func_NA_killer(temp_q)
+  
+  temp_q_remain_NA_col <- which(colSums(is.na(temp_q)) > 0)
+  
+  temp_med <- apply(temp_q[, temp_q_remain_NA_col], 2, median, na.rm = T)
+  
+  temp_stale_ret_col <- which(temp_med == 0)
+  
+  temp_q[ , temp_stale_ret_col] <- NA
+  
+  temp_q <- func_NA_killer(temp_q)
+
+  
+  ###
+  
   # Store quarterly bank returns for quarterly regressions
   list_ret_banks[[k]] <- temp_q
   
