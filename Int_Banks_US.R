@@ -167,29 +167,51 @@ for (k in qtr_grid)
   
   temp_q <- func_NA_killer(temp_mat_q) #kill the full NA columns and rows
   
-  ### Further Cleaning---Partial NA filling for covariance matrices ###
+  ### Further Cleaning---Partial NA filling for covariance matrices ###############
   
-  # The number of NAs in each column is reported by the following line
-  num_NA_col <- colSums(is.na(temp_q[, which(colSums(is.na(temp_q)) > 0)]) > 0)
-  num_obs <- nrow(temp_q)
-  num_miss_obs <- num_obs - num_NA_col
+  ## Clear columns with too many NA or stale entries
   
-  temp_q[ , which(num_miss_obs >= num_obs/2)] <- NA
+  # Location of NA columns with more than 50% missing observations
+  col_high_NA <- which(colSums(is.na(temp_q)) > nrow(temp_q)/2)
   
-  temp_q <- func_NA_killer(temp_q)
+  # How many stale entries? (A: returns will be 0 for stale prices.)
+  # This function computes number of 0 entries in each column ignoring NAs
+  func_stale <- function(vec)
+  { 
+    temp_vec <- vec[!is.na(vec)]
+    temp_sum <- sum(temp_vec == 0) 
+    return(temp_sum) 
+  }
   
-  temp_q_remain_NA_col <- which(colSums(is.na(temp_q)) > 0)
+  num_stale_col <- apply(temp_q, 2, func_stale) #number of 0s column-wise
   
-  temp_med <- apply(temp_q[, temp_q_remain_NA_col], 2, median, na.rm = T)
-  
-  temp_stale_ret_col <- which(temp_med == 0)
-  
-  temp_q[ , temp_stale_ret_col] <- NA
-  
-  temp_q <- func_NA_killer(temp_q)
+  col_high_stale <- which(num_stale_col >= nrow(temp_q)/2) #highly stale columns
+  col_high_NA_or_stale <- c(col_high_NA, col_high_stale)
 
+  temp_q[, col_high_NA_or_stale] <- NA #ignore such columns
+  temp_q <- func_NA_killer(temp_q) #kill full NA columns, then rows (if any)
   
-  ###
+  # What to do with the remaining NA entries? Replace them with column medians
+  
+  col_remain_NA <- which(colSums(is.na(temp_q)) > 0) #remainder NA column location
+  
+  med_col <- apply(temp_q, 2, median, na.rm = T) #column-wise median
+  
+  temp_NA_row_col <- which(is.na(temp_q), T) %>% #row+columns of NAs
+    tibble::as_tibble()
+  
+  for (l in 1:length(col_remain_NA))
+  {
+    temp_row <- temp_NA_row_col %>% 
+      dplyr::filter(., col == col_remain_NA[l]) %>% 
+      dplyr::select(row) %>% #locate rows for lth NA column
+      as.matrix(.)
+    
+    # Replace with column median
+    temp_q[temp_row, col_remain_NA[l]] <- med_col[col_remain_NA[l]] 
+  }
+  
+  ##################################################################################
   
   # Store quarterly bank returns for quarterly regressions
   list_ret_banks[[k]] <- temp_q
