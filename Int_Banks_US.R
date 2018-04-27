@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-### Function Declarations ###
+### Function Declarations #####################################################################
 
 # This function kills a data frame's full NA columns and rows, in that order.
 # It take as input a data matrix and returns it after deleting (first) full NA 
@@ -27,13 +27,23 @@ func_stale <- function(vec)
   return(temp_sum)
 }
 
+# This function replaces missing values of a vector with its median
+func_part_NA_filler <- function(vec)
+{
+  vec_med <- median(vec, na.rm = T)
+  vec_NA <- is.na(vec)
+  vec[vec_NA] <- vec_med
+
+  return(vec)
+}
+
 # This function takes a data matrix and removes columns with a high proportion
 # of missing or stale entries. (Stale entries have return 0.) Any columns
 # with leftover missing entries are replaced with their respective medians.
 #
 # The inputs are the data matrix and the critical threshold (in [0,1]) defining 
-# "too high". The default is alpha = 0.5. This function depends on two other 
- #self-defined functions func_stale() and func_NA_killer()
+# "too high". The default is alpha = 0.5. This function depends on three other 
+# self-defined functions func_stale(), func_NA_killer() and func_part_NA_filler()
 func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
 { 
   # Location of columns with more than alpha proportion of missing observations
@@ -47,28 +57,10 @@ func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
   
   temp_matrix <- func_full_NA_killer(temp_matrix) #kill full NA columns, then rows (if any)
   
-  # What to do with the remaining NA entries? Replace them with column medians
-  col_remain_NA <- which(colSums(is.na(temp_matrix)) > 0) #remainder NA column location
-  
-  med_col <- apply(temp_matrix, 2, median, na.rm = T) #column-wise median
-  
-  temp_NA_row_col <- which(is.na(temp_matrix), T) %>%
-    tibble::as_tibble() #gives rows and columns of NAs
-  
-  for (l in 1:length(col_remain_NA))
-  {
-    temp_row <- temp_NA_row_col %>% 
-      dplyr::filter(., col == col_remain_NA[l]) %>%
-      dplyr::select(row) %>% 
-      as.matrix(.)
-    
-    # Replace with column median
-    temp_matrix[temp_row, col_remain_NA[l]] <- med_col[col_remain_NA[l]]
-  }
+  temp_matrix <- apply(temp_matrix, 2, func_part_NA_filler)
   
   return(temp_matrix)
 }
-
 
 ### Function Declaration Over ###########################################################
 
