@@ -2,6 +2,76 @@
 
 library(tidyverse)
 
+### Function Declarations ###
+
+# This function kills a data frame's full NA columns and rows, in that order.
+# It take as input a data matrix and returns it after deleting (first) full NA 
+# columns and (then) full NA rows.
+func_full_NA_killer <- function(data_matrix)
+{
+  # full NA column killer
+  temp_no_NA_col <- data_matrix[, colSums(is.na(data_matrix)) < nrow(data_matrix)]
+  
+  # full NA row killer
+  temp_no_NA_col_row <- temp_no_NA_col[rowSums(is.na(temp_no_NA_col)) != 
+                                         ncol(temp_no_NA_col), ]
+  
+  return(temp_no_NA_col_row) 
+}
+
+# This function returns the number of 0s in a vector ignoring NAs.
+func_stale <- function(vec)
+{
+  temp_vec <- vec[!is.na(vec)]
+  temp_sum <- sum(temp_vec == 0)
+  return(temp_sum)
+}
+
+# This function takes a data matrix and removes columns with a high proportion
+# of missing or stale entries. (Stale entries have return 0.) Any columns
+# with leftover missing entries are replaced with their respective medians.
+#
+# The inputs are the data matrix and the critical threshold (in [0,1]) defining 
+# "too high". The default is alpha = 0.5. This function depends on two other 
+ #self-defined functions func_stale() and func_NA_killer()
+func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
+{ 
+  # Location of columns with more than alpha proportion of missing observations
+  col_high_NA <- which(colSums(is.na(temp_matrix)) > nrow(temp_matrix)*alpha)
+  
+  # Stale entries
+  num_stale_col <- apply(temp_matrix, 2, func_stale) #number of 0s column-wise
+  col_high_stale <- which(num_stale_col >= nrow(temp_matrix)*alpha) #highly stale columns
+  
+  temp_matrix[, c(col_high_NA, col_high_stale)] <- NA #ignore such columns
+  
+  temp_matrix <- func_full_NA_killer(temp_matrix) #kill full NA columns, then rows (if any)
+  
+  # What to do with the remaining NA entries? Replace them with column medians
+  col_remain_NA <- which(colSums(is.na(temp_matrix)) > 0) #remainder NA column location
+  
+  med_col <- apply(temp_matrix, 2, median, na.rm = T) #column-wise median
+  
+  temp_NA_row_col <- which(is.na(temp_matrix), T) %>%
+    tibble::as_tibble() #gives rows and columns of NAs
+  
+  for (l in 1:length(col_remain_NA))
+  {
+    temp_row <- temp_NA_row_col %>% 
+      dplyr::filter(., col == col_remain_NA[l]) %>%
+      dplyr::select(row) %>% 
+      as.matrix(.)
+    
+    # Replace with column median
+    temp_matrix[temp_row, col_remain_NA[l]] <- med_col[col_remain_NA[l]]
+  }
+  
+  return(temp_matrix)
+}
+
+
+### Function Declaration Over ###########################################################
+
 ############################
 ### Directory_Management ###
 ############################
@@ -20,7 +90,8 @@ file_path <- paste0(data_folder_path, file_name)
   
 ### Read .dta file for US banks
 data_US_full <- haven::read_dta(file_path)
-# Note that since the data file is 2.7 GB, this step takes ~50 sec to run
+# Note that since the data file is 2.7 GB, this step 
+# takes ~50 sec to run on this desktop with 16GB RAM
 
 data_US <- data_US_full %>% 
   dplyr::select(c(date, siccd, comnam, prc, ret)) %>%
@@ -80,7 +151,7 @@ qtr_grid <- qtr_min:qtr_max
 
 data_list_US <- rep(list(NULL), num_bank_US)
 
-#these banks have inconsistent, duplicated data: ignore them
+# These banks have inconsistent, duplicated data: ignore them
 ind_bank_ignore <- c(57, 99, 128, 210, 217, 335, 388,
                      509, 559, 589, 597, 626, 934,
                      1051, 1300, 1361, 1679, 1691) 
@@ -143,7 +214,7 @@ for (i in ind_bank_use)
 
 names(data_list_US) <- name_bank_US
 
-data_list_US_df <- dplyr::bind_rows(data_list_US)
+data_list_US_df <- dplyr::bind_rows(data_list_US) #in panel format
 
 #####################################################################################
 ### Quarterly covariance matrices and their eigenvector computation #################
@@ -156,8 +227,6 @@ list_eig_val <- rep(list(NULL), qtr_max)
 pc_out_of_sample <- rep(list(NULL), qtr_max)
 var_share <- rep(list(NULL), qtr_max)
 
-source('func_NA_killer.R', echo = F)
-
 for (k in qtr_grid)
 {
   # Isolate return matrix for that quarter
@@ -165,53 +234,9 @@ for (k in qtr_grid)
     dplyr::filter(qtr_num == qtr_grid[k]) %>%
     dplyr::select(-c(date, qtr_num)) 
   
-  temp_q <- func_NA_killer(temp_mat_q) #kill the full NA columns and rows
+  temp_q <- func_full_NA_killer(temp_mat_q) #kill the full NA columns and rows
   
-  ### Further Cleaning---Partial NA filling for covariance matrices ###############
-  
-  ## Clear columns with too many NA or stale entries
-  
-  # Location of NA columns with more than 50% missing observations
-  col_high_NA <- which(colSums(is.na(temp_q)) > nrow(temp_q)/2)
-  
-  # How many stale entries? (A: returns will be 0 for stale prices.)
-  # This function computes number of 0 entries in each column ignoring NAs
-  func_stale <- function(vec)
-  { 
-    temp_vec <- vec[!is.na(vec)]
-    temp_sum <- sum(temp_vec == 0) 
-    return(temp_sum) 
-  }
-  
-  num_stale_col <- apply(temp_q, 2, func_stale) #number of 0s column-wise
-  
-  col_high_stale <- which(num_stale_col >= nrow(temp_q)/2) #highly stale columns
-  col_high_NA_or_stale <- c(col_high_NA, col_high_stale)
-
-  temp_q[, col_high_NA_or_stale] <- NA #ignore such columns
-  temp_q <- func_NA_killer(temp_q) #kill full NA columns, then rows (if any)
-  
-  # What to do with the remaining NA entries? Replace them with column medians
-  
-  col_remain_NA <- which(colSums(is.na(temp_q)) > 0) #remainder NA column location
-  
-  med_col <- apply(temp_q, 2, median, na.rm = T) #column-wise median
-  
-  temp_NA_row_col <- which(is.na(temp_q), T) %>% #row+columns of NAs
-    tibble::as_tibble()
-  
-  for (l in 1:length(col_remain_NA))
-  {
-    temp_row <- temp_NA_row_col %>% 
-      dplyr::filter(., col == col_remain_NA[l]) %>% 
-      dplyr::select(row) %>% #locate rows for lth NA column
-      as.matrix(.)
-    
-    # Replace with column median
-    temp_q[temp_row, col_remain_NA[l]] <- med_col[col_remain_NA[l]] 
-  }
-  
-  ##################################################################################
+  temp_q <- func_high_stale_NA_filler(temp_q) #stale killer, partial NA filler
   
   # Store quarterly bank returns for quarterly regressions
   list_ret_banks[[k]] <- temp_q
@@ -230,6 +255,41 @@ for (k in qtr_grid)
   # Variance contribution of first eigenvector is \lambda_1/(sum over \lambda)
   var_share[[k]] <- cumsum(list_eig_val[[k]])/sum(list_eig_val[[k]]) 
   names(var_share[[k]]) <- paste0("Lambda_", 1:ncol(list_eig_vec[[k]])) 
+  
+  # ### Out-of-sample Principal Component Computation #################################
+  # 
+  # if (k < qtr_max) #for all quarters except the last one
+  # {
+  #   # The returns for the subsequent quarter will be used to compute out of sample
+  #   # principal components. 
+  #   temp_q_subsequent <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k+1]) %>%
+  #     dplyr::select(-c(date, qtr_num)) 
+  #   
+  #   # Kill the NA columns and rows and save as matrix 
+  #   temp_q_subsequent <- func_NA_killer(temp_q_subsequent) %>% as.matrix(.)
+  #   
+  #   # Current quarter's returns
+  #   temp_q_current <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k]) %>%
+  #     dplyr::select(-c(date, qtr_num))
+  #   
+  #   temp_q_current <- func_NA_killer(temp_q_current) %>% as.matrix(.)
+  #   
+  #   # When number of usable banks is the same in two subsequent quarters
+  #   if (ncol(temp_q_subsequent) == ncol(list_eig_vec[[k]]))
+  #   {
+  #     pc_out_of_sample[[k+1]] <- temp_q_subsequent%*%list_eig_vec[[k]]
+  #     #(CHECK FOR NA PROLIFERATION ISSUES)
+  #   } else if (ncol(temp_q_current) == ncol(list_eig_vec[[k]]))
+  #   {
+  #     pc_out_of_sample[[k+1]] <- temp_q_current%*%list_eig_vec[[k]]
+  #   }
+  #   ### CAN WE GET RID OF THIS WORKAROUND? THINK HARDER ###
+  #   
+  # }
+  # 
+  
+  
+  ###################################################################################
   
 }
 
