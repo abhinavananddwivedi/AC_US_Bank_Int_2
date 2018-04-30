@@ -248,37 +248,41 @@ for (k in qtr_grid)
   var_share[[k]] <- cumsum(list_eig_val[[k]])/sum(list_eig_val[[k]]) 
   names(var_share[[k]]) <- paste0("Lambda_", 1:ncol(list_eig_vec[[k]])) 
   
-  # ### Out-of-sample Principal Component Computation #################################
-  # 
-  # if (k < qtr_max) #for all quarters except the last one
-  # {
-  #   # The returns for the subsequent quarter will be used to compute out of sample
-  #   # principal components. 
-  #   temp_q_subsequent <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k+1]) %>%
-  #     dplyr::select(-c(date, qtr_num)) 
-  #   
-  #   # Kill the NA columns and rows and save as matrix 
-  #   temp_q_subsequent <- func_NA_killer(temp_q_subsequent) %>% as.matrix(.)
-  #   
-  #   # Current quarter's returns
-  #   temp_q_current <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k]) %>%
-  #     dplyr::select(-c(date, qtr_num))
-  #   
-  #   temp_q_current <- func_NA_killer(temp_q_current) %>% as.matrix(.)
-  #   
-  #   # When number of usable banks is the same in two subsequent quarters
-  #   if (ncol(temp_q_subsequent) == ncol(list_eig_vec[[k]]))
-  #   {
-  #     pc_out_of_sample[[k+1]] <- temp_q_subsequent%*%list_eig_vec[[k]]
-  #     #(CHECK FOR NA PROLIFERATION ISSUES)
-  #   } else if (ncol(temp_q_current) == ncol(list_eig_vec[[k]]))
-  #   {
-  #     pc_out_of_sample[[k+1]] <- temp_q_current%*%list_eig_vec[[k]]
-  #   }
-  #   ### CAN WE GET RID OF THIS WORKAROUND? THINK HARDER ###
-  #   
-  # }
-  # 
+  ### Out-of-sample Principal Component Computation #################################
+
+  if (k < qtr_max) #for all quarters except the last one
+  {
+    # The returns for the subsequent quarter will be used to compute out of sample
+    # principal components.
+    temp_q_subsequent <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k+1]) %>%
+      dplyr::select(-c(date, qtr_num))
+
+    # Kill the NA columns and rows and save as matrix
+    temp_q_subsequent <- func_full_NA_killer(temp_q_subsequent) %>% 
+      func_high_stale_NA_filler(.) %>%
+      as.matrix(.)
+
+    # Current quarter's returns
+    temp_q_current <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k]) %>%
+      dplyr::select(-c(date, qtr_num))
+
+    temp_q_current <- func_full_NA_killer(temp_q_current) %>% 
+      func_high_stale_NA_filler(.) %>%
+      as.matrix(.)
+
+    # When number of usable banks is the same in two subsequent quarters
+    if (ncol(temp_q_subsequent) == ncol(list_eig_vec[[k]]))
+    {
+      pc_out_of_sample[[k+1]] <- temp_q_subsequent%*%list_eig_vec[[k]]
+      #(CHECK FOR NA PROLIFERATION ISSUES)
+    } else if (ncol(temp_q_current) == ncol(list_eig_vec[[k]]))
+    {
+      pc_out_of_sample[[k+1]] <- temp_q_current%*%list_eig_vec[[k]]
+    }
+    ### CAN WE GET RID OF THIS WORKAROUND? THINK HARDER ###
+
+  }
+
   
   
   ###################################################################################
