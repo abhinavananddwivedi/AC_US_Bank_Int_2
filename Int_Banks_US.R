@@ -79,6 +79,8 @@ time_start <- Sys.time()
 data_folder_path <- "../Data_Bank_Int/"
 file_name <- "SICCD_6020-6079_6710-6712_20171105.dta"
 file_path <- paste0(data_folder_path, file_name)
+
+### Main script starts here onwards ##################################################
   
 ### Read .dta file for US banks
 data_US_full <- haven::read_dta(file_path)
@@ -92,6 +94,7 @@ data_US <- data_US_full %>%
 
 name_bank_full <- unique(data_US$comnam)
 
+# CHANGE THIS PART AND REWRITE TO INCLUDE GS, MS(DW), WFC ETC.
 ### Remove banks with fewer than median observations 
 data_US_num_obs <- data_US %>%
   group_by(comnam) %>%
@@ -126,8 +129,6 @@ summ_stat_comnam <- data_US_bank %>%
                    'std_dev' = sd(ret, na.rm = T), 
                    'iqr' = IQR(ret, na.rm = T)
                    )
-
-### Main script starts here onwards ##################################################
 
 name_bank_US <- setdiff(name_bank_full, name_bank_few)
 num_bank_US <- length(name_bank_US)
@@ -254,16 +255,18 @@ for (k in qtr_grid)
   {
     # The returns for the subsequent quarter will be used to compute out of sample
     # principal components.
-    temp_q_subsequent <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k+1]) %>%
+    temp_q_subsequent <- temp_df %>% 
+      dplyr::filter(qtr_num == qtr_grid[k+1]) %>%
       dplyr::select(-c(date, qtr_num))
 
-    # Kill the NA columns and rows and save as matrix
+    # Kill+Fill the NA columns and rows and save as matrix
     temp_q_subsequent <- func_full_NA_killer(temp_q_subsequent) %>% 
       func_high_stale_NA_filler(.) %>%
       as.matrix(.)
 
     # Current quarter's returns
-    temp_q_current <- temp_df %>% dplyr::filter(qtr_num == qtr_grid[k]) %>%
+    temp_q_current <- temp_df %>% 
+      dplyr::filter(qtr_num == qtr_grid[k]) %>%
       dplyr::select(-c(date, qtr_num))
 
     temp_q_current <- func_full_NA_killer(temp_q_current) %>% 
@@ -288,6 +291,126 @@ for (k in qtr_grid)
   ###################################################################################
   
 }
+
+# Computing share of explanatory power of eigenvectors, top to bottom
+
+eig_vec_med <- c()
+eig_vec_mean <- c()
+
+for (i in 1:35)
+{
+  eig_vec_med[i] <- lapply(var_share, `[`, paste0("Lambda_", i)) %>%
+    unlist() %>% 
+    median()
+  
+  eig_vec_mean[i] <- lapply(var_share, `[`, paste0("Lambda_", i)) %>%
+    unlist() %>% 
+    mean()
+}
+# IMPROVE THIS LINE!!!
+
+#######################################################################
+##### Principal Component Regressions and Integration Computation #####
+#######################################################################
+
+temp_qtr_integration <- rep(list(NULL), qtr_max)
+temp_reg <- rep(list(NULL), qtr_max)
+
+for (l in 2:qtr_max) #PC computed from quarter 2 onwards
+{
+  # Principal components as explanatory variables
+  temp_x <- pc_out_of_sample[[l]]
+  
+  # Note that each quarter, num of explanatory pc is different now
+  temp_x <- temp_x[, which(var_share[[l]] < 0.90)] %>% 
+    data.matrix(.)
+  
+  # Dependent variables are corresponding quarterly bank returns 
+  temp_y <- list_ret_banks[[l]] %>% 
+    data.matrix(.)
+  
+  # Inlcude only those banks which have more than 20% usable returns in quarter
+  temp_y <- temp_y[, colSums(is.na(temp_y)) <= nrow(temp_y)*0.20]
+  
+  # Computing integration as adjusted R squares of PC regresssions
+  if (nrow(temp_y) == nrow(temp_x)) #if the sizes of matrices conform
+  {
+    temp_reg[[l]] <- summary(lm(temp_y ~ temp_x, na.action = na.omit)) #store the summary of OLS
+    temp_adj_rsqr <- lapply(temp_reg[[l]], `[`, "adj.r.squared") %>%
+      as.data.frame(.) #store the adjusted rsquares from each regression
+    names(temp_adj_rsqr) <- colnames(temp_y)
+    
+    #temp_adj_rsqr[which(temp_adj_rsqr < 0)] <- 0
+    
+    # Store each bank's integration each quarter as a row vector in a list
+    temp_qtr_integration[[l]] <- temp_adj_rsqr 
+  }
+}
+
+names(temp_qtr_integration) <- paste0("Quarter_", qtr_grid)
+
+temp_null <- sapply(temp_qtr_integration, is.null) #locate null elements
+
+# For convenience, change the integration list to a matrix with banks as columns #
+# Convert list to tibble 
+temp_qtr_mat <- dplyr::bind_rows(temp_qtr_integration) #note that NULL elements are killed
+
+# Initialize the integration matrix, name its columns as banks
+temp_int_mat <- data.frame(matrix(NA, nrow = qtr_max, ncol = ncol(temp_qtr_mat)))
+names(temp_int_mat) <- colnames(temp_qtr_mat)
+
+# Assign the relevant rows to the matrix, the rest remain NAs
+temp_int_mat[temp_null==0, ] <- temp_qtr_mat
+
+# Sample statistics along rows (stat_dim = 1) or columns (stat_dim = 2)
+func_sample_stat <- function(data_matrix, stat_dim)
+{
+  
+  temp_mean <- data_matrix %>% apply(., stat_dim, mean, na.rm = T)
+  temp_median <- data_matrix %>% apply(., stat_dim, median, na.rm = T)
+  temp_sd <- data_matrix %>% apply(., stat_dim, sd, na.rm = T)
+  temp_IQR <- data_matrix %>% apply(., stat_dim, IQR, na.rm = T)
+  temp_min <- data_matrix %>% apply(., stat_dim, min, na.rm = T)
+  temp_max <- data_matrix %>% apply(., stat_dim, max, na.rm = T)
+  
+  sample_stat <- list(temp_mean, temp_median, temp_sd, temp_IQR, 
+                      temp_min, temp_max)
+  names(sample_stat) <- c("Mean", "Median", "Std_Dev", "IQR",
+                          "Min", "Max")
+  
+  return(sample_stat)
+}
+
+
+sample_stat_quarterly <- func_sample_stat(temp_int_mat, 1) #rowwise
+sample_stat_bankwise <- func_sample_stat(temp_int_mat, 2) #columnwise
+
+## Time Trends for Integration ##
+
+temp_int_t <- temp_int_mat %>% as.data.frame()
+
+#########################################################
+# Pick column only if fewer than 10(/44) unusable entries
+temp_index_low <- which(colSums(is.na(temp_int_t)) <= 10) 
+temp_int_t_reg <- temp_int_t[, temp_index_low] %>% data.matrix()
+
+# Testing for time trends
+temp_lm_t <- summary(lm(temp_int_t_reg ~ qtr_grid, na.action = na.omit))
+
+temp_lm_t_val <- rep(list(NULL), length(temp_lm_t))
+temp_lm_p_val <- rep(list(NULL), length(temp_lm_t))
+
+for (p in 1:length(temp_lm_t))
+{
+  #temp_temp <- temp_lm_t[[p]][["coefficients"]][, c("t value", "Pr(>|t|)")]
+  temp_temp <- temp_lm_t[[p]]
+  temp_lm_t_val[[p]] <- temp_temp$coefficients[, "t value"] %>%
+    as.data.frame()
+  temp_lm_p_val[[p]] <- temp_temp$coefficients[, "Pr(>|t|)"] %>%
+    as.data.frame()
+}
+### VERY POOR CODE WRITING HERE, PLEASE USE SOME FUNCTIONAL PROGRAMMMING HERE
+names(temp_lm_p_val) <- names(temp_lm_t_val) <- names(temp_lm_t)
 
 
 
