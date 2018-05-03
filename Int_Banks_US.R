@@ -87,14 +87,41 @@ data_US_full <- haven::read_dta(file_path)
 # Note that since the data file is 2.7 GB, this step 
 # takes ~50 sec to run on this desktop with 16GB RAM
 
-data_US <- data_US_full %>% 
+######################################################################
+### Primary Filtration a la Stulz ####################################
+######################################################################
+
+# Filtration based on share codes
+share_code_adr <- c(30:39) #for ADR, the share class has first digit 3
+share_code_foreign <- paste0(c(1:9), 2) %>%
+  as.numeric(.) #for foreign incorporated banks, second digit is 2
+share_code_closed_end <- paste0(c(1:9), 4) %>% 
+  as.numeric(.) #closed end funds have second digit 4
+share_code_REIT <- paste0(c(1:9), 8) %>% 
+  as.numeric(.) # REITs have second digit 8
+
+# Remove American ADRs and banks incorporated not in the US
+data_US_inter <- data_US_full %>%
+  dplyr::filter(!(shrcd %in% share_code_adr) & 
+                  !(shrcd %in% share_code_foreign)
+                )
+
+# Removal of banks with nominal price <= $1
+data_US_inter <- data_US_inter %>%
+  dplyr::filter(prc > 1)
+
+#######################################################################
+
+data_US <- data_US_inter %>% 
   dplyr::select(c(date, siccd, comnam, prc, ret)) %>%
   tibble::add_column(., qtr_num = NA) %>%
   dplyr::arrange(., comnam)
 
 name_bank_full <- unique(data_US$comnam)
 
+##############################################################
 # CHANGE THIS PART AND REWRITE TO INCLUDE GS, MS(DW), WFC ETC.
+##############################################################
 ### Remove banks with fewer than median observations 
 data_US_num_obs <- data_US %>%
   group_by(comnam) %>%
@@ -285,10 +312,6 @@ for (k in qtr_grid)
     ### CAN WE GET RID OF THIS WORKAROUND? THINK HARDER ###
 
   }
-
-  
-  
-  ###################################################################################
   
 }
 
@@ -387,31 +410,31 @@ sample_stat_bankwise <- func_sample_stat(temp_int_mat, 2) #columnwise
 
 ## Time Trends for Integration ##
 
-temp_int_t <- temp_int_mat %>% as.data.frame()
-
-#########################################################
-# Pick column only if fewer than 10(/44) unusable entries
-temp_index_low <- which(colSums(is.na(temp_int_t)) <= 10) 
-temp_int_t_reg <- temp_int_t[, temp_index_low] %>% data.matrix()
-
-# Testing for time trends
-temp_lm_t <- summary(lm(temp_int_t_reg ~ qtr_grid, na.action = na.omit))
-
-temp_lm_t_val <- rep(list(NULL), length(temp_lm_t))
-temp_lm_p_val <- rep(list(NULL), length(temp_lm_t))
-
-for (p in 1:length(temp_lm_t))
-{
-  #temp_temp <- temp_lm_t[[p]][["coefficients"]][, c("t value", "Pr(>|t|)")]
-  temp_temp <- temp_lm_t[[p]]
-  temp_lm_t_val[[p]] <- temp_temp$coefficients[, "t value"] %>%
-    as.data.frame()
-  temp_lm_p_val[[p]] <- temp_temp$coefficients[, "Pr(>|t|)"] %>%
-    as.data.frame()
-}
-### VERY POOR CODE WRITING HERE, PLEASE USE SOME FUNCTIONAL PROGRAMMMING HERE
-names(temp_lm_p_val) <- names(temp_lm_t_val) <- names(temp_lm_t)
-
+# temp_int_t <- temp_int_mat %>% as.data.frame()
+# 
+# #########################################################
+# # Pick column only if fewer than 10(/44) unusable entries
+# temp_index_low <- which(colSums(is.na(temp_int_t)) <= 10) 
+# temp_int_t_reg <- temp_int_t[, temp_index_low] %>% data.matrix()
+# 
+# # Testing for time trends
+# temp_lm_t <- summary(lm(temp_int_t_reg ~ qtr_grid, na.action = na.omit))
+# 
+# temp_lm_t_val <- rep(list(NULL), length(temp_lm_t))
+# temp_lm_p_val <- rep(list(NULL), length(temp_lm_t))
+# 
+# for (p in 1:length(temp_lm_t))
+# {
+#   #temp_temp <- temp_lm_t[[p]][["coefficients"]][, c("t value", "Pr(>|t|)")]
+#   temp_temp <- temp_lm_t[[p]]
+#   temp_lm_t_val[[p]] <- temp_temp$coefficients[, "t value"] %>%
+#     as.data.frame()
+#   temp_lm_p_val[[p]] <- temp_temp$coefficients[, "Pr(>|t|)"] %>%
+#     as.data.frame()
+# }
+# ### VERY POOR CODE WRITING HERE, PLEASE USE SOME FUNCTIONAL PROGRAMMMING HERE
+# names(temp_lm_p_val) <- names(temp_lm_t_val) <- names(temp_lm_t)
+# 
 
 
 #####################################################################################
