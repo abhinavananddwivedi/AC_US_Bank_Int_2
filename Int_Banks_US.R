@@ -92,8 +92,6 @@ data_US_full <- haven::read_dta(file_path)
 ######################################################################
 
 # Filtration based on SIC codes
-ind_sic_full <- unique(data_US_full$siccd)
-
 ind_comm_banks <- c(6020:6029)
 ind_saving_inst <- c(6030:6039)
 ind_credit_union <- c(6060:6069)
@@ -107,12 +105,50 @@ ind_bank_use <- c(ind_comm_banks, ind_saving_inst,
 # Information taken from http://www.crsp.com/products/documentation/data-definitions-1
 ind_share_code_common <- c(10, 11) #only common shares, exclude all other types
 
+# Price to adjusted price conversion
+
+#data_US_full <- data_US_full %>% 
+#  dplyr::mutate(., prc_adj = prc/cfacpr) 
+temp_name <- data_US_full %>% 
+  dplyr::select(c(siccd, comnam)) %>% 
+  dplyr::distinct(.) %>%
+  dplyr::arrange(siccd)
+
+bank_sp_ignore <- c("AMERICAN EXPRESS CO",
+                    "BERKSHIRE HATHAWAY INC DEL",
+                    "G E I C O CORP",
+                    "MELLON FINANCIAL CORP",
+                    "STATE STREET CORP")
+
+temp_gs <- data_US_full %>% 
+  filter(comnam == "GOLDMAN SACHS GROUP INC")
+temp_msdw <- data_US_full %>% 
+  filter(comnam == "MORGAN STANLEY DEAN WITTER & CO")
+temp_jpm <-  data_US_full %>% 
+  filter(comnam == "J P MORGAN CHASE & CO" | 
+           comnam == "JPMORGAN CHASE & CO" |
+           comnam == "MORGAN J P & CO INC")
+temp_bofa <- data_US_full %>% 
+  filter(comnam == "BANK OF AMERICA CORP")
+temp_amex <- data_US_full %>% 
+  filter(comnam == "AMERICAN EXPRESS CO")
+temp_state_str <- data_US_full %>%
+  filter(comnam == "STATE STREET BOSTON CORP" |
+           comnam == "STATE STREET CORP")
+temp_mellon <- data_US_full %>%
+  filter(comnam == "MELLON BANK CORP" |
+           comnam == "MELLON FINANCIAL CORP")
+temp_wfc <- data_US_full %>%
+  filter(comnam == "WELLS FINANCIAL CORP")
+
 ### Filter ###
 
 data_US_inter <- data_US_full %>% 
   dplyr::filter(siccd %in% ind_bank_use) %>%
   dplyr::filter(shrcd %in% ind_share_code_common) %>%
-  dplyr::filter(prc > 1) # Further filtration of banks with nominal price <= $1
+  dplyr::filter(prc_adj > 1) # Further filtration of banks with nominal price <= $1
+
+
 
 #######################################################################
 
