@@ -91,24 +91,28 @@ data_US_full <- haven::read_dta(file_path)
 ### Primary Filtration a la Stulz ####################################
 ######################################################################
 
+# Filtration based on SIC codes
+ind_sic_full <- unique(data_US_full$siccd)
+
+ind_comm_banks <- c(6020:6029)
+ind_saving_inst <- c(6030:6039)
+ind_credit_union <- c(6060:6069)
+ind_bank_hold <- c(6710:6712)
+
+ind_bank_use <- c(ind_comm_banks, ind_saving_inst,
+                  ind_credit_union, ind_bank_hold
+                  ) #use only these, ignore others
+
 # Filtration based on share codes
-share_code_adr <- c(30:39) #for ADR, the share class has first digit 3
-share_code_foreign <- paste0(c(1:9), 2) %>%
-  as.numeric(.) #for foreign incorporated banks, second digit is 2
-share_code_closed_end <- paste0(c(1:9), 4) %>% 
-  as.numeric(.) #closed end funds have second digit 4
-share_code_REIT <- paste0(c(1:9), 8) %>% 
-  as.numeric(.) # REITs have second digit 8
+# Information taken from http://www.crsp.com/products/documentation/data-definitions-1
+ind_share_code_common <- c(10, 11) #only common shares, exclude all other types
 
-# Remove American ADRs and banks incorporated not in the US
-data_US_inter <- data_US_full %>%
-  dplyr::filter(!(shrcd %in% share_code_adr) & 
-                  !(shrcd %in% share_code_foreign)
-                )
+### Filter ###
 
-# Removal of banks with nominal price <= $1
-data_US_inter <- data_US_inter %>%
-  dplyr::filter(prc > 1)
+data_US_inter <- data_US_full %>% 
+  dplyr::filter(siccd %in% ind_bank_use) %>%
+  dplyr::filter(shrcd %in% ind_share_code_common) %>%
+  dplyr::filter(prc > 1) # Further filtration of banks with nominal price <= $1
 
 #######################################################################
 
@@ -123,15 +127,15 @@ name_bank_full <- unique(data_US$comnam)
 # CHANGE THIS PART AND REWRITE TO INCLUDE GS, MS(DW), WFC ETC.
 ##############################################################
 ### Remove banks with fewer than median observations 
-data_US_num_obs <- data_US %>%
-  group_by(comnam) %>%
-  count(.)
-
-data_few_ind <- which(data_US_num_obs$n <= median(data_US_num_obs$n))
-name_bank_few <- name_bank_full[data_few_ind]
-
-data_US_bank <- data_US %>% 
-  dplyr::filter(., comnam %in% name_bank_few == 0)
+# data_US_num_obs <- data_US %>%
+#   group_by(comnam) %>%
+#   count(.)
+# 
+# data_few_ind <- which(data_US_num_obs$n <= median(data_US_num_obs$n))
+# name_bank_few <- name_bank_full[data_few_ind]
+# 
+# data_US_bank <- data_US %>% 
+#   dplyr::filter(., comnam %in% name_bank_few == 0)
 
 ## Some summary statistics for bank returns ##
 
