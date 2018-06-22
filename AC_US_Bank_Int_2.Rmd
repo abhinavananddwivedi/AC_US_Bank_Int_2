@@ -96,6 +96,14 @@ Additionally we also seek guidance from the sample construction in @Adrian_Brunn
 
 Since our sample and definition of the US banking system follows the discussion in @Fahlenbrach_et_al:2016 more closely, we try to construct our sample as close to theirs as we can.
 
+## Note on CUSIPs, Tickers etc.
+
+CUSIP, which is controlled by Standard & Poor's, is officially a 9-character string. The first 6 identify the issuer, the 7th and 8th identify the issue and the 9th is a check digit that is fully determined by the first 8 characters. CRSP (the default data source for Eventus on WRDS and, when subscribed and installed, for Eventus for Windows and Linux) omits the check digit and uses an 8-character CUSIP field. Common equity issues always have an 8th character of 0. As CRSP covers only common stocks, all CUSIPs in CRSP end in 0 as the 8th character. CUSIPs from other sources that have a non-zero digit in the 8th position are not common stock CUSIPs.
+
+Given the above-described structure, we can see that eight characters are required to uniquely identify a security
+
+Tickers can be reused and several companies might be listed in different exchanges with the same ticker code (<http://findb.aalto.fi/faq/database_general.html>)
+
 ### Directory Management
 
 First we need to be able to navigate to the directory where data are stored.

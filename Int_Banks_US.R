@@ -172,6 +172,14 @@ data_US <- data_US_inter %>%
 
 name_banks_full <- unique(data_US$comnam) %>% dplyr::as_tibble()
 
+ticker_full <- data_US_full %>%
+  dplyr::select(ticker) %>%
+  dplyr::distinct()
+
+cusip_banks_full <- data_US_full %>%
+  dplyr::select(c(ncusip, cusip)) %>%
+  dplyr::distinct()
+
 ## Banks with size >$2B in 2016
 
 name_banks_20162B <- data_US_bank_TA %>%
@@ -179,6 +187,40 @@ name_banks_20162B <- data_US_bank_TA %>%
   dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
   dplyr::distinct(conm)
 
+name_banks_20162B_legal <- data_US_bank_TA %>%
+  dplyr::filter(fyearq == 2016) %>%
+  dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
+  dplyr::distinct(conml)
+
+func_up <- function(str)
+{
+  return(toupper(str))
+}
+
+names_bank_2B_legal <- func_up(name_banks_20162B_legal) 
+
+ticker_2B <- data_US_bank_TA %>%
+  dplyr::select(tic) %>%
+  dplyr::distinct(.)
+
+cusip_banks_2B <- data_US_bank_TA %>%
+  dplyr::select(cusip) %>%
+  dplyr::distinct() #this is 9 digit CUSIP
+
+cusip_banks_2B_8 <- substr(cusip_banks_2B$cusip, 1, 8) %>% 
+  tibble::as_tibble() #converting from 9 to 8 digit CUSIP
+
+# common names for the full banks and those with assets>$2B
+name_common <- dplyr::intersect(name_banks_full$value,
+                                name_banks_20162B$conm)
+
+# common tickers for the full banks and those with assets>$2B
+ticker_common <- dplyr::intersect(ticker_full$ticker,
+                                  ticker_2B$tic)
+
+# common cusips for the full banks and those with assets>$2B
+cusip_common <- dplyr::intersect(cusip_banks_full$cusip, 
+                                 cusip_banks_2B_8$value)
 
 ##############################################################
 # CHANGE THIS PART AND REWRITE TO INCLUDE GS, MS(DW), WFC ETC.
