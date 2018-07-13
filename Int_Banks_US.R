@@ -166,42 +166,24 @@ data_US_inter <- data_US_full %>%
 #######################################################################
 
 data_US <- data_US_inter %>% 
-  dplyr::select(c(date, siccd, comnam, prc, ret)) %>%
+  dplyr::select(c(date, siccd, comnam, 
+                  prc, ret, ncusip, cusip)) %>%
+  dplyr::rename(., "cusip_8" = cusip) %>%
   tibble::add_column(., qtr_num = NA) %>%
   dplyr::arrange(., comnam)
 
 name_banks_full <- unique(data_US$comnam) %>% dplyr::as_tibble()
 
-ticker_full <- data_US_full %>%
-  dplyr::select(ticker) %>%
-  dplyr::distinct()
-
-cusip_banks_full <- data_US_full %>%
+cusip_banks_full <- data_US %>%
   dplyr::select(c(ncusip, cusip)) %>%
   dplyr::distinct()
 
 ## Banks with size >$2B in 2016
 
 name_banks_20162B <- data_US_bank_TA %>%
-  dplyr::filter(fyearq == 2016) %>%
+  dplyr::filter(fyearq == 2016 & fqtr == 4) %>%
   dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
   dplyr::distinct(conm)
-
-name_banks_20162B_legal <- data_US_bank_TA %>%
-  dplyr::filter(fyearq == 2016) %>%
-  dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
-  dplyr::distinct(conml)
-
-func_up <- function(str)
-{
-  return(toupper(str))
-}
-
-names_bank_2B_legal <- func_up(name_banks_20162B_legal) 
-
-ticker_2B <- data_US_bank_TA %>%
-  dplyr::select(tic) %>%
-  dplyr::distinct(.)
 
 cusip_banks_2B <- data_US_bank_TA %>%
   dplyr::select(cusip) %>%
@@ -209,15 +191,33 @@ cusip_banks_2B <- data_US_bank_TA %>%
 
 cusip_banks_2B_8 <- substr(cusip_banks_2B$cusip, 1, 8) %>% 
   tibble::as_tibble() #converting from 9 to 8 digit CUSIP
+cusip_banks_2B_6 <- substr(cusip_banks_2B$cusip, 1, 6) %>% 
+  tibble::as_tibble() #converting from 9 to 6 digit CUSIP
 
-# common names for the full banks and those with assets>$2B
-name_common <- dplyr::intersect(name_banks_full$value,
-                                name_banks_20162B$conm)
+#############################################################
+### TESTING NEW IDEAS FOR MERGING CRSP+CSTAT VIA CUSIP ######
+#############################################################
 
-# common tickers for the full banks and those with assets>$2B
-ticker_common <- dplyr::intersect(ticker_full$ticker,
-                                  ticker_2B$tic)
+test_data_2b <- data_US_bank_TA %>%
+  dplyr::select(conm,
+                conml,
+                cusip,
+                sic) %>%
+  dplyr::distinct(.)
+cusip_2b_8 <- test_data_2b$cusip %>%
+  substr(., 1, 8) %>%
+  tibble::as_tibble()
+cusip_2b_6 <- test_data_2b$cusip %>%
+  substr(., 1, 6) %>%
+  tibble::as_tibble()
+test_data_2b <- test_data_2b %>%
+  tibble::add_column(cusip_8 = cusip_2b_8$value) %>%
+  tibble::add_column(cusip_6 = cusip_2b_6$value)
 
+
+############################################################
+############################################################
+############################################################
 # common cusips for the full banks and those with assets>$2B
 cusip_common <- dplyr::intersect(cusip_banks_full$cusip, 
                                  cusip_banks_2B_8$value)
