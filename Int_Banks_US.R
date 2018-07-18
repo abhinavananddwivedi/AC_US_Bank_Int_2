@@ -115,104 +115,82 @@ ind_bank_use <- c(ind_comm_banks, ind_saving_inst,
 # Information taken from http://www.crsp.com/products/documentation/data-definitions-1
 ind_share_code_common <- c(10, 11) #only common shares, exclude all other types
 
-### Price to adjusted price conversion: DO? OR DON'T? ###
-
-#data_US_full <- data_US_full %>% 
-#  dplyr::mutate(., prc_adj = prc/cfacpr) 
-
-###
-
-# temp_name <- data_US_full %>% 
-#   dplyr::select(c(siccd, comnam)) %>% 
-#   dplyr::distinct(.) %>%
-#   dplyr::arrange(siccd)
-
-# bank_sp_ignore <- c("AMERICAN EXPRESS CO",
-#                     "BERKSHIRE HATHAWAY INC DEL",
-#                     "G E I C O CORP",
-#                     "MELLON FINANCIAL CORP",
-#                     "STATE STREET CORP")
-# 
-# temp_gs <- data_US_full %>% 
-#   filter(comnam == "GOLDMAN SACHS GROUP INC")
-# temp_msdw <- data_US_full %>% 
-#   filter(comnam == "MORGAN STANLEY DEAN WITTER & CO")
-# temp_jpm <-  data_US_full %>% 
-#   filter(comnam == "J P MORGAN CHASE & CO" | 
-#            comnam == "JPMORGAN CHASE & CO" |
-#            comnam == "MORGAN J P & CO INC")
-# temp_bofa <- data_US_full %>% 
-#   filter(comnam == "BANK OF AMERICA CORP")
-# temp_amex <- data_US_full %>% 
-#   filter(comnam == "AMERICAN EXPRESS CO")
-# temp_state_str <- data_US_full %>%
-#   filter(comnam == "STATE STREET BOSTON CORP" |
-#            comnam == "STATE STREET CORP")
-# temp_mellon <- data_US_full %>%
-#   filter(comnam == "MELLON BANK CORP" |
-#            comnam == "MELLON FINANCIAL CORP")
-# temp_wfc <- data_US_full %>%
-#   filter(comnam == "WELLS FINANCIAL CORP")
-
 ### Filter ###
 
 data_US_inter <- data_US_full %>% 
-  dplyr::filter(siccd %in% ind_bank_use) %>% #ignore non-banks
+  dplyr::filter(siccd %in% ind_bank_use |
+                  hsiccd %in% ind_bank_use) %>% #ignore non-banks
   dplyr::filter(shrcd %in% ind_share_code_common) %>% #include common shares
   dplyr::filter(prc > 1) #ignore banks with nominal price <= $1
 
-
-  
 #######################################################################
 
 data_US <- data_US_inter %>% 
-  dplyr::select(c(date, siccd, comnam, 
-                  prc, ret, ncusip, cusip)) %>%
+  dplyr::select(c(date, siccd, hsiccd,
+                  comnam, prc, ret, 
+                  ncusip, cusip)
+                ) %>%
   dplyr::rename(., "cusip_8" = cusip) %>%
   tibble::add_column(., qtr_num = NA) %>%
   dplyr::arrange(., comnam)
 
-name_banks_full <- unique(data_US$comnam) %>% dplyr::as_tibble()
+data_US_id <- data_US_inter %>%
+  dplyr::select(comnam, siccd,
+                hsiccd, ncusip, 
+                cusip, permno) %>%
+  dplyr::distinct() 
 
-cusip_banks_full <- data_US %>%
-  dplyr::select(c(ncusip, cusip)) %>%
-  dplyr::distinct()
-
+### Compustat Data
 ## Banks with size >$2B in 2016
 
-name_banks_20162B <- data_US_bank_TA %>%
+data_US_2b_id <- data_US_bank_TA %>%
   dplyr::filter(fyearq == 2016 & fqtr == 4) %>%
   dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
-  dplyr::distinct(conm)
+  dplyr::select(conm, conml,
+                sic, cusip,
+                gvkey) %>%
+  dplyr::distinct(.)
 
-cusip_banks_2B <- data_US_bank_TA %>%
-  dplyr::select(cusip) %>%
-  dplyr::distinct() #this is 9 digit CUSIP
-
-cusip_banks_2B_8 <- substr(cusip_banks_2B$cusip, 1, 8) %>% 
+cusip_banks_2B_8 <- substr(data_US_2b_id$cusip, 1, 8) %>% 
   tibble::as_tibble() #converting from 9 to 8 digit CUSIP
-cusip_banks_2B_6 <- substr(cusip_banks_2B$cusip, 1, 6) %>% 
-  tibble::as_tibble() #converting from 9 to 6 digit CUSIP
 
 #############################################################
 ### TESTING NEW IDEAS FOR MERGING CRSP+CSTAT VIA CUSIP ######
 #############################################################
 
-test_data_2b <- data_US_bank_TA %>%
-  dplyr::select(conm,
-                conml,
-                cusip,
-                sic) %>%
-  dplyr::distinct(.)
-cusip_2b_8 <- test_data_2b$cusip %>%
+func_cusip_check <- function(cusip_8)
+{
+  last_2_char <- substr(cusip_8, 7, 8)
+  if (last_2_char == '10' |
+      last_2_char == '11'
+  )
+  {
+    return(1)
+  } else
+  {
+    return(0)
+  }
+}
+
+cusip_2b_8 <- data_US_2b_id$cusip %>%
   substr(., 1, 8) %>%
   tibble::as_tibble()
-cusip_2b_6 <- test_data_2b$cusip %>%
-  substr(., 1, 6) %>%
-  tibble::as_tibble()
+test_comm_share <- sapply(cusip_2b_8, func_cusip_check)
+
 test_data_2b <- test_data_2b %>%
   tibble::add_column(cusip_8 = cusip_2b_8$value) %>%
-  tibble::add_column(cusip_6 = cusip_2b_6$value)
+  tibble::add_column(comm_share = test_comm_share)
+
+test_data_US <- data_US %>%
+  dplyr::select(comnam, siccd, cusip_8) %>%
+  dplyr::distinct(.)
+
+
+test_join_8 <- dplyr::left_join(test_data_2b, 
+                                test_data_US,
+                                by = "cusip_8"
+                                )
+
 
 
 ############################################################
