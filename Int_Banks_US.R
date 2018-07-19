@@ -1,6 +1,11 @@
 ### Integration Among US Banks: A Reboot Using WRDS Data ###
 
+# Declare libraries
 library(tidyverse)
+
+# Preprocess the datasets from CRSP and Compustat 
+
+source('Int_Banks_US_data_preprocessing.R', echo = F)
 
 ### Function Declarations #####################################################################
 
@@ -38,7 +43,7 @@ func_part_NA_filler <- function(vec)
   vec_med <- median(vec, na.rm = T)
   vec_NA <- is.na(vec)
   vec[vec_NA] <- vec_med
-
+  
   return(vec)
 }
 
@@ -70,173 +75,10 @@ func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
 
 ### Function Declaration Over ###########################################################
 
-############################
-### Directory_Management ###
-############################
-
-# For replication or reproduction of this script, change the address
-# of the directories below to conform to their location in the host
-# machine
-
-###
-#time_start <- Sys.time()
-###
-
-data_folder_path <- "../Data_Bank_Int/"
-file_name_ret_daily <- "SICCD_6020-6079_6710-6712_20171105.dta" #daily return file
-file_name_TA <- "US_Bank_Cstat_TA.dta" #total assets file
-
-file_path_ret <- paste0(data_folder_path, file_name_ret_daily)
-file_path_TA <- paste0(data_folder_path, file_name_TA)
-### Main script starts here onwards ##################################################
-  
-### Read .dta file for US banks
-data_US_full <- haven::read_dta(file_path_ret)
-# Note that since the data file is 2.7 GB, this step 
-# takes ~50 sec to run on this desktop with 16GB RAM
-
-data_US_bank_TA <- haven::read_dta(file_path_TA)
-
-######################################################################
-### Primary Filtration a la Stulz ####################################
-######################################################################
-
-# Filtration based on SIC codes
-ind_comm_banks <- c(6020:6029) #commercial banks
-ind_saving_inst <- c(6030:6039) #saving institutions
-ind_credit_union <- c(6060:6069) #credit unions
-ind_bank_hold <- c(6710:6712) #bank holding companies
-
-ind_bank_use <- c(ind_comm_banks, ind_saving_inst,
-                  ind_credit_union, ind_bank_hold
-                  ) #use only these, ignore others
-
-# Filtration based on share codes
-# Information taken from http://www.crsp.com/products/documentation/data-definitions-1
-ind_share_code_common <- c(10, 11) #only common shares, exclude all other types
-
-### Filter ###
-
-data_US_inter <- data_US_full %>% 
-  dplyr::filter(siccd %in% ind_bank_use |
-                  hsiccd %in% ind_bank_use) %>% #ignore non-banks
-  dplyr::filter(shrcd %in% ind_share_code_common) %>% #include common shares
-  dplyr::filter(prc > 1) #ignore banks with nominal price <= $1
-
-#######################################################################
-
-data_US <- data_US_inter %>% 
-  dplyr::select(c(date, siccd, hsiccd,
-                  comnam, prc, ret, 
-                  ncusip, cusip)
-                ) %>%
-  dplyr::rename(., "cusip_8" = cusip) %>%
-  tibble::add_column(., qtr_num = NA) %>%
-  dplyr::arrange(., comnam)
-
-data_US_id <- data_US_inter %>%
-  dplyr::select(comnam, siccd,
-                hsiccd, ncusip, 
-                cusip, permno) %>%
-  dplyr::distinct() 
-
-### Compustat Data
-## Banks with size >$2B in 2016
-
-data_US_2b_id <- data_US_bank_TA %>%
-  dplyr::filter(fyearq == 2016 & fqtr == 4) %>%
-  dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
-  dplyr::select(conm, conml,
-                sic, cusip,
-                gvkey) %>%
-  dplyr::distinct(.)
-
-cusip_banks_2B_8 <- substr(data_US_2b_id$cusip, 1, 8) %>% 
-  tibble::as_tibble() #converting from 9 to 8 digit CUSIP
-
-#############################################################
-### TESTING NEW IDEAS FOR MERGING CRSP+CSTAT VIA CUSIP ######
-#############################################################
-
-func_cusip_check <- function(cusip_8)
-{
-  last_2_char <- substr(cusip_8, 7, 8)
-  if (last_2_char == '10' |
-      last_2_char == '11'
-  )
-  {
-    return(1)
-  } else
-  {
-    return(0)
-  }
-}
-
-cusip_2b_8 <- data_US_2b_id$cusip %>%
-  substr(., 1, 8) %>%
-  tibble::as_tibble()
-test_comm_share <- sapply(cusip_2b_8, func_cusip_check)
-
-test_data_2b <- test_data_2b %>%
-  tibble::add_column(cusip_8 = cusip_2b_8$value) %>%
-  tibble::add_column(comm_share = test_comm_share)
-
-test_data_US <- data_US %>%
-  dplyr::select(comnam, siccd, cusip_8) %>%
-  dplyr::distinct(.)
-
-
-test_join_8 <- dplyr::left_join(test_data_2b, 
-                                test_data_US,
-                                by = "cusip_8"
-                                )
 
 
 
-############################################################
-############################################################
-############################################################
-# common cusips for the full banks and those with assets>$2B
-cusip_common <- dplyr::intersect(cusip_banks_full$cusip, 
-                                 cusip_banks_2B_8$value)
 
-##############################################################
-# CHANGE THIS PART AND REWRITE TO INCLUDE GS, MS(DW), WFC ETC.
-##############################################################
-### Remove banks with fewer than median observations 
-# data_US_num_obs <- data_US %>%
-#   group_by(comnam) %>%
-#   count(.)
-# 
-# data_few_ind <- which(data_US_num_obs$n <= median(data_US_num_obs$n))
-# name_bank_few <- name_bank_full[data_few_ind]
-# 
-# data_US_bank <- data_US %>% 
-#   dplyr::filter(., comnam %in% name_bank_few == 0)
-
-## Some summary statistics for bank returns ##
-
-# Sample stats according to SICCD (industry classification)
-summ_stat_siccd <- data_US_bank %>% 
-  dplyr::group_by(siccd) %>% 
-  dplyr::summarise(., 'minimum' = min(ret, na.rm = T), 
-                   'maximum' = max(ret, na.rm = T), 
-                   'avg' = mean(ret, na.rm = T), 
-                   'med' = median(ret, na.rm = T), 
-                   'std_dev' = sd(ret, na.rm = T), 
-                   'iqr' = IQR(ret, na.rm = T)
-                   )
-
-# Sample stats according to comnam (bank name)
-summ_stat_comnam <- data_US_bank %>% 
-  dplyr::group_by(comnam) %>% 
-  dplyr::summarise(., 'minimum' = min(ret, na.rm = T), 
-                   'maximum' = max(ret, na.rm = T), 
-                   'avg' = mean(ret, na.rm = T), 
-                   'med' = median(ret, na.rm = T), 
-                   'std_dev' = sd(ret, na.rm = T), 
-                   'iqr' = IQR(ret, na.rm = T)
-                   )
 
 name_bank_US <- setdiff(name_bank_full, name_bank_few)
 num_bank_US <- length(name_bank_US)
