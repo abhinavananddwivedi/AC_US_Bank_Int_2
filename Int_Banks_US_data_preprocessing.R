@@ -85,8 +85,7 @@ func_cusip_check <- function(cusip_8)
   # returns 0
   last_2_char <- substr(cusip_8, 7, 8)
   if (last_2_char == '10' |
-      last_2_char == '11'
-  )
+      last_2_char == '11')
   {
     return(1)
   } else

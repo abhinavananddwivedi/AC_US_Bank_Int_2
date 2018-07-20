@@ -3,9 +3,10 @@
 # Declare libraries
 library(tidyverse)
 
-# Preprocess the datasets from CRSP and Compustat 
+# Read, tidy and preprocess the datasets from CRSP and Compustat 
 
 source('Int_Banks_US_data_preprocessing.R', echo = F)
+#takes ~90 seconds to run
 
 ### Function Declarations #####################################################################
 
@@ -75,13 +76,13 @@ func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
 
 ### Function Declaration Over ###########################################################
 
+### The Main Script Starts Here ###
 
+name_bank_US <- data_US_bank %>%
+  dplyr::select(comnam) %>%
+  dplyr::distinct(.)
 
-
-
-
-name_bank_US <- setdiff(name_bank_full, name_bank_few)
-num_bank_US <- length(name_bank_US)
+num_bank_US <- nrow(name_bank_US)
 
 year_min <- min(lubridate::year(data_US_bank$date)) #year 1
 year_max <- max(lubridate::year(data_US_bank$date)) #year end
@@ -94,18 +95,18 @@ qtr_grid <- qtr_min:qtr_max
 
 data_list_US <- rep(list(NULL), num_bank_US)
 
-# These banks have inconsistent, duplicated data: ignore them
-ind_bank_ignore <- c(57, 99, 128, 210, 217, 335, 388,
-                     509, 559, 589, 597, 626, 934,
-                     1051, 1300, 1361, 1679, 1691) 
+# # These banks have inconsistent, duplicated data: ignore them
+# ind_bank_ignore <- c(57, 99, 128, 210, 217, 335, 388,
+#                      509, 559, 589, 597, 626, 934,
+#                      1051, 1300, 1361, 1679, 1691) 
+# 
+# ind_bank_use <- setdiff((1:num_bank_US), ind_bank_ignore)
 
-ind_bank_use <- setdiff((1:num_bank_US), ind_bank_ignore)
-
-for (i in ind_bank_use)
+for (i in 1:num_bank_US)
 {
   temp <- data_US_bank %>% 
-    dplyr::filter(comnam == name_bank_US[i]) %>%
-    dplyr::distinct(.) #delete duplicate entries
+    dplyr::filter(comnam == name_bank_US$comnam[i]) %>%
+    dplyr::distinct(.) #delete duplicate entries if any
   
   ### Quarterization of returns
   for (j in seq_along(years))
