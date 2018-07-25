@@ -156,7 +156,7 @@ for (i in 1:num_bank_US)
   
 }
 
-names(data_list_US) <- name_bank_US
+#names(data_list_US) <- name_bank_US
 
 data_list_US_df <- dplyr::bind_rows(data_list_US) #in panel format
 
@@ -244,7 +244,7 @@ for (k in qtr_grid)
 eig_vec_med <- c()
 eig_vec_mean <- c()
 
-for (i in 1:35)
+for (i in 1:15)
 {
   eig_vec_med[i] <- lapply(var_share, `[`, paste0("Lambda_", i)) %>%
     unlist() %>% 
@@ -310,27 +310,6 @@ names(temp_int_mat) <- colnames(temp_qtr_mat)
 temp_int_mat[temp_null==0, ] <- temp_qtr_mat
 
 # Sample statistics along rows (stat_dim = 1) or columns (stat_dim = 2)
-func_sample_stat <- function(data_matrix, stat_dim)
-{
-  
-  temp_mean <- data_matrix %>% apply(., stat_dim, mean, na.rm = T)
-  temp_median <- data_matrix %>% apply(., stat_dim, median, na.rm = T)
-  temp_sd <- data_matrix %>% apply(., stat_dim, sd, na.rm = T)
-  temp_IQR <- data_matrix %>% apply(., stat_dim, IQR, na.rm = T)
-  temp_min <- data_matrix %>% apply(., stat_dim, min, na.rm = T)
-  temp_max <- data_matrix %>% apply(., stat_dim, max, na.rm = T)
-  
-  sample_stat <- list(temp_mean, temp_median, temp_sd, temp_IQR, 
-                      temp_min, temp_max)
-  names(sample_stat) <- c("Mean", "Median", "Std_Dev", "IQR",
-                          "Min", "Max")
-  
-  return(sample_stat)
-}
-
-
-sample_stat_quarterly <- func_sample_stat(temp_int_mat, 1) #rowwise
-sample_stat_bankwise <- func_sample_stat(temp_int_mat, 2) #columnwise
 
 ## Time Trends for Integration ##
 
@@ -362,5 +341,5 @@ sample_stat_bankwise <- func_sample_stat(temp_int_mat, 2) #columnwise
 
 
 #####################################################################################
-time_stop <- Sys.time()
+#time_stop <- Sys.time()
 #(time_stop - time_start)
