@@ -4,75 +4,75 @@
 library(tidyverse)
 
 # Read, tidy and preprocess the datasets from CRSP and Compustat 
-
 source('Int_Banks_US_data_preprocessing.R', echo = F)
-#takes ~90 seconds to run
+#takes ~90 seconds to run on Ubuntu 16.04 with 16GB RAM
+#Processor: Intel Core i5-4570 CPU @ 3.20GHz × 4 
 
 ### Function Declarations #####################################################################
 
-func_full_NA_killer <- function(data_matrix)
-{
-  # This function kills a data frame's full NA columns and rows, in that order.
-  # It take as input a data matrix and returns it after deleting (first) full NA 
-  # columns and (then) full NA rows.
-  
-  # full NA column killer
-  temp_no_NA_col <- data_matrix[, colSums(is.na(data_matrix)) < nrow(data_matrix)]
-  
-  # full NA row killer
-  temp_no_NA_col_row <- temp_no_NA_col[rowSums(is.na(temp_no_NA_col)) != 
-                                         ncol(temp_no_NA_col), ]
-  
-  return(temp_no_NA_col_row) 
-}
-
-
-func_stale <- function(vec)
-{
-  # This function returns the number of 0s in a vector ignoring NAs.
-  
-  temp_vec <- vec[!is.na(vec)]
-  temp_sum <- sum(temp_vec == 0)
-  return(temp_sum)
-}
-
-
-func_part_NA_filler <- function(vec)
-{
-  # This function replaces missing values of a vector with its median
-  
-  vec_med <- median(vec, na.rm = T)
-  vec_NA <- is.na(vec)
-  vec[vec_NA] <- vec_med
-  
-  return(vec)
-}
-
-func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
-{
-  # This function takes a data matrix and removes columns with a high proportion
-  # of missing or stale entries. (Stale entries have return 0.) Any columns
-  # with leftover missing entries are replaced with their respective medians.
-  #
-  # The inputs are the data matrix and the critical threshold (in [0,1]) defining 
-  # "too high". The default is alpha = 0.5. This function depends on three other 
-  # self-defined functions func_stale(), func_NA_killer() and func_part_NA_filler()
-  
-  # Location of columns with more than alpha proportion of missing observations
-  col_high_NA <- which(colSums(is.na(temp_matrix)) > nrow(temp_matrix)*alpha)
-  
-  # Stale entries
-  num_stale_col <- apply(temp_matrix, 2, func_stale) #number of 0s column-wise
-  col_high_stale <- which(num_stale_col >= nrow(temp_matrix)*alpha) #highly stale columns
-  
-  temp_matrix[, c(col_high_NA, col_high_stale)] <- NA #ignore such columns
-  
-  temp_matrix <- func_full_NA_killer(temp_matrix) #kill full NA columns, then rows (if any)
-  
-  temp_matrix <- apply(temp_matrix, 2, func_part_NA_filler)
-  
-  return(temp_matrix)
-}
+# func_full_NA_killer <- function(data_matrix)
+# {
+#   # This function kills a data frame's full NA columns and rows, in that order.
+#   # It take as input a data matrix and returns it after deleting (first) full NA 
+#   # columns and (then) full NA rows.
+#   
+#   # full NA column killer
+#   temp_no_NA_col <- data_matrix[, colSums(is.na(data_matrix)) < nrow(data_matrix)]
+#   
+#   # full NA row killer
+#   temp_no_NA_col_row <- temp_no_NA_col[rowSums(is.na(temp_no_NA_col)) != 
+#                                          ncol(temp_no_NA_col), ]
+#   
+#   return(temp_no_NA_col_row) 
+# }
+# 
+# 
+# func_stale <- function(vec)
+# {
+#   # This function returns the number of 0s in a vector ignoring NAs.
+#   
+#   temp_vec <- vec[!is.na(vec)]
+#   temp_sum <- sum(temp_vec == 0)
+#   return(temp_sum)
+# }
+# 
+# 
+# func_part_NA_filler <- function(vec)
+# {
+#   # This function replaces missing values of a vector with its median
+#   
+#   vec_med <- median(vec, na.rm = T)
+#   vec_NA <- is.na(vec)
+#   vec[vec_NA] <- vec_med
+#   
+#   return(vec)
+# }
+# 
+# func_high_stale_NA_filler <- function(temp_matrix, alpha = 0.5)
+# {
+#   # This function takes a data matrix and removes columns with a high proportion
+#   # of missing or stale entries. (Stale entries have return 0.) Any columns
+#   # with leftover missing entries are replaced with their respective medians.
+#   #
+#   # The inputs are the data matrix and the critical threshold (in [0,1]) defining 
+#   # "too high". The default is alpha = 0.5. This function depends on three other 
+#   # self-defined functions func_stale(), func_NA_killer() and func_part_NA_filler()
+#   
+#   # Location of columns with more than alpha proportion of missing observations
+#   col_high_NA <- which(colSums(is.na(temp_matrix)) > nrow(temp_matrix)*alpha)
+#   
+#   # Stale entries
+#   num_stale_col <- apply(temp_matrix, 2, func_stale) #number of 0s column-wise
+#   col_high_stale <- which(num_stale_col >= nrow(temp_matrix)*alpha) #highly stale columns
+#   
+#   temp_matrix[, c(col_high_NA, col_high_stale)] <- NA #ignore such columns
+#   
+#   temp_matrix <- func_full_NA_killer(temp_matrix) #kill full NA columns, then rows (if any)
+#   
+#   temp_matrix <- apply(temp_matrix, 2, func_part_NA_filler)
+#   
+#   return(temp_matrix)
+# }
 
 ### Function Declaration Over ###########################################################
 
