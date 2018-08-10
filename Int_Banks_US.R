@@ -148,6 +148,7 @@ list_eig_vec <- rep(list(NULL), qtr_max)
 list_eig_val <- rep(list(NULL), qtr_max)
 pc_out_of_sample <- rep(list(NULL), qtr_max)
 var_share <- rep(list(NULL), qtr_max)
+pr_comp <- rep(list(NULL), qtr_max)
 
 for (k in qtr_grid)
 {
@@ -196,26 +197,29 @@ for (k in qtr_grid)
 
 ### Out-of-sample Principal Component Computation #################################
 
-for (l in qtr_grid[-qtr_max]) #For all except the last quarter
+#for (l in qtr_grid[-qtr_max]) #For all except the last quarter
+for (l in qtr_grid)
 {
-  temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
+  #temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
   temp_q_current <- list_ret_banks[[l]] %>% as.matrix()
   
-  if (ncol(temp_q_next) == ncol(list_eig_vec[[l]]))
-  {
-    pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(list_eig_vec[[l]])
-  } else if (ncol(temp_q_current) == ncol(list_eig_vec[[l]]))
-  {
-    pc_out_of_sample[[l+1]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])
-  }
+  pr_comp[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+    as.matrix(.)
+  
+  # if (ncol(temp_q_next) == ncol(list_eig_vec[[l]]))
+  # {
+  #   pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(list_eig_vec[[l]]) %>%
+  #     as.matrix(.)
+  # } else if (ncol(temp_q_current) == ncol(list_eig_vec[[l]]))
+  # {
+  #   pc_out_of_sample[[l+1]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+  #     as.matrix(.)
+  # }
 
 
 }
 
-func_mat_isna <- function(matrix)
-{
-  return(colSums(is.na(matrix)))
-}
+
 
 # # Computing share of explanatory power of eigenvectors, top to bottom
 # 
@@ -238,14 +242,28 @@ func_mat_isna <- function(matrix)
 ##### Principal Component Regressions and Integration Computation #####
 #######################################################################
 
-# US_bank_integration_qtr <- rep(list(NULL), qtr_max)
-# temp_reg <- rep(list(NULL), qtr_max)
-# 
-# for (m in qtr_grid[-1])
-# {
-#   
-# }
+US_bank_integration_qtr <- rep(list(NULL), qtr_max)
+list_reg <- rep(list(NULL), qtr_max)
 
+#for (m in qtr_grid[-1])
+for (m in qtr_grid)
+{
+  # Principal components as explanatory variables
+  #var_x_expl <- pc_out_of_sample[[m]]
+  var_x_expl <- pr_comp[[m]]
+  
+  # Note that each quarter, num of explanatory pc is different now
+  # Pick as many PCs as will explain 90% of the variance
+  var_x_expl <- var_x_expl[, which(var_share[[m]] < 0.9)] %>%
+    data.matrix(.)
+  
+  var_y <- list_ret_banks[[m]] %>% data.matrix(.)
+  
+  if(nrow(var_x_expl) == nrow(var_y))
+  {
+    list_reg[[m]] <- summary(lm(var_y ~ var_x_expl))
+  }
+}
 # for (l in 2:qtr_max) #PC computed from quarter 2 onwards
 # {
 #   # Principal components as explanatory variables
