@@ -128,12 +128,13 @@ func_stale <- function(vec)
 
 func_missing <- function(vec)
 {
-  # This function returns number of NAs in a vector
+  # This function returns number of missing values in a vector
   return(sum(is.na(vec)))
 }
 
 func_NA_filler <- function(vec)
 {
+  # This function fills a vector's missing values with its median 
   vec[is.na(vec)] <- median(vec, na.rm = T)
   return(vec)
 }
@@ -176,7 +177,6 @@ for (k in qtr_grid)
   
   # Compute covariance matrices 
   temp_cov <- temp_q %>% 
-    # as.data.frame(.) %>% 
     cov(., use = "pairwise.complete.obs")
   
   #Pick nearest positive definite matrix
@@ -197,46 +197,27 @@ for (k in qtr_grid)
 
 ### Out-of-sample Principal Component Computation #################################
 
-#for (l in qtr_grid[-qtr_max]) #For all except the last quarter
-for (l in qtr_grid)
+for (l in qtr_grid[-qtr_max]) #For all except the last quarter
+#for (l in qtr_grid)
 {
-  #temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
+  temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
   temp_q_current <- list_ret_banks[[l]] %>% as.matrix()
   
-  pr_comp[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
-    as.matrix(.)
+  # pr_comp[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+  #   as.matrix(.)
   
-  # if (ncol(temp_q_next) == ncol(list_eig_vec[[l]]))
-  # {
-  #   pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(list_eig_vec[[l]]) %>%
-  #     as.matrix(.)
-  # } else if (ncol(temp_q_current) == ncol(list_eig_vec[[l]]))
-  # {
-  #   pc_out_of_sample[[l+1]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
-  #     as.matrix(.)
-  # }
+  if (ncol(temp_q_next) == ncol(list_eig_vec[[l]]))
+  {
+    pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(list_eig_vec[[l]]) %>%
+      as.matrix(.)
+  } else if (ncol(temp_q_current) == ncol(list_eig_vec[[l]]))
+  {
+    pc_out_of_sample[[l+1]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+      as.matrix(.)
+  }
 
 
 }
-
-
-
-# # Computing share of explanatory power of eigenvectors, top to bottom
-# 
-# eig_vec_med <- c()
-# eig_vec_mean <- c()
-# 
-# for (i in 1:15)
-# {
-#   eig_vec_med[i] <- lapply(var_share, `[`, paste0("Lambda_", i)) %>%
-#     unlist() %>% 
-#     median()
-#   
-#   eig_vec_mean[i] <- lapply(var_share, `[`, paste0("Lambda_", i)) %>%
-#     unlist() %>% 
-#     mean()
-# }
-# IMPROVE THIS LINE!!!
 
 #######################################################################
 ##### Principal Component Regressions and Integration Computation #####
@@ -244,73 +225,40 @@ for (l in qtr_grid)
 
 US_bank_integration_qtr <- rep(list(NULL), qtr_max)
 list_reg <- rep(list(NULL), qtr_max)
+list_qtrly_integration <- rep(list(NULL), qtr_max)
 
-#for (m in qtr_grid[-1])
-for (m in qtr_grid)
+# Assume 15 principal components are enough to explain 90% variance
+num_pc <- 15
+
+for (m in qtr_grid[-1])
+#for (m in qtr_grid)
 {
   # Principal components as explanatory variables
-  #var_x_expl <- pc_out_of_sample[[m]]
-  var_x_expl <- pr_comp[[m]]
+  var_x_expl <- pc_out_of_sample[[m]]
+  #var_x_expl <- pr_comp[[m]]
   
   # Note that each quarter, num of explanatory pc is different now
   # Pick as many PCs as will explain 90% of the variance
-  var_x_expl <- var_x_expl[, which(var_share[[m]] < 0.9)] %>%
-    data.matrix(.)
+  # var_x_expl <- var_x_expl[, which(var_share[[m]] < 0.9)] %>%
+  #   data.matrix(.)
+  var_x_expl <- var_x_expl[, 1:num_pc]
   
   var_y <- list_ret_banks[[m]] %>% data.matrix(.)
   
   if(nrow(var_x_expl) == nrow(var_y))
   {
     list_reg[[m]] <- summary(lm(var_y ~ var_x_expl))
+    temp_adj_rsqr <- lapply(list_reg[[m]], `[`, "adj.r.squared") %>%
+      as.data.frame(.)
+    names(temp_adj_rsqr) <- colnames(var_y)
+    
+    # Store each bank's integration each quarter as a row vector in a list
+    list_qtrly_integration[[m]] <- temp_adj_rsqr
   }
+  
+  
 }
-# for (l in 2:qtr_max) #PC computed from quarter 2 onwards
-# {
-#   # Principal components as explanatory variables
-#   temp_x <- pc_out_of_sample[[l]]
-#
-#   # Note that each quarter, num of explanatory pc is different now
-#   temp_x <- temp_x[, which(var_share[[l]] < 0.90)] %>%
-#     data.matrix(.)
-#
-#   # Dependent variables are corresponding quarterly bank returns
-#   temp_y <- list_ret_banks[[l]] %>%
-#     data.matrix(.)
-#
-#   # Inlcude only those banks which have more than 20% usable returns in quarter
-#   temp_y <- temp_y[, colSums(is.na(temp_y)) <= nrow(temp_y)*0.20]
-#   ### THIS SEEMS REDUNDANT. FULLY FILLED MATRICES ENCOUNTERED
-#   ### MAYBE STALE VALUE CHECKING INSTEAD?
-#
-#   # Computing integration as adjusted R squares of PC regresssions
-#   if (nrow(temp_y) == nrow(temp_x)) #if the sizes of matrices conform
-#   {
-#     temp_reg[[l]] <- summary(lm(temp_y ~ temp_x, na.action = na.omit)) #store the summary of OLS
-#     temp_adj_rsqr <- lapply(temp_reg[[l]], `[`, "adj.r.squared") %>%
-#       as.data.frame(.) #store the adjusted rsquares from each regression
-#     names(temp_adj_rsqr) <- colnames(temp_y)
-#
-#     # Store each bank's integration each quarter as a row vector in a list
-#     temp_qtr_integration[[l]] <- max(temp_adj_rsqr, 0)
-#
-#   }
-# }
-#
-# names(temp_qtr_integration) <- paste0("Quarter_", qtr_grid)
-# 
-# temp_null <- sapply(temp_qtr_integration, is.null) #locate null elements
-# 
-# # For convenience, change the integration list to a matrix with banks as columns #
-# # Convert list to tibble 
-# temp_qtr_mat <- dplyr::bind_rows(temp_qtr_integration) #note that NULL elements are killed
-# 
-# # Initialize the integration matrix, name its columns as banks
-# temp_int_mat <- data.frame(matrix(NA, nrow = qtr_max, ncol = ncol(temp_qtr_mat)))
-# names(temp_int_mat) <- colnames(temp_qtr_mat)
-# 
-# # Assign the relevant rows to the matrix, the rest remain NAs
-# temp_int_mat[temp_null==0, ] <- temp_qtr_mat
 
-#####################################################################################
-#time_stop <- Sys.time()
-#(time_stop - time_start)
+names(list_qtrly_integration) <- paste0("Quarter_", qtr_grid)
+
+integration_matrix_qtrly <- dplyr::bind_rows(list_qtrly_integration)
