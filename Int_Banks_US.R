@@ -147,9 +147,9 @@ list_ret_banks <- rep(list(NULL), qtr_max)
 list_cov <- rep(list(NULL), qtr_max)
 list_eig_vec <- rep(list(NULL), qtr_max)
 list_eig_val <- rep(list(NULL), qtr_max)
-pc_out_of_sample <- rep(list(NULL), qtr_max)
 var_share <- rep(list(NULL), qtr_max)
-pr_comp <- rep(list(NULL), qtr_max)
+pc_out_of_sample <- rep(list(NULL), qtr_max)
+pc_in_sample <- rep(list(NULL), qtr_max)
 
 for (k in qtr_grid)
 {
@@ -195,24 +195,36 @@ for (k in qtr_grid)
   
 }
 
-### Out-of-sample Principal Component Computation #################################
+### Principal Component Computation #####################################
 
 for (l in qtr_grid[-qtr_max]) #For all except the last quarter
-#for (l in qtr_grid)
 {
   temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
   temp_q_current <- list_ret_banks[[l]] %>% as.matrix()
   
-  # pr_comp[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
-  #   as.matrix(.)
+  pc_in_sample[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+    as.matrix(.)
   
-  if (ncol(temp_q_next) == ncol(list_eig_vec[[l]]))
+  bank_qtr_next <- ncol(temp_q_next)
+  
+  eig_matrix_curr <- list_eig_vec[[l]]
+  num_eig_vec_current <- ncol(eig_matrix_curr)
+  
+  num_diff_banks <- min(bank_qtr_next, num_eig_vec_current)
+  
+  if (bank_qtr_next == num_eig_vec_current)
   {
-    pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(list_eig_vec[[l]]) %>%
+    pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(eig_matrix_curr) %>%
       as.matrix(.)
-  } else if (ncol(temp_q_current) == ncol(list_eig_vec[[l]]))
+  } else if (bank_qtr_next - num_eig_vec_current > 0)
   {
-    pc_out_of_sample[[l+1]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
+    pc_out_of_sample[[l+1]] <- temp_q_next[, 1:num_diff_banks]%*%as.matrix(eig_matrix_curr)%>%
+      as.matrix(.)
+  } else if (bank_qtr_next - num_eig_vec_current < 0)
+  {
+    pc_out_of_sample[[l+1]] <- temp_q_next%*%as.matrix(
+      eig_matrix_curr[1:num_diff_banks, 1:num_diff_banks]
+      )%>%
       as.matrix(.)
   }
 
@@ -224,41 +236,72 @@ for (l in qtr_grid[-qtr_max]) #For all except the last quarter
 #######################################################################
 
 US_bank_integration_qtr <- rep(list(NULL), qtr_max)
-list_reg <- rep(list(NULL), qtr_max)
-list_qtrly_integration <- rep(list(NULL), qtr_max)
+list_reg_in_sample <- rep(list(NULL), qtr_max)
+list_reg_out_of_sample <- rep(list(NULL), qtr_max)
+list_qtrly_integration_out <- rep(list(NULL), qtr_max)
+list_qtrly_integration_in <- rep(list(NULL), qtr_max)
 
 # Assume 15 principal components are enough to explain 90% variance
-num_pc <- 15
+# num_pc <- 15
 
 for (m in qtr_grid[-1])
-#for (m in qtr_grid)
 {
   # Principal components as explanatory variables
-  var_x_expl <- pc_out_of_sample[[m]]
-  #var_x_expl <- pr_comp[[m]]
+  var_x_expl_out <- pc_out_of_sample[[m]]
+  var_x_expl_in <- pc_in_sample[[m]]
+
+  ### Out of Sample Regressions ###
   
   # Note that each quarter, num of explanatory pc is different now
   # Pick as many PCs as will explain 90% of the variance
-  # var_x_expl <- var_x_expl[, which(var_share[[m]] < 0.9)] %>%
-  #   data.matrix(.)
-  var_x_expl <- var_x_expl[, 1:num_pc]
+  var_x_expl_out <- var_x_expl_out[, which(var_share[[m]] < 0.9)] %>% 
+    data.matrix(.)
   
+  # Dependent variable is bank returns
   var_y <- list_ret_banks[[m]] %>% data.matrix(.)
   
-  if(nrow(var_x_expl) == nrow(var_y))
+  list_reg_out_of_sample[[m]] <- summary(lm(var_y ~ var_x_expl_out))
+  temp_adj_rsqr_out <- lapply(list_reg_out_of_sample[[m]], `[`, "adj.r.squared") %>%
+    as.data.frame(.)
+  names(temp_adj_rsqr_out) <- colnames(var_y)
+  
+  ### In sample regressions ###
+  if (m != qtr_max)
   {
-    list_reg[[m]] <- summary(lm(var_y ~ var_x_expl))
-    temp_adj_rsqr <- lapply(list_reg[[m]], `[`, "adj.r.squared") %>%
+    var_x_expl_in <- var_x_expl_in[, which(var_share[[m]] < 0.9)] %>% 
+      data.matrix(.)
+    list_reg_in_sample[[m]] <- summary(lm(var_y ~ var_x_expl_in))
+    temp_adj_rsqr_in <- lapply(list_reg_in_sample[[m]], `[`, "adj.r.squared") %>%
       as.data.frame(.)
-    names(temp_adj_rsqr) <- colnames(var_y)
-    
-    # Store each bank's integration each quarter as a row vector in a list
-    list_qtrly_integration[[m]] <- temp_adj_rsqr
+    names(temp_adj_rsqr_in) <- colnames(var_y)
   }
   
+  # Store each bank's integration each quarter as a row vector in a list
+  list_qtrly_integration_out[[m]] <- temp_adj_rsqr_out
+  list_qtrly_integration_in[[m]] <- temp_adj_rsqr_in
   
 }
 
-names(list_qtrly_integration) <- paste0("Quarter_", qtr_grid)
+names(list_qtrly_integration_out) <- paste0("Quarter_", qtr_grid)
+names(list_qtrly_integration_in) <- paste0("Quarter_", qtr_grid)
 
-integration_matrix_qtrly <- dplyr::bind_rows(list_qtrly_integration)
+integration_matrix_qtrly_out <- dplyr::bind_rows(list_qtrly_integration_out)
+integration_matrix_qtrly_in <- dplyr::bind_rows(list_qtrly_integration_in)
+
+rep_yr <- rep(year_min:year_max, each = 4)
+rep_qtr <- rep(c("Q1","Q2","Q3","Q4"), num_years)
+date_col <- paste0(rep_yr, rep_qtr)
+
+integration_matrix_qtrly_out <- integration_matrix_qtrly_out %>%
+  tibble::add_column(., Date = date_col[-1]) %>%
+  dplyr::select(Date, everything())
+
+integration_matrix_qtrly_in <- integration_matrix_qtrly_in %>%
+  tibble::add_column(., Date = date_col[-1]) %>%
+  dplyr::select(Date, everything())
+
+# Writing Out Some Important Files
+readr::write_csv(integration_matrix_qtrly_out, "Integration_Out.csv")
+readr::write_csv(integration_matrix_qtrly_in, "Integration_In.csv")
+readr::write_csv(name_cusip_sic, "US_Bank_CUSIP_SIC.csv")
+readr::write_csv(name_cusip, "US_Bank_CUSIP.csv")
