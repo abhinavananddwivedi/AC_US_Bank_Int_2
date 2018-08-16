@@ -300,8 +300,21 @@ integration_matrix_qtrly_in <- integration_matrix_qtrly_in %>%
   tibble::add_column(., Date = date_col[-1]) %>%
   dplyr::select(Date, everything())
 
+b_1 <- names(integration_matrix_qtrly_out[2])
+b_end <- names(integration_matrix_qtrly_out[ncol(integration_matrix_qtrly_out)])
+
+b_1_in <- names(integration_matrix_qtrly_in[2])
+b_end_in <- names(integration_matrix_qtrly_out[ncol(integration_matrix_qtrly_in)])
+
+int_mat_qtrly_out_long <- integration_matrix_qtrly_out %>%
+  tidyr::gather(., b_1:b_end, key = "Banks", value = "Integration")
+int_mat_qtrly_in_long <- integration_matrix_qtrly_in %>%
+  tidyr::gather(., b_1:b_end_in, key = "Banks", value = "Integration")
+
 # Writing Out Some Important Files
 readr::write_csv(integration_matrix_qtrly_out, "Integration_Out.csv")
 readr::write_csv(integration_matrix_qtrly_in, "Integration_In.csv")
 readr::write_csv(name_cusip_sic, "US_Bank_CUSIP_SIC.csv")
 readr::write_csv(name_cusip, "US_Bank_CUSIP.csv")
+readr::write_csv(int_mat_qtrly_in_long, "Integration_In_Long.csv")
+readr::write_csv(int_mat_qtrly_out_long, "Integration_Out_Long.csv")
