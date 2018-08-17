@@ -2,6 +2,7 @@
 
 # Libraries
 library(tidyverse)
+library(lubridate)
 
 ############################
 ### Directory_Management ###
@@ -49,6 +50,7 @@ data_US_inter <- data_US_full %>%
   dplyr::filter(siccd %in% ind_bank_use |
                   hsiccd %in% ind_bank_use) %>% #ignore non-banks
   dplyr::filter(shrcd %in% ind_share_code_common) %>% #include common shares
+  dplyr::filter(lubridate::year(date) >= "1993") %>%
   dplyr::filter(prc > 1) #ignore banks with nominal price <= $1
 
 # Identifying US banks
@@ -63,17 +65,17 @@ cusip_US_8 <- unique(data_US_id$cusip) %>%
 
 ### COMPUSTAT DATA CUSIPS (8 digits) ###
 
-# Identify banks with size >$2B in 2016
-data_US_2b_id <- data_US_bank_TA %>%
+# Identify banks with size >$1B in 2016
+data_US_1b_id <- data_US_bank_TA %>%
   dplyr::filter(fyearq == 2016 & fqtr == 4) %>%
-  dplyr::filter(atq >= 2000) %>% #total assets in $millions, 1B=1000mil
+  dplyr::filter(atq >= 1000) %>% #total assets in $millions, 1B=1000mil
   dplyr::select(conm, conml,
                 sic, cusip,
                 gvkey) %>%
   dplyr::distinct(.)
 
-# Admissible cusips of banks with assets >$2B
-cusip_2b_8 <- data_US_2b_id$cusip %>%
+# Admissible cusips of banks with assets >$1B
+cusip_1b_8 <- data_US_1b_id$cusip %>%
   substr(., 1, 8) %>%
   tibble::as_tibble()
 
@@ -95,23 +97,23 @@ func_cusip_check <- function(cusip_8)
 }
 
 # Apply cusip check function to indicate common stock status
-test_comm_share <- sapply(cusip_2b_8$value, func_cusip_check)
+test_comm_share <- sapply(cusip_1b_8$value, func_cusip_check)
 
 # Attach to Compustat data then filter banks with common stock
-data_US_2b_id <- data_US_2b_id %>%
-  tibble::add_column(cusip_8 = cusip_2b_8$value) %>%
+data_US_1b_id <- data_US_1b_id %>%
+  tibble::add_column(cusip_8 = cusip_1b_8$value) %>%
   tibble::add_column(comm_share = test_comm_share) %>%
   dplyr::filter(comm_share == 1) #only common shares
 
-cusip_2b_8 <- data_US_2b_id$cusip_8 %>%
+cusip_1b_8 <- data_US_1b_id$cusip_8 %>%
   tibble::as_tibble() #update admissible 8 digit cusips
 
-### Isolate cusips of banks with assets > $2B in both datasets ###
-common_cusip <- dplyr::intersect(cusip_2b_8$value, 
+### Isolate cusips of banks with assets > $1B in both datasets ###
+common_cusip <- dplyr::intersect(cusip_1b_8$value, 
                                  cusip_US_8$value)
 
 ### The final CRSP sample of US banks contains only those banks 
-### whose 2016 total assets are more than $2B
+### whose 2016 total assets are more than $1B
 
 data_US_bank <- data_US_inter %>%
   dplyr::select(c(date, comnam, 

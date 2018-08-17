@@ -20,11 +20,8 @@ func_neg_to_zero <- function(vec)
   return(vec)
 }
 
-int_US_bank_wide <- apply(integration_matrix_qtrly_out, 
-                          2, 
-                          func_neg_to_zero) %>%
-  tibble::as_tibble()
-
+### Data in Long Format ###
+  
 int_US_bank_long <- int_mat_qtrly_out_long
 temp_int_long <- func_neg_to_zero(int_mat_qtrly_out_long$Integration)
 int_US_bank_long$Integration <- temp_int_long 
@@ -66,37 +63,64 @@ func_med <- function(vec)
 {
   # This function returns medians after
   # coercing to numeric and ignoring NAs
-  return(median(as.numeric(vec), na.rm = T))
+  return(median(vec, na.rm = T))
 }
 
-# int_med_US_bank_qrtly <- apply(int_US_bank_wide[, -1], 1, func_med)
-# 
-# plot_data_median_int <- data.frame(Date = )
-# 
-# plot_int_US_qrtly <-  plot(int_US_bank_wide$Date, int_med_US_bank_qrtly,
-#                            type = "l",
-#                            col = "blue",
-#                            xlab = "Time",
-#                            ylab = "Median Integration"
-# )
+## Data in Wide Format ##
+## Median Integration Levels Each Quarter ##
 
-### Top 20 Banks by Median Integration
+temp_int_med_bank <- integration_matrix_qtrly_out %>%
+  dplyr::select(-Date) %>%
+  apply(., 2, func_neg_to_zero) %>%
+  apply(., 1, func_med)
 
+date_med <- integration_matrix_qtrly_out$Date
+year_end <- paste0(years, "Q4")
 
+plot_data <- data.frame(date = as.factor(date_med), 
+                        med_bank_int = as.numeric(temp_int_med_bank)
+                        )
 
+plot_med_bank_int <- ggplot(data = plot_data, 
+                            mapping = aes(x = as.character(date), y = med_bank_int)) +
+  geom_line(group = 1) +
+  theme_bw() +
+  labs(x = "Years", y = "Median Integration Level") +
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+
+### Top 25 Banks by Median Integration
+
+col_missing <- apply(integration_matrix_qtrly_out[, -1], 2, func_missing)
+col_admissible <- which(col_missing <= 30)
+
+col_med_admissible <- apply(integration_matrix_qtrly_out[, col_admissible[-1]], 
+                            2, func_med) 
+names(col_med_admissible) <- name_bank_US$comnam[col_admissible[-1]]
+
+med_admissible_banks <- tibble::as_tibble(col_med_admissible) %>% 
+  tibble::rownames_to_column() 
+
+med_top_25_admissible <- med_admissible_banks %>%
+  dplyr::filter(rank(desc(value)) <= 25) %>%
+  dplyr::arrange(desc(value))
+
+# barplot(med_top_25_admissible$value, 
+#         names.arg = med_top_25_admissible$rowname,
+#         las = 2)
 
 ### Two Yearly Integration Boxplots ###
 
 year_seq <- paste0(seq(year_min, year_max, 2), "Q4")
 
 data_boxplot <- int_US_bank_long %>%
+  #dplyr::filter(Date >= "1992Q1") %>%
   dplyr::filter(Date %in% year_seq)
 
-(boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
+boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
     geom_boxplot(na.rm = T) +
     coord_flip() +
-    theme_bw())
+    theme_bw()
 ###
 
 
