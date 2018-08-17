@@ -109,11 +109,9 @@ med_top_25_admissible <- med_admissible_banks %>%
 #         las = 2)
 
 ### Two Yearly Integration Boxplots ###
-
 year_seq <- paste0(seq(year_min, year_max, 2), "Q4")
 
 data_boxplot <- int_US_bank_long %>%
-  #dplyr::filter(Date >= "1992Q1") %>%
   dplyr::filter(Date %in% year_seq)
 
 boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
