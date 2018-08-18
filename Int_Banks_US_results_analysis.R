@@ -21,9 +21,16 @@ func_neg_to_zero <- function(vec)
 }
 
 ### Data in Long Format ###
+
+#### FOR THINKPAD --- COMMENT OUT WHEN USING DESKTOP ####
+#int_mat_qrtly_out_long <- readr::read_csv("Integration_Out_Long.csv")
+#integration_matrix_qtrly_out <- readr::read_csv("Integration_Out.csv")
+#years <- 1993:2016
+#########################################################
   
-int_US_bank_long <- int_mat_qtrly_out_long
-temp_int_long <- func_neg_to_zero(int_mat_qtrly_out_long$Integration)
+int_US_bank_long <- int_mat_qrtly_out_long
+#temp_int_long <- func_neg_to_zero(int_mat_qtrly_out_long$Integration)
+temp_int_long <- func_neg_to_zero(int_US_bank_long$Integration)
 int_US_bank_long$Integration <- temp_int_long 
 
 ### Summary Statistics ###
