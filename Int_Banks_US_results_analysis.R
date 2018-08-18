@@ -9,8 +9,7 @@ library(moments)
 # Read, tidy and preprocess the datasets from CRSP and Compustat 
 source('Int_Banks_US.R', echo = F)
 #includes another nested script file for preprocessing raw data
-#takes ~120 seconds to run on Ubuntu 18.04 with 16GB RAM
-#processor: Intel Core i5-4570 CPU @ 3.20GHz × 4 
+
 
 func_neg_to_zero <- function(vec)
 {
@@ -19,17 +18,8 @@ func_neg_to_zero <- function(vec)
   vec[temp] <- 0
   return(vec)
 }
-
-### Data in Long Format ###
-
-#### FOR THINKPAD --- COMMENT OUT WHEN USING DESKTOP ####
-#int_mat_qrtly_out_long <- readr::read_csv("Integration_Out_Long.csv")
-#integration_matrix_qtrly_out <- readr::read_csv("Integration_Out.csv")
-#years <- 1993:2016
-#########################################################
   
-int_US_bank_long <- int_mat_qrtly_out_long
-#temp_int_long <- func_neg_to_zero(int_mat_qtrly_out_long$Integration)
+int_US_bank_long <- int_mat_qtrly_out_long
 temp_int_long <- func_neg_to_zero(int_US_bank_long$Integration)
 int_US_bank_long$Integration <- temp_int_long 
 
@@ -98,7 +88,7 @@ plot_med_bank_int <- ggplot(data = plot_data,
 ### Top 25 Banks by Median Integration
 
 col_missing <- apply(integration_matrix_qtrly_out[, -1], 2, func_missing)
-col_admissible <- which(col_missing <= 30)
+col_admissible <- which(col_missing <= 50)
 
 col_med_admissible <- apply(integration_matrix_qtrly_out[, col_admissible[-1]], 
                             2, func_med) 
@@ -111,12 +101,14 @@ med_top_25_admissible <- med_admissible_banks %>%
   dplyr::filter(rank(desc(value)) <= 25) %>%
   dplyr::arrange(desc(value))
 
-# barplot(med_top_25_admissible$value, 
-#         names.arg = med_top_25_admissible$rowname,
-#         las = 2)
+barplot_top_25 <- ggplot(med_top_25_admissible, aes(rowname, value)) +
+  geom_bar(stat = "identity", show.legend = T) + 
+  labs(x = "Banks", y = "Median Integration") +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=90, hjust=1))
 
-### Two Yearly Integration Boxplots ###
-year_seq <- paste0(seq(year_min, year_max, 2), "Q4")
+### Yearly Integration Boxplots ###
+year_seq <- paste0(seq(year_min, year_max, 1), "Q4")
 
 data_boxplot <- int_US_bank_long %>%
   dplyr::filter(Date %in% year_seq)
@@ -124,10 +116,12 @@ data_boxplot <- int_US_bank_long %>%
 boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
     geom_boxplot(na.rm = T) +
-    coord_flip() +
-    theme_bw()
+    theme_bw() + 
+    theme(axis.text.x=element_text(angle=90, hjust=1)) 
 ###
 
 
 time_end <- Sys.time()
 print(time_end - time_start)
+#takes ~120 seconds to run on Ubuntu 18.04 with 16GB RAM
+#processor: Intel Core i5-4570 CPU @ 3.20GHz × 4 
