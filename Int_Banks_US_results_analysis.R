@@ -105,7 +105,7 @@ barplot_top_25 <- ggplot(med_top_25_admissible, aes(rowname, value)) +
   geom_bar(stat = "identity", show.legend = T) + 
   labs(x = "Banks", y = "Median Integration") +
   theme_bw() +
-  theme(axis.text.x=element_text(angle=90, hjust=1))
+  theme(axis.text.x=element_text(angle=60, hjust=1))
 
 ### Yearly Integration Boxplots ###
 year_seq <- paste0(seq(year_min, year_max, 1), "Q4")
@@ -117,7 +117,7 @@ boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
     geom_boxplot(na.rm = T) +
     theme_bw() + 
-    theme(axis.text.x=element_text(angle=90, hjust=1)) 
+    theme(axis.text.x=element_text(angle=60, hjust=1)) 
 ###
 
 
