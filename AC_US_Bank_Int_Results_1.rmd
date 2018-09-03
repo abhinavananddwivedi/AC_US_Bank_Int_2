@@ -80,7 +80,11 @@ boxplot_int_yearly
 
 ```{r most_int}
 
-knitr::kable(med_top_25_admissible)
+med_top_25 <- med_top_25_admissible %>%
+  dplyr::rename(., "Bank" = rowname) %>%
+  dplyr::rename(., "Median_Integration" = value)
+
+knitr::kable(med_top_25)
 
 
 barplot_top_25
