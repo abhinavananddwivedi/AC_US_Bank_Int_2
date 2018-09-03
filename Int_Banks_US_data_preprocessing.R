@@ -3,6 +3,7 @@
 # Libraries
 library(tidyverse)
 library(lubridate)
+library(moments)
 
 ############################
 ### Directory_Management ###
@@ -136,7 +137,12 @@ summ_stat_siccd <- data_US_bank %>%
                    'avg' = mean(ret, na.rm = T), 
                    'med' = median(ret, na.rm = T), 
                    'std_dev' = sd(ret, na.rm = T), 
-                   'iqr' = IQR(ret, na.rm = T))
+                   'iqr' = IQR(ret, na.rm = T),
+                   'skew' = moments::skewness(ret, na.rm = T),
+                   'kurt' = moments::kurtosis(ret, na.rm = T)
+                   )
+
+readr::write_csv(summ_stat_siccd, "Summary_Stat_SIC.csv")
 
 # Sample stats according to comnam (bank name)
 summ_stat_comnam <- data_US_bank %>% 
@@ -146,6 +152,9 @@ summ_stat_comnam <- data_US_bank %>%
                    'avg' = mean(ret, na.rm = T), 
                    'med' = median(ret, na.rm = T), 
                    'std_dev' = sd(ret, na.rm = T), 
-                   'iqr' = IQR(ret, na.rm = T))
+                   'iqr' = IQR(ret, na.rm = T),
+                   'skew' = moments::skewness(ret, na.rm = T),
+                   'kurt' = moments::kurtosis(ret, na.rm = T)
+                   )
 
-
+readr::write_csv(summ_stat_comnam, "Summary_Stat_Banks.csv")

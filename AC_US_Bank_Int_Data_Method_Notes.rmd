@@ -1,0 +1,105 @@
+---
+title: "Integration Among US Banks: Data and Methodology Guide"
+author: Abhinav Anand and John Cotter
+date: '`r format(Sys.time(), "%Y/%m/%d")`' #current date
+
+output:
+  pdf_document:
+    keep_tex: true
+
+fontsize: 11pt
+documentclass: article
+geometry: margin = 1.5in
+
+linkcolor: blue
+urlcolor: red
+citecolor: magenta
+
+# citation_package: natbib
+# bibliography: Working_Paper.bib
+
+header-includes:
+   - \linespread{1.25}
+   - \usepackage{amsmath}
+
+
+---
+
+
+```{r setup, eval=T, message=FALSE, warning=F, include=FALSE}
+
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(moments) 
+
+knitr::opts_chunk$set(echo = F, 
+                      warning = T, 
+                      message = F, 
+                      eval = T, 
+                      include = T,
+                      fig.height=5.5, 
+                      fig.width=5.5,
+                      fig.align = 'center'
+                      )
+
+# Preprocess, then compute then postprocess
+# Includes two nested scripts 
+#source('Int_Banks_US_results_analysis.R', echo = F)
+
+
+```
+
+# Data
+
+The starting period for our sample is January 1 1993 and the ending period is December 31 2016. 
+
+Our sample consists of all US depository credit institutions and bank holding companies for which data are available in both CRSP and Compustat. We use the WRDS interface to collect data from both sources.
+
+
+## Sample Construction
+
+Finance and insurance related entries are distributed between SIC codes 6000--6799. The following table illustrates this classification in more detail.[^Full_SIC]
+
+[^Full_SIC]: The full list can be found on the link: <http://www.ehso.com/siccodes.php>
+
+```{r SIC_Codes_Finance}
+url_SIC <- "https://en.wikipedia.org/wiki/Standard_Industrial_Classification"
+webpage <- xml2::read_html(url_SIC)
+SIC_tables <- rvest::html_nodes(webpage, "table")
+table_2 <- rvest::html_table(SIC_tables[3], fill = F)
+sic_fin <- seq(6000, 6799)
+table_2_fin <- table_2[[1]] %>% dplyr::filter(`SIC Code` %in% sic_fin)
+knitr::kable(table_2_fin, caption = "SIC codes for finance and 
+             related industry groups")
+```
+
+We collect daily price and return data from the CRSP database for all entities whose SIC codes lie between 6020--6079 or from 6710--6712 between the above mentioned dates. Commercial banks lie between SIC codes 6020--6029, saving institutions between 6030--6039, credit unions between 6060--6069; and bank holding companies between 6710--6712. The SIC code ranges $\{6020,\hdots,6079\}\cup \{6710, 6711, 6712\}$ are referred to henceforth as 'admissible' SICs.
+
+We include only common stocks corresponding to codes 10 and 11 and remove all American Depository Receipts (ADRs) and firms incorporated in non-US countries. We further delete all entities with nominal stock prices less than $1. For firms whose SIC classification changes from admissible to inadmissible or vice versa, we include them only for the time duration corresponding to their status as admissible banks. Since we include all such banks irrespective of whether they are alive or not, our study is free from survivorship bias.
+
+Finally we include only those US banks whose total assets in 2016 are at least $1 billion according to data collected from Compustat. This leaves us with a final sample of 349 unique banks.
+
+Our attention on public banks with primary listings in the US excludes several multinational banking corporations which might have secondary listings in the US but primary listings elsewhere. For example, the British bank HSBC has a secondary listing on the New York Stock Exchange but under our definition, we do not include it in the list of US banks. In the same way, financial service providers such as mutual funds, insurance companies etc. are not included in our definition of banks. Since the focus of our paper is to isolate and study integration dynamics of US banks, inclusion of European or Asian banks with secondary listings in the US may bias our estimates.
+
+# Methodology
+
+## Frequency of Estimation of Bank Integration
+
+Our sample stretches from January 1 1993 to December 31 2016. We partition the duration of the study into quarters and compute bank integration each quarter from daily bank returns. Hence the integration estimates start from 1993 Quarter 1 to 2016 Quarter 4---a total of 96 quarters. 
+
+Under this setup, there are between 62--66 daily observations for each bank’s return each quarter. We compute the covariance matrix of the 338 US banks each quarter and extract as many principal components each quarter as are necessary to explain 90% of bank returns. For banks which do not contain data for the entire sample period, we start estimating their integration levels from the time their data begin appearing in CRSP.
+
+## Construction of Principal Components
+
+Principal components each quarter are constructed from the covariance matrices of all banks with available returns in a particular quarter. For example, at the beginning of the sample there are only 43 banks with available returns and hence the size of the covariance matrix from which principal components are extracted is $43\times 43$. As time progresses, the coverage of banks increases steadily so that by the end of the sample (quarter 96) there are 234 admissible banks and hence the corresponding covariance matrix has dimensions $234\times 234$. 
+
+In constructing covariance matrices, we first remove any bank which has no available returns for the entire quarter. Further we also remove banks for which stale returns and missing values exceed a threshold of 30% quarterly observations.[^Stale_Missing] This takes care of most of the banks in our sample. For the remnant few banks with leftover missing values, we replace them with their banks' respective quarterly medians and then compute the covariance matrix. 
+
+[^Stale_Missing]: Since there are 62--66 observations each quarter, this means that if a bank in question has greater than 22 missing and/or stale entries, we remove it from the construction of the covariance matrix. 
+
+### Out-of-Sample Principal Component Construction
+
+Once eigenvectors of the covariance matrices are computed in order of largest to smallest eigenvalue, out-of-sample principal components are estimated by applying them to observed returns for the subsequent quarter. For example, eigenvectors from the covariance matrix in 1993Q1 are applied to the covariance matrix in 1993Q2 to obtain principal components in 1993Q2. Hence there are overall 95 such quarterly principal component computations---from 1993Q2 to 2016Q4.
+
+Each quarter we collect as many principal components as necessary for explaining 90% of returns. Hence the number of principal components used differs from quarter to quarter.

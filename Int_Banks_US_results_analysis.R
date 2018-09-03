@@ -37,7 +37,7 @@ int_summ_stat_qrtrly <- int_US_bank_long %>%
                    'skew' = moments::skewness(Integration, na.rm = T),
                    'kurt' = moments::kurtosis(Integration, na.rm = T)
                    )
-readr::write_csv(int_summ_stat_qrtrly, "US_Bank_Intgration_Summary_Quarterly")
+readr::write_csv(int_summ_stat_qrtrly, "US_Bank_Intgration_Summary_Quarterly.csv")
 
 ## By Banks ##
 int_summ_stat_bank <- int_US_bank_long %>%
@@ -51,7 +51,7 @@ int_summ_stat_bank <- int_US_bank_long %>%
                    'skew' = moments::skewness(Integration, na.rm = T),
                    'kurt' = moments::kurtosis(Integration, na.rm = T)
                    )
-readr::write_csv(int_summ_stat_qrtrly, "US_Bank_Intgration_Summary_Bankwise")
+readr::write_csv(int_summ_stat_bank, "US_Bank_Intgration_Summary_Bankwise.csv")
 
 ###
 
@@ -83,7 +83,7 @@ plot_med_bank_int <- ggplot(data = plot_data,
   geom_line(group = 1) +
   theme_bw() +
   labs(x = "Years", y = "Median Integration Level") +
-  theme(axis.text.x=element_text(angle=90, hjust=1))
+  theme(axis.text.x=element_text(angle=60, hjust=1))
 
 ### Top 25 Banks by Median Integration
 

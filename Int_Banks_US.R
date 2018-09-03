@@ -241,9 +241,6 @@ list_reg_out_of_sample <- rep(list(NULL), qtr_max)
 list_qtrly_integration_out <- rep(list(NULL), qtr_max)
 list_qtrly_integration_in <- rep(list(NULL), qtr_max)
 
-# Assume 15 principal components are enough to explain 90% variance
-# num_pc <- 15
-
 for (m in qtr_grid[-1])
 {
   # Principal components as explanatory variables

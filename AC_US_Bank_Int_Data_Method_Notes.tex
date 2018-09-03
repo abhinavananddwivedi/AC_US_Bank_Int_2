@@ -1,0 +1,261 @@
+\documentclass[11pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin = 1.5in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={Integration Among US Banks: Data and Methodology Guide},
+            pdfauthor={Abhinav Anand and John Cotter},
+            colorlinks=true,
+            linkcolor=blue,
+            citecolor=magenta,
+            urlcolor=red,
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Integration Among US Banks: Data and Methodology Guide}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Abhinav Anand and John Cotter}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{2018/09/03}
+
+\linespread{1.25}
+\usepackage{amsmath}
+
+\begin{document}
+\maketitle
+
+\section{Data}\label{data}
+
+The starting period for our sample is January 1 1993 and the ending
+period is December 31 2016.
+
+Our sample consists of all US depository credit institutions and bank
+holding companies for which data are available in both CRSP and
+Compustat. We use the WRDS interface to collect data from both sources.
+
+\subsection{Sample Construction}\label{sample-construction}
+
+Finance and insurance related entries are distributed between SIC codes
+6000--6799. The following table illustrates this classification in more
+detail.\footnote{The full list can be found on the link:
+  \url{http://www.ehso.com/siccodes.php}}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{SIC codes for finance and related industry
+groups}\tabularnewline
+\toprule
+SIC Code & Industry\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+SIC Code & Industry\tabularnewline
+\midrule
+\endhead
+6012 & Pay Day Lenders\tabularnewline
+6021 & National Commercial Banks\tabularnewline
+6022 & State Commercial Banks\tabularnewline
+6029 & Commercial Banks, NEC\tabularnewline
+6035 & Savings Institution, Federally Chartered\tabularnewline
+6036 & Savings Institutions, Not Federally Chartered\tabularnewline
+6099 & Functions Related To Depository Banking, NEC\tabularnewline
+6111 & Federal \& Federally Sponsored Credit Agencies\tabularnewline
+6141 & Personal Credit Institutions\tabularnewline
+6153 & Short-Term Business Credit Institutions\tabularnewline
+6159 & Miscellaneous Business Credit Institution\tabularnewline
+6162 & Mortgage Bankers \& Loan Correspondents\tabularnewline
+6163 & Loan Brokers\tabularnewline
+6172 & Finance Lessors\tabularnewline
+6189 & Asset-Backed Securities\tabularnewline
+6199 & Finance Services\tabularnewline
+6200 & Security \& Commodity Brokers, Dealers, Exchanges \&
+Services\tabularnewline
+6211 & Security Brokers, Dealers \& Flotation Companies\tabularnewline
+6221 & Commodity Contracts Brokers \& Dealers\tabularnewline
+6282 & Investment Advice\tabularnewline
+6311 & Life Insurance\tabularnewline
+6321 & Accident \& Health Insurance\tabularnewline
+6324 & Hospital \& Medical Service Plans\tabularnewline
+6331 & Fire, Marine \& Casualty Insurance\tabularnewline
+6351 & Surety Insurance\tabularnewline
+6361 & Title Insurance\tabularnewline
+6399 & Insurance Carriers, NEC\tabularnewline
+6411 & Insurance Agents, Brokers \& Service\tabularnewline
+6500 & Real Estate\tabularnewline
+6510 & Real Estate Operators (No Developers) \& Lessors\tabularnewline
+6512 & Operators of Nonresidential Buildings\tabularnewline
+6513 & Operators of Apartment Buildings\tabularnewline
+6519 & Lessors of Real Property, NEC\tabularnewline
+6531 & Real Estate Agents \& Managers (For Others)\tabularnewline
+6532 & Real Estate Dealers (For Their Own Account)\tabularnewline
+6552 & Land Subdividers \& Developers (No Cemeteries)\tabularnewline
+6770 & Blank Checks\tabularnewline
+6792 & Oil Royalty Traders\tabularnewline
+6794 & Patent Owners \& Lessors\tabularnewline
+6795 & Mineral Royalty Traders\tabularnewline
+6798 & Real Estate Investment Trusts\tabularnewline
+6799 & Investors, NEC\tabularnewline
+\bottomrule
+\end{longtable}
+
+We collect daily price and return data from the CRSP database for all
+entities whose SIC codes lie between 6020--6079 or from 6710--6712
+between the above mentioned dates. Commercial banks lie between SIC
+codes 6020--6029, saving institutions between 6030--6039, credit unions
+between 6060--6069; and bank holding companies between 6710--6712. The
+SIC code ranges \(\{6020,\hdots,6079\}\cup \{6710, 6711, 6712\}\) are
+referred to henceforth as `admissible' SICs.
+
+We include only common stocks corresponding to codes 10 and 11 and
+remove all American Depository Receipts (ADRs) and firms incorporated in
+non-US countries. We further delete all entities with nominal stock
+prices less than \$1. For firms whose SIC classification changes from
+admissible to inadmissible or vice versa, we include them only for the
+time duration corresponding to their status as admissible banks. Since
+we include all such banks irrespective of whether they are alive or not,
+our study is free from survivorship bias.
+
+Finally we include only those US banks whose total assets in 2016 are at
+least \$1 billion according to data collected from Compustat. This
+leaves us with a final sample of 349 unique banks.
+
+Our attention on public banks with primary listings in the US excludes
+several multinational banking corporations which might have secondary
+listings in the US but primary listings elsewhere. For example, the
+British bank HSBC has a secondary listing on the New York Stock Exchange
+but under our definition, we do not include it in the list of US banks.
+In the same way, financial service providers such as mutual funds,
+insurance companies etc. are not included in our definition of banks.
+Since the focus of our paper is to isolate and study integration
+dynamics of US banks, inclusion of European or Asian banks with
+secondary listings in the US may bias our estimates.
+
+\section{Methodology}\label{methodology}
+
+\subsection{Frequency of Estimation of Bank
+Integration}\label{frequency-of-estimation-of-bank-integration}
+
+Our sample stretches from January 1 1993 to December 31 2016. We
+partition the duration of the study into quarters and compute bank
+integration each quarter from daily bank returns. Hence the integration
+estimates start from 1993 Quarter 1 to 2016 Quarter 4---a total of 96
+quarters.
+
+Under this setup, there are between 62--66 daily observations for each
+bank's return each quarter. We compute the covariance matrix of the 338
+US banks each quarter and extract as many principal components each
+quarter as are necessary to explain 90\% of bank returns. For banks
+which do not contain data for the entire sample period, we start
+estimating their integration levels from the time their data begin
+appearing in CRSP.
+
+\subsection{Construction of Principal
+Components}\label{construction-of-principal-components}
+
+Principal components each quarter are constructed from the covariance
+matrices of all banks with available returns in a particular quarter.
+For example, at the beginning of the sample there are only 43 banks with
+available returns and hence the size of the covariance matrix from which
+principal components are extracted is \(43\times 43\). As time
+progresses, the coverage of banks increases steadily so that by the end
+of the sample (quarter 96) there are 234 admissible banks and hence the
+corresponding covariance matrix has dimensions \(234\times 234\).
+
+In constructing covariance matrices, we first remove any bank which has
+no available returns for the entire quarter. Further we also remove
+banks for which stale returns and missing values exceed a threshold of
+30\% quarterly observations.\footnote{Since there are 62--66
+  observations each quarter, this means that if a bank in question has
+  greater than 22 missing and/or stale entries, we remove it from the
+  construction of the covariance matrix.} This takes care of most of the
+banks in our sample. For the remnant few banks with leftover missing
+values, we replace them with their banks' respective quarterly medians
+and then compute the covariance matrix.
+
+\subsubsection{Out-of-Sample Principal Component
+Construction}\label{out-of-sample-principal-component-construction}
+
+Once eigenvectors of the covariance matrices are computed in order of
+largest to smallest eigenvalue, out-of-sample principal components are
+estimated by applying them to observed returns for the subsequent
+quarter. For example, eigenvectors from the covariance matrix in 1993Q1
+are applied to the covariance matrix in 1993Q2 to obtain principal
+components in 1993Q2. Hence there are overall 95 such quarterly
+principal component computations---from 1993Q2 to 2016Q4.
+
+Each quarter we collect as many principal components as necessary for
+explaining 90\% of returns. Hence the number of principal components
+used differs from quarter to quarter.
+
+
+\end{document}
