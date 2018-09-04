@@ -52,7 +52,7 @@ knitr::opts_chunk$set(echo = F,
 
 # Data
 
-The starting period for our sample is January 1 1993 and the ending period is December 31 2016. 
+The start date for our sample is January 1 1993 and the end date is December 31 2016. 
 
 Our sample consists of all US depository credit institutions and bank holding companies for which data are available in both CRSP and Compustat. We use the WRDS interface to collect data from both sources.
 
@@ -88,7 +88,7 @@ Our attention on public banks with primary listings in the US excludes several m
 
 Our sample stretches from January 1 1993 to December 31 2016. We partition the duration of the study into quarters and compute bank integration each quarter from daily bank returns. Hence the integration estimates start from 1993 Quarter 1 to 2016 Quarter 4---a total of 96 quarters. 
 
-Under this setup, there are between 62--66 daily observations for each bank’s return each quarter. We compute the covariance matrix of the 338 US banks each quarter and extract as many principal components each quarter as are necessary to explain 90% of bank returns. For banks which do not contain data for the entire sample period, we start estimating their integration levels from the time their data begin appearing in CRSP.
+Under this setup, there are between 62--66 daily observations for each bank’s return each quarter. We compute the covariance matrix of the 349 US banks each quarter and extract as many principal components each quarter as are necessary to explain 90% of bank returns. For banks which do not contain data for the entire sample period, we start estimating their integration levels from the time their data begin appearing in CRSP.
 
 ## Construction of Principal Components
 

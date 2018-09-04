@@ -23,6 +23,9 @@ int_US_bank_long <- int_mat_qtrly_out_long
 temp_int_long <- func_neg_to_zero(int_US_bank_long$Integration)
 int_US_bank_long$Integration <- temp_int_long 
 
+int_US_bank_wide <- int_US_bank_long %>%
+  tidyr::spread(., key = "Banks", value = "Integration")
+
 ### Summary Statistics ###
 
 ## By Quarter
@@ -53,13 +56,36 @@ int_summ_stat_bank <- int_US_bank_long %>%
                    )
 readr::write_csv(int_summ_stat_bank, "US_Bank_Intgration_Summary_Bankwise.csv")
 
-###
+### Histograms for Bank Integration ###
+
+# By Banks
+hist_banks <- rep(list(NULL), ncol(int_US_bank_wide))
+
+for (i in 1:(ncol(int_US_bank_wide)-1))
+{
+  hist_banks[[i]] <- hist(int_US_bank_wide[, i+1])
+}
+names(hist_banks) <- names(int_US_bank_wide[-1])
+
+# By Quarters
+hist_qtr <- rep(list(NULL), nrow(int_US_bank_wide))
+
+for (j in 1:(nrow(int_US_bank_wide)))
+{
+  temp_temp <- int_US_bank_wide[j, -1]
+  hist_qtr[[j]] <- hist(as.numeric(temp_temp))
+}
+
+# Animate quarterly histograms---no evidence of special distribution
+# for (i in 1:(qtr_max-1))
+# {
+#   plot(hist_qtr[[i]])
+# }
 
 ### Median US Bank Integration Time Series ###
 func_med <- function(vec)
 {
-  # This function returns medians after
-  # coercing to numeric and ignoring NAs
+  # This function returns medians after ignoring NAs
   return(median(vec, na.rm = T))
 }
 

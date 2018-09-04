@@ -48,8 +48,7 @@ knitr::opts_chunk$set(echo = F,
 source('Int_Banks_US_results_analysis.R', echo = F)
 
 # Further Tests to Do:
-# 1. Make integration histograms for all banks, find empirical distribution
-# 2. Is there core-periphery relationship now?
+
 # 3. Fit time trends to median and individual banks' integration.
 # 4. Why are there many left tail outliers in crisis periods? Relation to crises?
 # 5. How do D-SIBs and G-SIBs behave?
