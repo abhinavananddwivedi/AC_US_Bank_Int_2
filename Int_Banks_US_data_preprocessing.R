@@ -14,7 +14,8 @@ library(moments)
 # the host machine
 
 data_folder_path <- "../Data_Bank_Int/"
-file_name_ret_daily <- "SICCD_6020-6079_6710-6712_20171105.dta" #CRSP daily return file
+#file_name_ret_daily <- "SICCD_6020-6079_6710-6712_20171105.dta" #CRSP daily return file
+file_name_ret_daily <- "SICCD_6000_6799_20181009.dta" #CRSP daily return file
 file_name_TA <- "US_Bank_Cstat_TA.dta" #Compustat total assets file
 
 file_path_ret <- paste0(data_folder_path, file_name_ret_daily)
