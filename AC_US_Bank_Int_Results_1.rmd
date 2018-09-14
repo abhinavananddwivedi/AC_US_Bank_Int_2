@@ -55,6 +55,7 @@ source('Int_Banks_US_results_analysis.R', echo = F)
 # 6. What is median eigenvector explanatory power? Plot to confirm.
 # 7. How does bank integration vary with SIC codes? 
 # 8. Why does PCA capture integration? Improve Puk and Roll's answer.
+# 9. What are the identities of the left tail outliers in the boxplots? 
 
 
 ```
