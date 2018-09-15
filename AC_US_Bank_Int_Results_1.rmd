@@ -32,6 +32,7 @@ library(tidyverse)
 library(rmarkdown)
 library(knitr)
 library(moments) 
+library(broom)
 
 knitr::opts_chunk$set(echo = F, 
                       warning = T, 
@@ -49,22 +50,30 @@ source('Int_Banks_US_results_analysis.R', echo = F)
 
 # Further Tests to Do:
 
-# 3. Fit time trends to median and individual banks' integration.
 # 4. Why are there many left tail outliers in crisis periods? Relation to crises?
 # 5. How do D-SIBs and G-SIBs behave?
-# 6. What is median eigenvector explanatory power? Plot to confirm.
 # 7. How does bank integration vary with SIC codes? 
 # 8. Why does PCA capture integration? Improve Puk and Roll's answer.
-# 9. What are the identities of the left tail outliers in the boxplots? 
+# 9. What are the identities of the left tail outliers in the boxplots?
+# 10. Correlation between quarterly integration and quarterly returns?
+# 11. How do factor loadings evolve? (Brennan question)
 
 
 ```
 
 # Median US Bank Integration 
 
-```{r med_US_bank_int, fig.height= 5, fig.width=10}
+```{r med_US_bank_int, fig.height= 6, fig.width=11}
 
 plot_med_bank_int
+
+```
+
+## Linear Time Trends
+
+```{r linear_trend}
+
+knitr::kable(broom::tidy(trend_linear_int))
 
 ```
 
@@ -88,5 +97,24 @@ knitr::kable(med_top_25)
 
 
 barplot_top_25
+
+```
+
+# Explantory Power of Eigenvectors
+
+```{r expl_power_eig_vec}
+
+boxplot(t(var_share_df[1:30, ]))
+
+barplot(expl_power_eig_med[1:30])
+
+```
+
+# Linear Time Trends for Bank Integration 
+
+```{r time_trend_banks}
+
+knitr::kable(trend_T_p_val_df)
+
 
 ```

@@ -6,8 +6,6 @@ library(Matrix)
 
 # Read, tidy and preprocess the datasets from CRSP and Compustat 
 source('Int_Banks_US_data_preprocessing.R', echo = F)
-#takes ~90 seconds to run on Ubuntu 16.04 with 16GB RAM
-#Processor: Intel Core i5-4570 CPU @ 3.20GHz × 4 
 
 ############################################################################
 ### The Main Script Starts Here ############################################
