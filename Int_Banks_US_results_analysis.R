@@ -148,6 +148,13 @@ boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
     geom_boxplot(na.rm = T) +
     theme_bw() + 
     theme(axis.text.x=element_text(angle=60, hjust=1)) 
+
+boxplot_int_qtrly <- ggplot(data = int_US_bank_long,
+                             mapping = aes(x = Date, y = Integration)) +
+  geom_boxplot(na.rm = T) +
+  theme_bw() + 
+  theme(axis.text.x=element_text(angle=60, hjust=1)) 
+
 ###
 
 ### Explanatory power of eigenvectors ###
