@@ -87,7 +87,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018/09/15}
+    \date{2018/10/25}
 
 \linespread{1.25}
 \usepackage{amsmath}
@@ -106,8 +106,11 @@
 term & estimate & std.error & statistic & p.value\tabularnewline
 \midrule
 \endhead
-(Intercept) & 0.4635295 & 0.0134930 & 34.353313 & 0\tabularnewline
-qtrs & 0.0021438 & 0.0002308 & 9.288252 & 0\tabularnewline
+(Intercept) & 0.4581718 & 0.0132543 & 34.567852 &
+0.000000\tabularnewline
+qtrs & 0.0021318 & 0.0002241 & 9.513426 & 0.000000\tabularnewline
+dummy\_recession & 0.0537071 & 0.0203766 & 2.635722 &
+0.009791\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -411,6 +414,32 @@ NATIONAL BANK HOLDINGS CORP & 4.8078049 & 0.0001223\tabularnewline
 FIRST BANCSHARES INC MS & 0.2803760 & 0.7823860\tabularnewline
 \bottomrule
 \end{longtable}
+
+\section{Systemic Banks' Integration}\label{systemic-banks-integration}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/systemic-1} \end{center}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = temp_int_med_bank ~ qtrs + dummy_recession)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.133471 -0.044553 -0.002362  0.044842  0.204924 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)     0.4581718  0.0132543  34.568  < 2e-16 ***
+## qtrs            0.0021318  0.0002241   9.513 1.65e-15 ***
+## dummy_recession 0.0537071  0.0203766   2.636  0.00979 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.0637 on 96 degrees of freedom
+## Multiple R-squared:  0.5064, Adjusted R-squared:  0.4962 
+## F-statistic: 49.25 on 2 and 96 DF,  p-value: 1.906e-15
+\end{verbatim}
 
 
 \end{document}

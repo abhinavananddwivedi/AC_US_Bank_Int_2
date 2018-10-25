@@ -5,6 +5,7 @@ time_start <- Sys.time()
 # Declare libraries
 library(tidyverse)
 library(moments)
+library(zoo)
 
 # Read, tidy and preprocess the datasets from CRSP and Compustat 
 source('Int_Banks_US.R', echo = F)
@@ -40,7 +41,8 @@ int_summ_stat_qrtrly <- int_US_bank_long %>%
                    'skew' = moments::skewness(Integration, na.rm = T),
                    'kurt' = moments::kurtosis(Integration, na.rm = T)
                    )
-readr::write_csv(int_summ_stat_qrtrly, "US_Bank_Intgration_Summary_Quarterly.csv")
+readr::write_csv(int_summ_stat_qrtrly, 
+                 "US_Bank_Intgration_Summary_Quarterly.csv")
 
 ## By Banks ##
 int_summ_stat_bank <- int_US_bank_long %>%
@@ -109,8 +111,10 @@ plot_data <- data.frame(date = as.factor(date_med),
                         )
 
 plot_med_bank_int <- ggplot(data = plot_data, 
-                            mapping = aes(x = as.character(date), y = med_bank_int)) +
-  geom_line(group = 1) +
+                            mapping = aes(x = as.yearqtr(date), 
+                                          y = med_bank_int)) +
+  geom_line() +
+  scale_x_yearqtr(format="%YQ%q", n=25) +
   theme_bw() +
   labs(x = "Years", y = "Median Integration Level") +
   theme(axis.text.x=element_text(angle=60, hjust=1))
@@ -149,9 +153,12 @@ boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
     theme_bw() + 
     theme(axis.text.x=element_text(angle=60, hjust=1)) 
 
+# Quarterly Integration Boxplots
+
 boxplot_int_qtrly <- ggplot(data = int_US_bank_long,
                              mapping = aes(x = Date, y = Integration)) +
   geom_boxplot(na.rm = T) +
+#  scale_x_yearqtr(format="%YQ%q", n=25) +
   theme_bw() + 
   theme(axis.text.x=element_text(angle=60, hjust=1)) 
 
@@ -195,7 +202,7 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 #box_expl_eig <- boxplot(t(var_share_df[1:30, ]))
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
 
-### Fitting a liner time trend to each bank's integration series ###
+### Fitting a linear time trend to each bank's integration series ###
 
 int_LHS <- integration_matrix_qtrly_out[, -1] 
 int_LHS_missing <- apply(int_LHS, 2, func_missing)
@@ -236,9 +243,47 @@ trend_T_p_val_df <- tibble::add_column(trend_T_p_val_df,
 
 ### GSIBs and DSIBs ###
 
+name_GSIB <- name_cusip$comnam[c(28, 33, 36, 73, 183, 184, 304, 305, 347)]
+name_DSIB <- name_cusip$comnam[c(14, 87, 114, 173, 187, 188, 195, 223, 245, 
+                                 246, 247, 277, 278, 311, 335, 361)]
 
+name_systemic <- c(name_GSIB, name_DSIB)
 
+int_US_systemic_wide <- int_US_bank_long %>% 
+  dplyr::filter(Banks %in% name_systemic)  %>% 
+  tidyr::spread(., key = Banks, value = "Integration")
 
+readr::write_csv(int_US_systemic_wide, "Systemic_bank_int.csv")
+
+int_US_sys_med <- apply(int_US_systemic_wide[, -1], 1, func_med)
+
+plot_data_aug <- plot_data %>%
+  tibble::add_column(med_bank_int_sys = int_US_sys_med) 
+
+plot_data_aug_long <- plot_data_aug %>% 
+  tidyr::gather(c(med_bank_int, med_bank_int_sys), 
+                key = "median", value = "Integration")
+
+plot_systemic <- ggplot(data = plot_data_aug_long, 
+                        mapping = aes(x = as.yearqtr(date), 
+                                      y = Integration, 
+                                      color = median)) +
+  geom_line() +
+  scale_x_yearqtr(format="%YQ%q", n=25) +
+  theme_bw() +
+  labs(x = "Years", y = "Median Integration Level") +
+  theme(axis.text.x=element_text(angle=60, hjust=1))
+
+### Relation to NBER recessions ###
+
+# NBER claims recessionary periods from 
+# 2001Q1--2001Q4 and 2007Q4--2009Q2, i.e.,
+# quarter numbers 32:35 and 59:65
+
+dummy_recession <- rep(0, length(qtrs))
+dummy_recession[c(32:35, 59:65)] <- 1
+
+int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
 
 
 ###

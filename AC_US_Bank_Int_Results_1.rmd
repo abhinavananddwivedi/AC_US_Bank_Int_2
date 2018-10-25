@@ -50,10 +50,6 @@ source('Int_Banks_US_results_analysis.R', echo = F)
 
 # Further Tests to Do:
 
-# 4. Why are there many left tail outliers in crisis periods? Relation to crises?
-# 5. How do D-SIBs and G-SIBs behave?
-# No data for MS, GS and Citi, rest have multiple names, 12/22 DSIBs represented
-# 7. How does bank integration vary with SIC codes? 
 # 8. Why does PCA capture integration? Improve Puk and Roll's answer.
 # 9. What are the identities of the left tail outliers in the boxplots?
 # 10. Correlation between quarterly integration and quarterly returns?
@@ -74,7 +70,7 @@ plot_med_bank_int
 
 ```{r linear_trend}
 
-knitr::kable(broom::tidy(trend_linear_int))
+knitr::kable(broom::tidy(int_dummy_recession))
 
 ```
 
@@ -117,5 +113,21 @@ barplot(expl_power_eig_med[1:30])
 
 knitr::kable(trend_T_p_val_df)
 
+
+```
+
+# Systemic Banks' Integration
+
+```{r systemic, fig.width=11, fig.height=6}
+
+plot_systemic
+
+```
+
+# Effect of NBER Recessions on Bank Integration
+
+```{r dummy_recession}
+
+#knitr::kable(int_dummy_recession)
 
 ```
