@@ -11,10 +11,9 @@ library(moments)
 
 # For reproduction of this script change the address
 # of the directories to conform to their location in 
-# the host machine
+# the host machine. Note Linux vs Windows addresses.
 
-data_folder_path <- "../Data_Bank_Int/"
-#file_name_ret_daily <- "SICCD_6020-6079_6710-6712_20171105.dta" #CRSP daily return file
+data_folder_path <- "../Data_Bank_Int/" #Name of folder where data file exists
 file_name_ret_daily <- "SICCD_6000_6799.dta" #CRSP daily return file
 file_name_TA <- "US_Bank_Cstat_TA.dta" #Compustat total assets file
 
@@ -23,8 +22,8 @@ file_path_TA <- paste0(data_folder_path, file_name_TA)
 
 ### Read .dta file for US banks
 data_US_full <- haven::read_dta(file_path_ret)
-# Note that since the data file is 2.7 GB, this step 
-# takes ~50 sec to run on this desktop with 16GB RAM
+# Note that since the data file is ~7 GB, this step 
+# takes time. Not suitable for small RAM machines.
 
 data_US_bank_TA <- haven::read_dta(file_path_TA)
 
@@ -51,8 +50,8 @@ ind_share_code_common <- c(10, 11) #only common shares included
 data_US_inter <- data_US_full %>% 
   dplyr::filter(siccd %in% ind_bank_use |
                   hsiccd %in% ind_bank_use) %>% #ignore non-banks
-  dplyr::filter(shrcd %in% ind_share_code_common) %>% #include common shares
-  dplyr::filter(lubridate::year(date) >= "1993") %>%
+  dplyr::filter(shrcd %in% ind_share_code_common) %>% #include common shares only
+  dplyr::filter(lubridate::year(date) >= "1993") %>% #only banks post '93
   dplyr::filter(prc > 1) #ignore banks with nominal price <= $1
 
 # Identifying US banks
@@ -63,13 +62,13 @@ data_US_id <- data_US_inter %>%
   dplyr::distinct() 
 
 cusip_US_8 <- unique(data_US_id$cusip) %>%
-  tibble::as_tibble() #cusips of CRSP US banks
+  tibble::as_tibble() #cusips of CRSP US banks (8 digits)
 
 ### COMPUSTAT DATA CUSIPS (8 digits) ###
 
-# Identify banks with size >$1B in 2016
+# Identify banks with size >$1B in the last year
 data_US_1b_id <- data_US_bank_TA %>%
-  dplyr::filter(fyearq == 2016 & fqtr == 4) %>%
+  dplyr::filter(fyearq == 2016 & fqtr == 4) %>% 
   dplyr::filter(atq >= 1000) %>% #total assets in $millions, 1B=1000mil
   dplyr::select(conm, conml,
                 sic, cusip,

@@ -50,10 +50,11 @@ source('Int_Banks_US_results_analysis.R', echo = F)
 
 # Further Tests to Do:
 
-# 8. Why does PCA capture integration? Improve Puk and Roll's answer.
+# 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
 # 9. What are the identities of the left tail outliers in the boxplots?
 # 10. Correlation between quarterly integration and quarterly returns?
 # 11. How do factor loadings evolve? (Brennan question)
+# 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
 
 
 ```

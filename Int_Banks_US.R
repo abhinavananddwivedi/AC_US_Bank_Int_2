@@ -101,7 +101,7 @@ name_cusip <- data_list_US_df %>%
 func_full_NA_killer <- function(data_matrix)
 {
   # This function kills a data frame's full NA columns and rows, in that order.
-  # It take as input a data matrix and returns it after deleting (first) full NA
+  # It takes as input a data matrix and returns it after deleting (first) full NA
   # columns and (then) full NA rows.
   
   # full NA column killer
@@ -177,14 +177,14 @@ for (k in qtr_grid)
   temp_cov <- temp_q %>% 
     cov(., use = "pairwise.complete.obs")
   
-  #Pick nearest positive definite matrix
+  #Pick nearest positive definite matrix in case covariance matrix is not PD
   temp_cov <- Matrix::nearPD(temp_cov)
 
   list_cov[[k]] <- as.matrix(temp_cov$mat)
   
   list_eig_val[[k]] <- temp_cov$eigenvalues
   
-  # Variance contribution of first eigenvector is \lambda_1/(sum over \lambda)
+  # Variance contribution of eigenvectors is \lambda_i/(sum over \lambda_i)
   var_share[[k]] <- cumsum(list_eig_val[[k]])/sum(list_eig_val[[k]]) 
   names(var_share[[k]]) <- paste0("Lambda_", 1:length(list_eig_val[[k]])) 
   
@@ -200,8 +200,9 @@ for (l in qtr_grid[-qtr_max]) #For all except the last quarter
   temp_q_next <- list_ret_banks[[l+1]] %>% as.matrix()
   temp_q_current <- list_ret_banks[[l]] %>% as.matrix()
   
+  # In-sample principal component computation
   pc_in_sample[[l]] <- temp_q_current%*%as.matrix(list_eig_vec[[l]])%>%
-    as.matrix(.)
+    as.matrix(.) 
   
   bank_qtr_next <- ncol(temp_q_next)
   
@@ -242,8 +243,8 @@ list_qtrly_integration_in <- rep(list(NULL), qtr_max)
 for (m in qtr_grid[-1])
 {
   # Principal components as explanatory variables
-  var_x_expl_out <- pc_out_of_sample[[m]]
-  var_x_expl_in <- pc_in_sample[[m]]
+  var_x_expl_out <- pc_out_of_sample[[m]] #out-of-sample regressions
+  var_x_expl_in <- pc_in_sample[[m]] #in-sample regressions
 
   ### Out of Sample Regressions ###
   

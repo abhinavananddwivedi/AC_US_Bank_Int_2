@@ -167,8 +167,8 @@ boxplot_int_qtrly <- ggplot(data = int_US_bank_long,
 ### Explanatory power of eigenvectors ###
 
 func_len_max_NA_add <- function(temp_list)
-{ # This function takes a list of differing lengths
-  # then finds the maximum length of some element in the list
+{ # This function takes a list with elements of differing lengths,
+  # then finds the maximum length in the list,
   # then generates NAs equal to the difference between 
   # the individual element lengths and the maximum length
   # For example if element 1 has length 10 and the maximum 
@@ -284,6 +284,74 @@ dummy_recession <- rep(0, length(qtrs))
 dummy_recession[c(32:35, 59:65)] <- 1
 
 int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
+
+### Bank Integration Variation with SIC Codes ###
+
+name_bank_SIC_1 <- name_cusip_sic %>%
+  dplyr::filter(., siccd %in% ind_comm_banks) %>%
+  dplyr::select(comnam) %>%
+  dplyr::distinct(.)
+
+bank_int_SIC_1_med <- int_US_bank_long %>%
+  dplyr::filter(Banks %in% name_bank_SIC_1$comnam) %>%
+  tidyr::spread(., key = "Banks", value = "Integration") %>%
+  dplyr::select(-Date) %>%
+  apply(., 1, func_med)
+
+name_bank_SIC_2 <- name_cusip_sic %>%
+  dplyr::filter(., siccd %in% ind_credit_union) %>%
+  dplyr::select(comnam) %>%
+  dplyr::distinct(.)
+
+bank_int_SIC_2_med <- int_US_bank_long %>%
+  dplyr::filter(Banks %in% name_bank_SIC_2$comnam) %>%
+  tidyr::spread(., key = "Banks", value = "Integration") %>%
+  dplyr::select(-Date) %>%
+  apply(., 1, func_med)
+
+name_bank_SIC_3 <- name_cusip_sic %>%
+  dplyr::filter(., siccd %in% ind_saving_inst) %>%
+  dplyr::select(comnam) %>%
+  dplyr::distinct(.)
+
+bank_int_SIC_3_med <- int_US_bank_long %>%
+  dplyr::filter(Banks %in% name_bank_SIC_3$comnam) %>%
+  tidyr::spread(., key = "Banks", value = "Integration") %>%
+  dplyr::select(-Date) %>%
+  apply(., 1, func_med)
+
+name_bank_SIC_4 <- name_cusip_sic %>%
+  dplyr::filter(., siccd %in% ind_bank_hold) %>%
+  dplyr::select(comnam) %>%
+  dplyr::distinct(.)
+
+bank_int_SIC_4_med <- int_US_bank_long %>%
+  dplyr::filter(Banks %in% name_bank_SIC_4$comnam) %>%
+  tidyr::spread(., key = "Banks", value = "Integration") %>%
+  dplyr::select(-Date) %>%
+  apply(., 1, func_med)
+
+bank_int_SIC_med <- data.frame(SIC_1 = bank_int_SIC_1_med,
+                               SIC_2 = bank_int_SIC_2_med,
+                               SIC_3 = bank_int_SIC_3_med,
+                               SIC_4 = bank_int_SIC_4_med)
+
+func_summ <- function(vec)
+{
+  # This function computes summary stats of a vector
+  temp_summ <- data.frame(avg = mean(vec, na.rm = T),
+                          med = median(vec, na.rm =T),
+                          std = sd(vec, na.rm = T),
+                          iqr = IQR(vec, na.rm = T),
+                          skew = moments::skewness(vec, na.rm = T),
+                          kurt = moments::kurtosis(vec, na.rm = T)
+                          )
+  
+  return(temp_summ)
+}
+
+bank_SIC_summ_stat <- apply(bank_int_SIC_med, 2, func_summ)
+
 
 
 ###
