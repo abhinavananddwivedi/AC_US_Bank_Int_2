@@ -1,6 +1,8 @@
 time_start <- Sys.time()
 
+########################################################
 ### Results and Analysis: Integration Among US Banks ###
+########################################################
 
 # Declare libraries
 library(tidyverse)
@@ -20,14 +22,18 @@ func_neg_to_zero <- function(vec)
   return(vec)
 }
   
+# Bank integration data in long form (panel format)
 int_US_bank_long <- int_mat_qtrly_out_long
 temp_int_long <- func_neg_to_zero(int_US_bank_long$Integration)
 int_US_bank_long$Integration <- temp_int_long 
 
+# Bank integration data in wide form (matrix format)
 int_US_bank_wide <- int_US_bank_long %>%
   tidyr::spread(., key = "Banks", value = "Integration")
 
+##########################
 ### Summary Statistics ###
+##########################
 
 ## By Quarter
 int_summ_stat_qrtrly <- int_US_bank_long %>%
@@ -58,7 +64,9 @@ int_summ_stat_bank <- int_US_bank_long %>%
                    )
 readr::write_csv(int_summ_stat_bank, "US_Bank_Intgration_Summary_Bankwise.csv")
 
+#######################################
 ### Histograms for Bank Integration ###
+#######################################
 
 # By Banks
 # hist_banks <- rep(list(NULL), ncol(int_US_bank_wide))
@@ -84,7 +92,10 @@ readr::write_csv(int_summ_stat_bank, "US_Bank_Intgration_Summary_Bankwise.csv")
 #   plot(hist_qtr[[i]])
 # }
 
+##############################################
 ### Median US Bank Integration Time Series ###
+##############################################
+
 func_med <- function(vec)
 {
   # This function returns medians after ignoring NAs
@@ -119,7 +130,9 @@ plot_med_bank_int <- ggplot(data = plot_data,
   labs(x = "Years", y = "Median Integration Level") +
   theme(axis.text.x=element_text(angle=60, hjust=1))
 
-### Top 25 Banks by Median Integration
+##########################################
+### Top 25 Banks by Median Integration ###
+##########################################
 
 col_missing <- apply(integration_matrix_qtrly_out[, -1], 2, func_missing)
 col_admissible <- which(col_missing <= 50)
@@ -141,7 +154,12 @@ barplot_top_25 <- ggplot(med_top_25_admissible, aes(rowname, value)) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=60, hjust=1))
 
-### Yearly Integration Boxplots ###
+###################################
+###### Integration Boxplots #######
+###################################
+
+# Yearly Integration Boxplots
+
 year_seq <- paste0(seq(year_min, year_max, 1), "Q4")
 
 data_boxplot <- int_US_bank_long %>%
@@ -164,7 +182,9 @@ boxplot_int_qtrly <- ggplot(data = int_US_bank_long,
 
 ###
 
+#########################################
 ### Explanatory power of eigenvectors ###
+#########################################
 
 func_len_max_NA_add <- function(temp_list)
 { # This function takes a list with elements of differing lengths,
@@ -197,12 +217,14 @@ var_share_df <- apply(cbind(var_share, var_share_NA_add), 1, unlist) %>%
 
 expl_power_eig_med <- apply(var_share_df, 1, func_med)
 
-## The explanatory power of the top thirty eigenvectors
+## The explanatory power of the top thirty eigenvectors ##
 
 #box_expl_eig <- boxplot(t(var_share_df[1:30, ]))
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
 
+#####################################################################
 ### Fitting a linear time trend to each bank's integration series ###
+#####################################################################
 
 int_LHS <- integration_matrix_qtrly_out[, -1] 
 int_LHS_missing <- apply(int_LHS, 2, func_missing)
@@ -240,8 +262,9 @@ trend_T_p_val_df <- tibble::add_column(trend_T_p_val_df,
                                        "Banks" = names(trend_T_p_val)) %>%
   dplyr::select(Banks, everything())
   
-
+#######################
 ### GSIBs and DSIBs ###
+#######################
 
 name_GSIB <- name_cusip$comnam[c(28, 33, 36, 73, 183, 184, 304, 305, 347)]
 name_DSIB <- name_cusip$comnam[c(14, 87, 114, 173, 187, 188, 195, 223, 245, 
@@ -274,7 +297,9 @@ plot_systemic <- ggplot(data = plot_data_aug_long,
   labs(x = "Years", y = "Median Integration Level") +
   theme(axis.text.x=element_text(angle=60, hjust=1))
 
+###################################
 ### Relation to NBER recessions ###
+###################################
 
 # NBER claims recessionary periods from 
 # 2001Q1--2001Q4 and 2007Q4--2009Q2, i.e.,
@@ -285,13 +310,17 @@ dummy_recession[c(32:35, 59:65)] <- 1
 
 int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
 
+#################################################
 ### Bank Integration Variation with SIC Codes ###
+#################################################
 
 name_bank_SIC_1 <- name_cusip_sic %>%
   dplyr::filter(., siccd %in% ind_comm_banks) %>%
   dplyr::select(comnam) %>%
   dplyr::distinct(.)
 
+# Apply row median function to banks in group SIC commercial banks
+# This will be the median commercial bank's integration
 bank_int_SIC_1_med <- int_US_bank_long %>%
   dplyr::filter(Banks %in% name_bank_SIC_1$comnam) %>%
   tidyr::spread(., key = "Banks", value = "Integration") %>%
@@ -350,7 +379,68 @@ func_summ <- function(vec)
   return(temp_summ)
 }
 
+# Summary stats of median bank integration for each SIC class
 bank_SIC_summ_stat <- apply(bank_int_SIC_med, 2, func_summ)
+
+# Boxplot of above
+box_int_SIC_Categ <- boxplot(bank_int_SIC_med)
+
+# Plots of median bank integration by SIC code
+
+# matplot(bank_int_SIC_med, 
+#         type = "l", 
+#         lty = 1, 
+#         lwd = 1, 
+#         col = 1:4, 
+#         xlab = "Quarters", 
+#         ylab = "Median bank Intgeration"
+#         )
+# 
+# legend(65, 0.4, 
+#        legend = c("Comm", "Cred_Uni", "Saving", "Holding"), 
+#        col = 1:4, 
+#        lty = 1, 
+#        cex=0.6
+#        )
+
+#################################################
+### Changes in Bank Integration Levels ##########
+#################################################
+
+func_diff <- function(vec)
+{
+  #This function accepts a vector and returns
+  #its first differenced vector with first term NA
+  
+  temp_diff <- diff(vec)
+  return(c(NA, temp_diff))
+}
+
+# Store the matrix whose columns are differenced integration columns
+int_diff_bank_wide <- apply(int_US_bank_wide[, -1], 2, func_diff)
+
+int_diff_sys <- apply(int_US_systemic_wide[, -1], 2, func_diff)
+
+int_US_sys_gsib <- int_US_bank_long %>% 
+  dplyr::filter(Banks %in% name_GSIB)  %>% 
+  tidyr::spread(., key = Banks, value = "Integration")
+
+int_diff_sys_gsib <- apply(int_US_sys_gsib[, -1], 2, func_diff)
+
+# matplot(int_diff_sys_gsib, 
+#         type = "l", 
+#         lty = 1, 
+#         col = 1:ncol(int_diff_sys_gsib),
+#         xlab = "Quarters",
+#         ylab = "GSIBs Differenced Integration"
+#         )
+# 
+# legend(60, -0.4, 
+#        legend = name_GSIB, 
+#        col = 1:length(name_GSIB), 
+#        lty = 1, 
+#        cex = 0.25
+#        )
 
 
 

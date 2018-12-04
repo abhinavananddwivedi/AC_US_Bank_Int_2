@@ -87,7 +87,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018/10/25}
+    \date{2018/12/04}
 
 \linespread{1.25}
 \usepackage{amsmath}
@@ -419,27 +419,58 @@ FIRST BANCSHARES INC MS & 0.2803760 & 0.7823860\tabularnewline
 
 \begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/systemic-1} \end{center}
 
+\section{Effect of NBER Recessions on Bank
+Integration}\label{effect-of-nber-recessions-on-bank-integration}
+
+\section{Integration Variation with SIC
+category}\label{integration-variation-with-sic-category}
+
 \begin{verbatim}
+## $SIC_1
+##        avg       med       std       iqr      skew     kurt
+## 1 0.584798 0.5714926 0.0922168 0.1276282 0.3894072 2.659068
 ## 
-## Call:
-## lm(formula = temp_int_med_bank ~ qtrs + dummy_recession)
+## $SIC_2
+##         avg       med       std       iqr      skew     kurt
+## 1 0.5848668 0.6330858 0.2226694 0.3003526 -0.802515 3.029697
 ## 
-## Residuals:
-##       Min        1Q    Median        3Q       Max 
-## -0.133471 -0.044553 -0.002362  0.044842  0.204924 
+## $SIC_3
+##         avg       med       std       iqr      skew     kurt
+## 1 0.5476616 0.5307884 0.1193832 0.2110806 0.2909012 2.119126
 ## 
-## Coefficients:
-##                  Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)     0.4581718  0.0132543  34.568  < 2e-16 ***
-## qtrs            0.0021318  0.0002241   9.513 1.65e-15 ***
-## dummy_recession 0.0537071  0.0203766   2.636  0.00979 ** 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.0637 on 96 degrees of freedom
-## Multiple R-squared:  0.5064, Adjusted R-squared:  0.4962 
-## F-statistic: 49.25 on 2 and 96 DF,  p-value: 1.906e-15
+## $SIC_4
+##         avg       med       std       iqr      skew     kurt
+## 1 0.5941108 0.5744666 0.1111273 0.1830553 0.2360741 2.176285
 \end{verbatim}
+
+\begin{verbatim}
+## $stats
+##           [,1]       [,2]      [,3]      [,4]
+## [1,] 0.3971835 0.05341229 0.3163659 0.3683127
+## [2,] 0.5135116 0.46086525 0.4472890 0.5092080
+## [3,] 0.5714926 0.63308578 0.5307884 0.5744666
+## [4,] 0.6411399 0.76679269 0.6583696 0.6922633
+## [5,] 0.8186373 0.96106915 0.8240858 0.8415198
+## 
+## $n
+## [1] 99 98 99 99
+## 
+## $conf
+##           [,1]      [,2]      [,3]      [,4]
+## [1,] 0.5512258 0.5842585 0.4972696 0.5453981
+## [2,] 0.5917595 0.6819131 0.5643071 0.6035350
+## 
+## $out
+## [1] 0.8362843 0.0000000 0.0000000
+## 
+## $group
+## [1] 1 2 2
+## 
+## $names
+## [1] "SIC_1" "SIC_2" "SIC_3" "SIC_4"
+\end{verbatim}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/SIC_Categ-1} \end{center}
 
 
 \end{document}

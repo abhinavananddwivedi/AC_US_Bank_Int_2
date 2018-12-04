@@ -132,3 +132,57 @@ plot_systemic
 #knitr::kable(int_dummy_recession)
 
 ```
+
+# Integration Variation with SIC category
+
+```{r SIC_Categ}
+
+# Summary stats of median bank integration for each SIC class
+bank_SIC_summ_stat
+
+# Boxplot of above
+box_int_SIC_Categ
+
+# Median bank integration plot
+
+matplot(bank_int_SIC_med, 
+        type = "l", 
+        lty = 1, 
+        lwd = 1, 
+        col = 1:4, 
+        xlab = "Quarters", 
+        ylab = "Median bank Intgeration"
+        )
+
+legend(65, 0.4, 
+       legend = c("Comm", "Cred_Uni", "Saving", "Holding"), 
+       col = 1:4, 
+       lty = 1, 
+       cex=0.6
+       )
+
+
+```
+
+# Differencing the Intgration Series
+
+```{r Diff}
+
+# GSIBs 
+matplot(int_diff_sys_gsib, 
+        type = "l", 
+        lty = 1, 
+        col = 1:ncol(int_diff_sys_gsib),
+        xlab = "Quarters",
+        ylab = "GSIBs Differenced Integration"
+        )
+
+legend(60, -0.4, 
+       legend = name_GSIB, 
+       col = 1:length(name_GSIB), 
+       lty = 1, 
+       cex = 0.25
+       )
+
+
+```

@@ -1,9 +1,15 @@
+#####################################################################
 ### Integration Among US Banks Using Data From CRSP and Compustat ###
+#####################################################################
 
 # Libraries
 library(tidyverse)
 library(lubridate)
 library(moments)
+
+#############################################################
+### Preprocessing Bank Price Data from CRSP #################
+#############################################################
 
 ############################
 ### Directory_Management ###
@@ -158,3 +164,15 @@ summ_stat_comnam <- data_US_bank %>%
                    )
 
 readr::write_csv(summ_stat_comnam, "Summary_Stat_Banks.csv")
+
+
+#############################################################
+### Preprocessing Bank Balance Sheet Data from Compustat ####
+#############################################################
+
+file_name_Cstat <- "US_Bank_Cstat.dta" #CRSP daily return file
+
+file_path_Cstat <- paste0(data_folder_path, file_name_ret_daily)
+
+### Read .dta file for US banks
+data_US_Cstat <- haven::read_dta(file_path_Cstat)
