@@ -26,7 +26,7 @@ file_name_TA <- "US_Bank_Cstat_TA.dta" #Compustat total assets file
 file_path_ret <- paste0(data_folder_path, file_name_ret_daily)
 file_path_TA <- paste0(data_folder_path, file_name_TA)
 
-### Read .dta file for US banks
+### Read .dta file for US bank returns
 data_US_full <- haven::read_dta(file_path_ret)
 # Note that since the data file is ~7 GB, this step 
 # takes time. Not suitable for small RAM machines.
@@ -171,8 +171,24 @@ readr::write_csv(summ_stat_comnam, "Summary_Stat_Banks.csv")
 #############################################################
 
 file_name_Cstat <- "US_Bank_Cstat.dta" #CRSP daily return file
-
-file_path_Cstat <- paste0(data_folder_path, file_name_ret_daily)
+file_path_Cstat <- paste0(data_folder_path, file_name_Cstat)
 
 ### Read .dta file for US banks
 data_US_Cstat <- haven::read_dta(file_path_Cstat)
+
+###############################################################
+####### Filtration, Cleaning, Tidying etc. ####################
+###############################################################
+
+data_Cstat_expl <- data_US_Cstat %>%
+  dplyr::select(gvkey, datacqtr, fyearq, datadate,
+                cusip, conm, atq, 
+                #capr1q, capr2q,
+                ceqq, cshoq, lseq, ltq, nimq, 
+                piq, seqq, stboq, tbq, teqq, 
+                tfdq, niinty, piy, tcoey, tcory,
+                addzip, city, sic, dlcq, dlttq, 
+                dptcq, dpdcq, dpscq, fdfrq, ffsq,
+                fhlbq, loq, mbshsq, mtgiq, niintq, 
+                npatq, tdomdq, teqq,
+                )
