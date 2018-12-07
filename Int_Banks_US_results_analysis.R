@@ -447,4 +447,7 @@ int_diff_sys_gsib <- apply(int_US_sys_gsib[, -1], 2, func_diff)
 ###
 
 time_end <- Sys.time()
-print(time_end - time_start)
+
+message("Tables and figures computed. Total time taken = ",
+        round(time_end - time_start, 2),
+        " min")

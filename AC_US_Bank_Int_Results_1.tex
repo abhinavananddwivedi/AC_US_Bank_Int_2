@@ -87,7 +87,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018/12/04}
+    \date{2018/12/07}
 
 \linespread{1.25}
 \usepackage{amsmath}
@@ -471,6 +471,44 @@ category}\label{integration-variation-with-sic-category}
 \end{verbatim}
 
 \begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/SIC_Categ-1} \end{center}
+
+\section{Differencing the Intgration
+Series}\label{differencing-the-intgration-series}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/Diff-1} \end{center}
+
+\section{Panel Estimation}\label{panel-estimation}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Pooled Model}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.04 & 0.07 & 0.55 & 0.58\tabularnewline
+size & 0.12 & 0.02 & 7.01 & 0.00\tabularnewline
+lev\_ratio & 0.89 & 0.28 & 3.14 & 0.00\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Fixed Effects Model}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+size & 0.33 & 0.03 & 11.84 & 0.00\tabularnewline
+lev\_ratio & 0.48 & 0.28 & 1.73 & 0.08\tabularnewline
+\bottomrule
+\end{longtable}
 
 
 \end{document}

@@ -46,7 +46,7 @@ knitr::opts_chunk$set(echo = F,
 
 # Preprocess, then compute then postprocess
 # Includes two nested scripts 
-source('Int_Banks_US_results_analysis.R', echo = F)
+source('Int_Banks_US_panel_estimation.R', echo = F)
 
 # Further Tests to Do:
 
@@ -184,5 +184,18 @@ legend(60, -0.4,
        cex = 0.25
        )
 
+
+```
+
+
+# Panel Estimation
+
+```{r panel_est}
+
+# Pooled
+knitr::kable(tidy_pool, digits = 2, caption = "Pooled Model")
+
+# Fixed Effects
+knitr::kable(tidy_fixed, digits = 2, caption = "Fixed Effects Model")
 
 ```

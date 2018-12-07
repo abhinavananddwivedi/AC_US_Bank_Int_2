@@ -86,6 +86,8 @@ for (i in 1:num_bank_US)
 
 data_list_US_df <- dplyr::bind_rows(data_list_US) #in panel format
 
+message("Quarterization over.")
+
 # Bank name, CUSIP, NCUSIP and SIC map
 name_cusip_sic <- data_list_US_df %>%
   dplyr::select(comnam, ncusip, cusip_8, siccd) %>%
@@ -229,6 +231,8 @@ for (l in qtr_grid[-qtr_max]) #For all except the last quarter
 
 
 }
+
+message("Principal component computation over.")
 
 #######################################################################
 ##### Principal Component Regressions and Integration Computation #####

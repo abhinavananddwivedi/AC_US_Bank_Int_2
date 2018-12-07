@@ -26,10 +26,17 @@ file_name_TA <- "US_Bank_Cstat_TA.dta" #Compustat total assets file
 file_path_ret <- paste0(data_folder_path, file_name_ret_daily)
 file_path_TA <- paste0(data_folder_path, file_name_TA)
 
+time_pre_read_CRSP <- Sys.time()
 ### Read .dta file for US bank returns
 data_US_full <- haven::read_dta(file_path_ret)
 # Note that since the data file is ~7 GB, this step 
 # takes time. Not suitable for small RAM machines.
+time_post_read_CRSP <- Sys.time()
+
+message("Read CRSP file. Time taken to read file = ", 
+        round(time_post_read_CRSP - time_pre_read_CRSP, 2),
+        " min"
+        )
 
 data_US_bank_TA <- haven::read_dta(file_path_TA)
 
@@ -173,22 +180,41 @@ readr::write_csv(summ_stat_comnam, "Summary_Stat_Banks.csv")
 file_name_Cstat <- "US_Bank_Cstat.dta" #CRSP daily return file
 file_path_Cstat <- paste0(data_folder_path, file_name_Cstat)
 
+time_pre_read_Cstat <- Sys.time()
 ### Read .dta file for US banks
 data_US_Cstat <- haven::read_dta(file_path_Cstat)
+time_post_read_Cstat <- Sys.time()
+
+message("Read compustat file. Time taken to read file = ", 
+        round(time_post_read_Cstat - time_pre_read_Cstat, 2),
+        " sec"
+        )
 
 ###############################################################
 ####### Filtration, Cleaning, Tidying etc. ####################
 ###############################################################
 
+# Select relevant variables
 data_Cstat_expl <- data_US_Cstat %>%
   dplyr::select(gvkey, datacqtr, fyearq, datadate,
                 cusip, conm, atq, 
-                #capr1q, capr2q,
+                capr1q, capr2q,
                 ceqq, cshoq, lseq, ltq, nimq, 
                 piq, seqq, stboq, tbq, teqq, 
                 tfdq, niinty, piy, tcoey, tcory,
                 addzip, city, sic, dlcq, dlttq, 
                 dptcq, dpdcq, dpscq, fdfrq, ffsq,
                 fhlbq, loq, mbshsq, mtgiq, niintq, 
-                npatq, tdomdq, teqq,
+                npatq, tdomdq, teqq
+                )
+
+# Add explanatory variables in the panel dataset:
+# Size = log10(total assets)
+# Leverage Ratio = (common equity)/(total assets)
+#
+#
+
+data_Cstat_expl <- data_Cstat_expl %>%
+  dplyr::mutate(size = log10(atq),
+                lev_ratio = ceqq/atq
                 )
