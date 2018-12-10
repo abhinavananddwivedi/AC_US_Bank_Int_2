@@ -55,6 +55,7 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 10. Correlation between quarterly integration and quarterly returns?
 # 11. How do factor loadings evolve? (Brennan question)
 # 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
+# 13. Do clustering at the level of time also
 
 
 ```

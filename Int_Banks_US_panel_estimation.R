@@ -30,7 +30,8 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
                                       data_Cstat_expl,
                                       by = c("Banks", "year_qtr")
                                       ) %>%
-  dplyr::select(c(Banks, year_qtr, Integration, size, lev_ratio, 
+  dplyr::select(c(Banks, year_qtr, Integration, 
+                  size, lev_ratio, debt_ST, profit, NIM,
                   everything()
                   )
                 )
@@ -40,56 +41,46 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
 ############## Panel Estimation Begins ###########################
 ##################################################################
 
-formula_full <- Integration ~ size + lev_ratio
+formula_full <- Integration ~ size + lev_ratio + debt_ST + profit + NIM
 
 func_panel_est <- function(formula, panel_data)
 {
-  # This function takes in the regression formula and data
-  # and returns three different panel specifications: pooled,
-  # fixed effects and random effects
-  temp_pool <- plm::plm(formula, model = "pooling", data = panel_data)
+  # This function takes in the regression formula and dataset
+  # and returns panel estimation with pooled and fixed effects.
+  # Heteroskedasticity is taken into account and clustering is
+  # done at the group (bank) level.
+  temp_pool <- plm::plm(formula, 
+                        model = "pooling", 
+                        data = panel_data)
   
   tidy_pool <- broom::tidy(lmtest::coeftest(temp_pool, 
                           vcov=vcovHC(temp_pool, 
                                     type="HC0", 
                                     cluster="group")))
   
-  #temp_fixed <- summary(plm::plm(formula, "within", panel_data))
+  temp_fixed <- plm::plm(formula, 
+                         model = "within", 
+                         data = panel_data)
   
-  return(tidy_pool)
+  tidy_fixed <- broom::tidy(lmtest::coeftest(temp_fixed, 
+                                            vcov=vcovHC(temp_fixed, 
+                                                        type="HC0", 
+                                                        cluster="group")))
+  
+  panel_est_tidy <- list(tidy_pool, tidy_fixed)
+  
+  return(panel_est_tidy)
 }
 
-### Pooling ###
+panel_est_full <- func_panel_est(formula_full, panel_US_bank_int)
+names(panel_est_full) <- c("Pool", "Fixed")
 
-panel_est_full_pool <- plm::plm(formula_full,
-                                model = "pooling",
-                                data = panel_US_bank_int
-                                )
-tidy_pool <- broom::tidy(lmtest::coeftest(panel_est_full_pool, 
-                              vcov=vcovHC(panel_est_full_pool, 
-                                          type="HC0", 
-                                          cluster="group")))
-
-
-#knitr::kable(tidy_pool, digits = 2, caption = "Pooled Model")
-
-### Fixed Effects ###
-
-panel_est_full_fixed <- plm::plm(formula_full,
-                                model = "within",
-                                data = panel_US_bank_int)
-
-tidy_fixed <- broom::tidy(lmtest::coeftest(panel_est_full_fixed, 
-                                          vcov=vcovHC(panel_est_full_fixed, 
-                                                      type="HC0", 
-                                                      cluster="group")))
-knitr::kable(tidy_fixed, digits = 2, caption = "Fixed Effects Model")
 
 ###############################
 ## Testing for fixed effects ##
 ###############################
 
-pFtest(panel_est_full_pool, panel_est_full_fixed)
+#pFtest(panel_est_full$Pool, panel_est_full$Fixed)
 
 ##################################################################
 

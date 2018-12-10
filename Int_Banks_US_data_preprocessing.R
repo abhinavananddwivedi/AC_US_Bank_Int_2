@@ -211,10 +211,23 @@ data_Cstat_expl <- data_US_Cstat %>%
 # Add explanatory variables in the panel dataset:
 # Size = log10(total assets)
 # Leverage Ratio = (common equity)/(total assets)
-#
-#
+# Current Debt = log10(debt in current liabilities)
+# Profit = log10(Pretax Income)
+# Net Interest Margin
+
+func_log10 <- function(vec)
+{
+  # This function returns log after ignoring
+  # all entries with subzero values
+  vec[vec <= 0] <- NA
+  return(log10(vec))
+}
+
 
 data_Cstat_expl <- data_Cstat_expl %>%
-  dplyr::mutate(size = log10(atq),
-                lev_ratio = ceqq/atq
+  dplyr::mutate(size = func_log10(atq),
+                lev_ratio = ceqq/atq,
+                debt_ST = func_log10(dlcq),
+                profit = func_log10(piy),
+                NIM = nimq
                 )
