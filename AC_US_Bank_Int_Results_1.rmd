@@ -194,9 +194,9 @@ legend(60, -0.4,
 ```{r panel_est}
 
 # Pooled
-knitr::kable(tidy_pool, digits = 2, caption = "Pooled Model")
+knitr::kable(panel_est_full$Pool, digits = 4, caption = "Pooled Model")
 
 # Fixed Effects
-knitr::kable(tidy_fixed, digits = 2, caption = "Fixed Effects Model")
+knitr::kable(panel_est_full$Fixed, digits = 4, caption = "Fixed Effects Model")
 
 ```

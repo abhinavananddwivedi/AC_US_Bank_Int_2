@@ -368,7 +368,9 @@ bank_int_SIC_med <- data.frame(SIC_1 = bank_int_SIC_1_med,
 func_summ <- function(vec)
 {
   # This function computes summary stats of a vector
-  temp_summ <- data.frame(avg = mean(vec, na.rm = T),
+  temp_summ <- data.frame(minimum = min(vec, na.rm = T), 
+                          maximum = max(vec, na.rm = T),
+                          avg = mean(vec, na.rm = T),
                           med = median(vec, na.rm =T),
                           std = sd(vec, na.rm = T),
                           iqr = IQR(vec, na.rm = T),

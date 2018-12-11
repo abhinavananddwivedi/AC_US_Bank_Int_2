@@ -213,7 +213,10 @@ data_Cstat_expl <- data_US_Cstat %>%
 # Leverage Ratio = (common equity)/(total assets)
 # Current Debt = log10(debt in current liabilities)
 # Profit = log10(Pretax Income)
-# Net Interest Margin
+# NIM = Net Interest Margin
+# T1_ratio = Tier 1 Capital Ratio
+# Total Liability = Total liab and shareholder equity - common equity
+# Deposit Financing Ratio = DFR = Total deposit/Total liab
 
 func_log10 <- function(vec)
 {
@@ -228,6 +231,9 @@ data_Cstat_expl <- data_Cstat_expl %>%
   dplyr::mutate(size = func_log10(atq),
                 lev_ratio = ceqq/atq,
                 debt_ST = func_log10(dlcq),
-                profit = func_log10(piy),
-                NIM = nimq
+                net_inc = func_log10(piy),
+                NIM = nimq,
+                T1_ratio = capr1q,
+                tot_liab = lseq - ceqq,
+                DFR = dptcq/tot_liab
                 )
