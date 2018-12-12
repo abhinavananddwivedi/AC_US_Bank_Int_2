@@ -56,9 +56,29 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 11. How do factor loadings evolve? (Brennan question)
 # 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
 # 13. Do clustering at the level of time also
+# 14. SRISK as explanatory factor
 
 
 ```
+# Panel Estimation
+
+```{r panel_est}
+
+# Default model
+knitr::kable(panel_est_full$tidy, digits = 4, caption = "Fixed Effects")
+
+# Alternative model
+knitr::kable(panel_est_alt$tidy, digits = 4, caption = "Alternative Model: Fixed Effects")
+
+# Default model: Systemic Banks
+knitr::kable(panel_est_full_sys$tidy, digits = 4, caption = "Fixed Effects: Systemic Banks")
+
+# Default model
+knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fixed Effects: Systemic Banks")
+
+```
+
+
 
 # Median US Bank Integration 
 
@@ -70,7 +90,7 @@ plot_med_bank_int
 
 ## Linear Time Trends
 
-```{r linear_trend}
+```{r linear_trend, include=FALSE}
 
 knitr::kable(broom::tidy(int_dummy_recession))
 
@@ -83,6 +103,8 @@ knitr::kable(broom::tidy(int_dummy_recession))
 boxplot_int_yearly
 
 ```
+
+
 
 # Most Integrated Banks
 
@@ -109,14 +131,7 @@ barplot(expl_power_eig_med[1:30])
 
 ```
 
-# Linear Time Trends for Bank Integration 
 
-```{r time_trend_banks}
-
-knitr::kable(trend_T_p_val_df)
-
-
-```
 
 # Systemic Banks' Integration
 
@@ -188,15 +203,11 @@ legend(60, -0.4,
 
 ```
 
+# Linear Time Trends for Bank Integration 
 
-# Panel Estimation
+```{r time_trend_banks}
 
-```{r panel_est}
+knitr::kable(trend_T_p_val_df)
 
-# Pooled
-knitr::kable(panel_est_full$Pool, digits = 4, caption = "Pooled Model")
-
-# Fixed Effects
-knitr::kable(panel_est_full$Fixed, digits = 4, caption = "Fixed Effects Model")
 
 ```

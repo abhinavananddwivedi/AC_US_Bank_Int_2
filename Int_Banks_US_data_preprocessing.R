@@ -197,26 +197,34 @@ message("Read compustat file. Time taken to read file = ",
 # Select relevant variables
 data_Cstat_expl <- data_US_Cstat %>%
   dplyr::select(gvkey, datacqtr, fyearq, datadate,
-                cusip, conm, atq, 
-                capr1q, capr2q,
+                cusip, conm, atq,
+                capr1q, capr2q, capr3q,
                 ceqq, cshoq, lseq, ltq, nimq, 
                 piq, seqq, stboq, tbq, teqq, 
                 tfdq, niinty, piy, tcoey, tcory,
-                addzip, city, sic, dlcq, dlttq, 
+                dlcq, dlttq, 
                 dptcq, dpdcq, dpscq, fdfrq, ffsq,
                 fhlbq, loq, mbshsq, mtgiq, niintq, 
-                npatq, tdomdq, teqq
+                npatq, tdomdq, teqq,
+                dd1q, dibq, fhlbq, ireoq, mbshsq,
+                mtgiq, olbmq, tfdq
                 )
 
 # Add explanatory variables in the panel dataset:
 # Size = log10(total assets)
-# Leverage Ratio = (common equity)/(total assets)
-# Current Debt = log10(debt in current liabilities)
-# Profit = log10(Pretax Income)
-# NIM = Net Interest Margin
+# Debt Ratio = (total borrowings)/(total assets)
+# Profit = NIM = Net Interest Margin
 # T1_ratio = Tier 1 Capital Ratio
-# Total Liability = Total liab and shareholder equity - common equity
 # Deposit Financing Ratio = DFR = Total deposit/Total liab
+## (Total Liability = Total liab and shareholder equity - common equity)
+# Short Term Funding Ratio = STFR = Other short term borrowing/Total Borrowing
+
+# Other explanatory variables
+# Common Equity Ratio = common equity/total assets
+# Tier 1 + Tier 2 combined = capr3q
+# D/E ratio = Debt/Equity; Long Term Debt/Total Shareholder Equity; 
+#             Tot Liab/common equity; Total borrowing/Total shareholder equity
+
 
 func_log10 <- function(vec)
 {
@@ -229,11 +237,13 @@ func_log10 <- function(vec)
 
 data_Cstat_expl <- data_Cstat_expl %>%
   dplyr::mutate(size = func_log10(atq),
-                lev_ratio = ceqq/atq,
-                debt_ST = func_log10(dlcq),
-                net_inc = func_log10(piy),
+                debt_ratio = tbq/atq,
                 NIM = nimq,
                 T1_ratio = capr1q,
                 tot_liab = lseq - ceqq,
-                DFR = dptcq/tot_liab
+                DFR = dptcq/tot_liab,
+                STFR = stboq/tbq,
+                com_eq_ratio = ceqq/atq,
+                T1_T2_ratio = capr3q,
+                DE_ratio_1 = tbq/seqq
                 )
