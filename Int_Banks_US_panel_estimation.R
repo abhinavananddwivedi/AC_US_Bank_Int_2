@@ -32,7 +32,8 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
                                       ) %>%
   dplyr::select(c(Banks, year_qtr, Integration, 
                   size, DE_ratio_1, NIM, T1_ratio, DFR, STFR,
-                  T1_T2_ratio, com_eq_ratio, fhlbq, mbshsq,
+                  T1_T2_ratio, com_eq_ratio, fhlbq, mbshsq, 
+                  eq_ratio,
                   everything()
                   )
                 )
@@ -42,11 +43,11 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
 ############## Panel Estimation Begins ###########################
 ##################################################################
 
-formula_full <- Integration ~ size + DE_ratio_1 + NIM + 
-  T1_T2_ratio + DFR 
+formula_full <- Integration ~ size + eq_ratio + NIM + 
+  T1_T2_ratio + DFR + STFR
 
 formula_alt <- Integration ~ size + com_eq_ratio + NIM +
-  T1_T2_ratio + DFR + fhlbq + mbshsq
+  T1_T2_ratio + DFR + fhlbq + mbshsq + STFR
 
 func_panel_est <- function(formula, panel_data)
 {

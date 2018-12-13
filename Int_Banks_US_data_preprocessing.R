@@ -190,6 +190,30 @@ message("Read compustat file. Time taken to read file = ",
         " sec"
         )
 
+### The risk free rate data: 3 Month Treasury Bill Rate ###
+
+file_name_Tbill3M <- "T_Bill_3M_US.csv"
+file_path_Tbill3M <- paste0(data_folder_path, file_name_Tbill3M)
+data_Tbill3M <- readr::read_csv(file_path_Tbill3M, 
+                                na = c("", "NA", "."))
+
+Tbill3M <- data_Tbill3M %>%
+  dplyr::rename("Tbill3M" = DTB3) %>%
+  dplyr::filter(lubridate::year(DATE) %in% 1993:2017)
+
+### The market index returns data: S&P 500 index returns ###
+
+file_name_SP500 <- "S_P_500_Index.dta"
+file_path_SP500 <- paste0(data_folder_path, file_name_SP500)
+data_market_index <- haven::read_dta(file_path_SP500)
+
+# Quarterly market returns
+market_return <- data_market_index %>%
+  dplyr::select(caldt, sprtrn) %>%
+  dplyr::rename("DATE" = caldt, "r_m" = sprtrn) %>%
+  dplyr::filter(lubridate::year(DATE) %in% 1993:2017)
+  
+
 ###############################################################
 ####### Filtration, Cleaning, Tidying etc. ####################
 ###############################################################
@@ -245,5 +269,6 @@ data_Cstat_expl <- data_Cstat_expl %>%
                 STFR = stboq/tbq,
                 com_eq_ratio = ceqq/atq,
                 T1_T2_ratio = capr3q,
-                DE_ratio_1 = tbq/seqq
+                DE_ratio_1 = tbq/seqq,
+                eq_ratio = seqq/atq
                 )
