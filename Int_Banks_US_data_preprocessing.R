@@ -54,7 +54,7 @@ ind_bank_use <- c(ind_comm_banks, ind_saving_inst,
                   ind_credit_union, ind_bank_hold) #use only these
 
 # Admissible share codes
-# Information taken from http://www.crsp.com/products/documentation/data-definitions-1
+# Taken from http://www.crsp.com/products/documentation/data-definitions-1
 ind_share_code_common <- c(10, 11) #only common shares included
 
 ### Filter CRSP data ###
@@ -181,8 +181,10 @@ file_name_Cstat <- "US_Bank_Cstat.dta" #CRSP daily return file
 file_path_Cstat <- paste0(data_folder_path, file_name_Cstat)
 
 time_pre_read_Cstat <- Sys.time()
+
 ### Read .dta file for US banks
 data_US_Cstat <- haven::read_dta(file_path_Cstat)
+
 time_post_read_Cstat <- Sys.time()
 
 message("Read compustat file. Time taken to read file = ", 
@@ -190,29 +192,53 @@ message("Read compustat file. Time taken to read file = ",
         " sec"
         )
 
+###########################################################
 ### The risk free rate data: 3 Month Treasury Bill Rate ###
+###########################################################
 
 file_name_Tbill3M <- "T_Bill_3M_US.csv"
 file_path_Tbill3M <- paste0(data_folder_path, file_name_Tbill3M)
 data_Tbill3M <- readr::read_csv(file_path_Tbill3M, 
                                 na = c("", "NA", "."))
 
-Tbill3M <- data_Tbill3M %>%
-  dplyr::rename("Tbill3M" = DTB3) %>%
-  dplyr::filter(lubridate::year(DATE) %in% 1993:2017)
+func_pr_to_ret <- function(vec)
+{
+  # This function takes in a price vector 
+  # and returns a relative return vector
+  temp <- diff(vec)
+  temp_ret <- c(NA, temp/vec[-length(vec)])
+  
+  return(temp_ret)
+}
 
+data_Tbill3M <- data_Tbill3M %>%
+  dplyr::mutate("Tbill3M_ret" = func_pr_to_ret(data_Tbill3M$DTB3))
+
+Tbill3M <- data_Tbill3M %>%
+  dplyr::select(DATE, Tbill3M_ret) %>%
+  dplyr::filter(lubridate::year(DATE) %in% 1993:2017) 
+
+############################################################
 ### The market index returns data: S&P 500 index returns ###
+############################################################
 
 file_name_SP500 <- "S_P_500_Index.dta"
 file_path_SP500 <- paste0(data_folder_path, file_name_SP500)
 data_market_index <- haven::read_dta(file_path_SP500)
 
-# Quarterly market returns
+## Daily market returns ##
+
 market_return <- data_market_index %>%
-  dplyr::select(caldt, sprtrn) %>%
-  dplyr::rename("DATE" = caldt, "r_m" = sprtrn) %>%
-  dplyr::filter(lubridate::year(DATE) %in% 1993:2017)
-  
+ dplyr::select(caldt, sprtrn) %>%
+ dplyr::rename("DATE" = caldt, "r_m" = sprtrn) %>%
+ dplyr::filter(lubridate::year(DATE) %in% 1993:2017)
+
+## Risk Premium = r_m - r_f ##
+
+df_rm_rf <- dplyr::full_join(Tbill3M, market_return,
+                               by = "DATE") %>%
+  dplyr::rename("r_f" = Tbill3M_ret) %>%
+  dplyr::mutate("risk_premium" = r_m - r_f)
 
 ###############################################################
 ####### Filtration, Cleaning, Tidying etc. ####################
@@ -237,7 +263,7 @@ data_Cstat_expl <- data_US_Cstat %>%
 # Add explanatory variables in the panel dataset:
 # Size = log10(total assets)
 # Equity Ratio = (total shareholder equity)/total assets
-# Profit = NIM = Net Interest Margin
+# Profit = NIM = Net Interest Margin/100
 # T1_T2_ratio = Tier 1 and Tier 2 Capital Ratio
 # Deposit Financing Ratio = DFR = (Total deposits)/(Total liabilities)
 ## (Total Liability = Total liab and shareholder equity - common equity)
@@ -263,13 +289,13 @@ func_log10 <- function(vec)
 data_Cstat_expl <- data_Cstat_expl %>%
   dplyr::mutate(size = func_log10(atq),
                 debt_ratio = tbq/atq,
-                NIM = nimq,
-                T1_ratio = capr1q,
+                NIM = nimq/100,
+                T1_ratio = capr1q/100,
                 tot_liab = lseq - ceqq,
                 DFR = dptcq/tot_liab,
                 STFR = stboq/tbq,
                 com_eq_ratio = ceqq/atq,
-                T1_T2_ratio = capr3q,
+                T1_T2_ratio = capr3q/100,
                 DE_ratio_1 = tbq/seqq,
                 eq_ratio = seqq/atq,
                 MBS = mbshsq
