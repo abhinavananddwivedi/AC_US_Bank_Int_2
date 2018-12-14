@@ -78,6 +78,18 @@ knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fi
 
 ```
 
+# Mortgage Backed Securities Dataset
+
+```{r MBS}
+
+ggplot(panel_US_MBS, aes(year_qtr, MBS, color = Banks)) +
+  geom_point() +
+  ylab("Mortgage Backed Securities Held for Sale") +
+  xlab("Years") +
+  coord_flip() +
+  theme_bw()
+
+```
 
 
 # Median US Bank Integration 

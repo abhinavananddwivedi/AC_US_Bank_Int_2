@@ -236,18 +236,19 @@ data_Cstat_expl <- data_US_Cstat %>%
 
 # Add explanatory variables in the panel dataset:
 # Size = log10(total assets)
-# Debt Ratio = (total borrowings)/(total assets)
+# Equity Ratio = (total shareholder equity)/total assets
 # Profit = NIM = Net Interest Margin
-# T1_ratio = Tier 1 Capital Ratio
-# Deposit Financing Ratio = DFR = Total deposit/Total liab
+# T1_T2_ratio = Tier 1 and Tier 2 Capital Ratio
+# Deposit Financing Ratio = DFR = (Total deposits)/(Total liabilities)
 ## (Total Liability = Total liab and shareholder equity - common equity)
-# Short Term Funding Ratio = STFR = Other short term borrowing/Total Borrowing
+# Short Term Funding Ratio = STFR = Other short-term borrowing/Total Borrowing
 
 # Other explanatory variables
+# Debt Ratio = (total borrowings)/(total assets)
 # Common Equity Ratio = common equity/total assets
-# Tier 1 + Tier 2 combined = capr3q
 # D/E ratio = Debt/Equity; Long Term Debt/Total Shareholder Equity; 
 #             Tot Liab/common equity; Total borrowing/Total shareholder equity
+# 
 
 
 func_log10 <- function(vec)
@@ -270,5 +271,6 @@ data_Cstat_expl <- data_Cstat_expl %>%
                 com_eq_ratio = ceqq/atq,
                 T1_T2_ratio = capr3q,
                 DE_ratio_1 = tbq/seqq,
-                eq_ratio = seqq/atq
+                eq_ratio = seqq/atq,
+                MBS = mbshsq
                 )
