@@ -257,7 +257,7 @@ data_Cstat_expl <- data_US_Cstat %>%
                 fhlbq, loq, mbshsq, mtgiq, niintq, 
                 npatq, tdomdq, teqq,
                 dd1q, dibq, fhlbq, ireoq, mbshsq,
-                mtgiq, olbmq, tfdq
+                mtgiq, olbmq, tfdq, ltmibq
                 )
 
 # Add explanatory variables in the panel dataset:
@@ -267,7 +267,7 @@ data_Cstat_expl <- data_US_Cstat %>%
 # T1_T2_ratio = Tier 1 and Tier 2 Capital Ratio
 # Deposit Financing Ratio = DFR = (Total deposits)/(Total liabilities)
 ## (Total Liability = Total liab and shareholder equity - common equity)
-# Short Term Funding Ratio = STFR = Other short-term borrowing/Total Borrowing
+# Short to Long Term Debt Ratio = (debt in current liab)/(total long term debt)
 
 # Other explanatory variables
 # Debt Ratio = (total borrowings)/(total assets)
@@ -293,7 +293,7 @@ data_Cstat_expl <- data_Cstat_expl %>%
                 T1_ratio = capr1q/100,
                 tot_liab = lseq - ceqq,
                 DFR = dptcq/tot_liab,
-                STFR = stboq/tbq,
+                STFR = dlcq/dlttq,
                 com_eq_ratio = ceqq/atq,
                 T1_T2_ratio = capr3q/100,
                 DE_ratio_1 = tbq/seqq,

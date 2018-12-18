@@ -50,6 +50,9 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 
 # Further Tests to Do:
 
+# 0. integration is dependence on common factors, but we are using idiosyncratic
+# explanatory factors!
+
 # 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
 # 9. What are the identities of the left tail outliers in the boxplots?
 # 10. Correlation between quarterly integration and quarterly returns?
@@ -57,6 +60,7 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
 # 13. Do clustering at the level of time also
 # 14. SRISK as explanatory factor
+# 15. Accounting for M&A? Bankruptcies? 
 
 
 ```

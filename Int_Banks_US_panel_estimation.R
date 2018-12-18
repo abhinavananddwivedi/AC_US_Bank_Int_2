@@ -50,10 +50,11 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
 ##################################################################
 
 formula_full <- Integration ~ size + eq_ratio + NIM + 
-  T1_T2_ratio + DFR
+  T1_T2_ratio + DFR 
 
 formula_alt <- Integration ~ size + com_eq_ratio + NIM +
-  T1_T2_ratio + DFR + STFR + MBS + func_log10(fhlbq) 
+  T1_T2_ratio + DFR + MBS + func_log10(fhlbq) 
+  
 
 func_panel_est <- function(formula, panel_data)
 {
@@ -138,7 +139,7 @@ panel_rec_NBER_2 <- panel_US_bank_int %>%
 ## Recessionary Explanatory Variables ##
 
 panel_est_rec_full <- func_panel_est(formula_full, panel_rec_NBER)
-panel_est_rec_full_1 <- func_panel_est(formula_full, panel_rec_NBER_2)
+panel_est_rec_full_1 <- func_panel_est(formula_full, panel_rec_NBER_1)
 panel_est_rec_full_2 <- func_panel_est(formula_full, panel_rec_NBER_2)
 
 panel_est_rec_alt <- func_panel_est(formula_alt, panel_rec_NBER)
