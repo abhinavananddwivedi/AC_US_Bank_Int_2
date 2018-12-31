@@ -87,97 +87,13 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018/12/18}
+    \date{2018/12/31}
 
 \linespread{1.25}
 \usepackage{amsmath}
 
 \begin{document}
 \maketitle
-
-\section{Panel Estimation}\label{panel-estimation}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Fixed Effects}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2557 & 0.0286 & 8.9430 & 0.0000\tabularnewline
-eq\_ratio & 1.3052 & 0.3954 & 3.3014 & 0.0010\tabularnewline
-NIM & -4.0331 & 0.8988 & -4.4874 & 0.0000\tabularnewline
-T1\_T2\_ratio & -0.5026 & 0.1723 & -2.9169 & 0.0035\tabularnewline
-DFR & 0.1435 & 0.0867 & 1.6553 & 0.0979\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Alternative Model: Fixed Effects}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2866 & 0.0416 & 6.8945 & 0.0000\tabularnewline
-com\_eq\_ratio & 0.5176 & 0.3827 & 1.3523 & 0.1764\tabularnewline
-NIM & -4.6297 & 1.2076 & -3.8339 & 0.0001\tabularnewline
-T1\_T2\_ratio & -0.3142 & 0.2440 & -1.2876 & 0.1980\tabularnewline
-DFR & 0.3144 & 0.1083 & 2.9032 & 0.0037\tabularnewline
-STFR & 0.0209 & 0.0305 & 0.6829 & 0.4947\tabularnewline
-MBS & 0.0265 & 0.0016 & 16.9663 & 0.0000\tabularnewline
-func\_log10(fhlbq) & 0.0120 & 0.0113 & 1.0646 & 0.2871\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Fixed Effects: Systemic Banks}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2558 & 0.0531 & 4.8198 & 0.0000\tabularnewline
-eq\_ratio & 1.1537 & 1.0732 & 1.0750 & 0.2827\tabularnewline
-NIM & 0.8788 & 2.3539 & 0.3734 & 0.7090\tabularnewline
-T1\_T2\_ratio & 0.0793 & 0.6307 & 0.1257 & 0.9000\tabularnewline
-DFR & -0.1594 & 0.1302 & -1.2249 & 0.2210\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Alternative Model:Fixed Effects: Systemic Banks}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.1543 & 0.1483 & 1.0406 & 0.3011\tabularnewline
-com\_eq\_ratio & -1.5387 & 1.8375 & -0.8374 & 0.4047\tabularnewline
-NIM & -0.8687 & 3.7646 & -0.2308 & 0.8181\tabularnewline
-T1\_T2\_ratio & 2.7842 & 0.6973 & 3.9927 & 0.0001\tabularnewline
-DFR & 0.7803 & 0.4647 & 1.6794 & 0.0968\tabularnewline
-STFR & 0.4300 & 0.1149 & 3.7417 & 0.0003\tabularnewline
-func\_log10(fhlbq) & -0.0053 & 0.0181 & -0.2938 & 0.7696\tabularnewline
-\bottomrule
-\end{longtable}
-
-\section{Mortgage Backed Securities
-Dataset}\label{mortgage-backed-securities-dataset}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/MBS-1} \end{center}
 
 \section{Median US Bank Integration}\label{median-us-bank-integration}
 
@@ -237,6 +153,11 @@ Eigenvectors}\label{explantory-power-of-eigenvectors}
 \section{Systemic Banks' Integration}\label{systemic-banks-integration}
 
 \begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/systemic-1} \end{center}
+
+\section{Bank Integration By
+Quintiles}\label{bank-integration-by-quintiles}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/quint_bank_int-1} \end{center}
 
 \section{Effect of NBER Recessions on Bank
 Integration}\label{effect-of-nber-recessions-on-bank-integration}
@@ -553,6 +474,83 @@ FARMERS NATIONAL BANC CORP & 1.2980043 & 0.2071524\tabularnewline
 L C N B CORP & 1.1255402 & 0.2719686\tabularnewline
 NATIONAL BANK HOLDINGS CORP & 4.8078049 & 0.0001223\tabularnewline
 FIRST BANCSHARES INC MS & 0.2803760 & 0.7823860\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{Panel Estimation}\label{panel-estimation}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Fixed Effects}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+size & 0.2557 & 0.0286 & 8.9430 & 0.0000\tabularnewline
+eq\_ratio & 1.3052 & 0.3954 & 3.3014 & 0.0010\tabularnewline
+NIM & -4.0331 & 0.8988 & -4.4874 & 0.0000\tabularnewline
+T1\_T2\_ratio & -0.5026 & 0.1723 & -2.9169 & 0.0035\tabularnewline
+DFR & 0.1435 & 0.0867 & 1.6553 & 0.0979\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Alternative Model: Fixed Effects}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+size & 0.2912 & 0.0417 & 6.9755 & 0.0000\tabularnewline
+com\_eq\_ratio & 0.4883 & 0.3803 & 1.2841 & 0.1992\tabularnewline
+NIM & -4.5903 & 1.2128 & -3.7850 & 0.0002\tabularnewline
+T1\_T2\_ratio & -0.3259 & 0.2444 & -1.3333 & 0.1825\tabularnewline
+DFR & 0.3017 & 0.1046 & 2.8847 & 0.0039\tabularnewline
+MBS & 0.0265 & 0.0016 & 16.6910 & 0.0000\tabularnewline
+func\_log10(fhlbq) & 0.0092 & 0.0106 & 0.8732 & 0.3826\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Fixed Effects: Systemic Banks}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+size & 0.2558 & 0.0531 & 4.8198 & 0.0000\tabularnewline
+eq\_ratio & 1.1537 & 1.0732 & 1.0750 & 0.2827\tabularnewline
+NIM & 0.8788 & 2.3539 & 0.3734 & 0.7090\tabularnewline
+T1\_T2\_ratio & 0.0793 & 0.6307 & 0.1257 & 0.9000\tabularnewline
+DFR & -0.1594 & 0.1302 & -1.2249 & 0.2210\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Alternative Model:Fixed Effects: Systemic Banks}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+size & 0.3134 & 0.1706 & 1.8372 & 0.0697\tabularnewline
+com\_eq\_ratio & -1.7806 & 1.4460 & -1.2314 & 0.2216\tabularnewline
+NIM & -0.2118 & 4.7845 & -0.0443 & 0.9648\tabularnewline
+T1\_T2\_ratio & 2.3842 & 0.6233 & 3.8254 & 0.0002\tabularnewline
+DFR & 0.0890 & 0.4956 & 0.1796 & 0.8579\tabularnewline
+func\_log10(fhlbq) & -0.0341 & 0.0115 & -2.9666 & 0.0039\tabularnewline
 \bottomrule
 \end{longtable}
 

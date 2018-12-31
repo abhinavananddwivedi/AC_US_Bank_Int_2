@@ -130,6 +130,45 @@ plot_med_bank_int <- ggplot(data = plot_data,
   labs(x = "Years", y = "Median Integration Level") +
   theme(axis.text.x=element_text(angle=60, hjust=1))
 
+################################################################
+########## Quintile Based Integration Time Series ##############
+################################################################
+
+func_quint <- function(vec)
+{
+  # This function returns 20th, 40th, 60th
+  # and 80th percentiles of a given vector
+  # after ignoring missing values
+  
+  temp_temp <- quantile(vec, c(0.20, 0.40,
+                               0.60, 0.80),
+                        na.rm = T)
+
+  return(temp_temp)
+}
+
+quint_bank_int <- apply(int_US_bank_wide[, -1], 1, func_quint) 
+quint_bank_int <- t(quint_bank_int) #Transpose
+colnames(quint_bank_int) <- c("Perc_20", "Perc_40", "Perc_60", "Perc_80")
+
+matplot(quint_bank_int, 
+        type = "l", 
+        lwd = 1,
+        lty = 1:ncol(quint_bank_int), 
+        xlab = "Years", 
+        ylab = "Bank Integration Quintiles"
+        )
+
+ 
+# legend(75, 0.3, 
+#       legend = colnames(quint_bank_int), 
+#       col = 1:ncol(quint_bank_int), 
+#       lty = 1:ncol(quint_bank_int), 
+#       lwd = 0.5,
+#       cex = 0.5
+#       )
+
+
 ##########################################
 ### Top 25 Banks by Median Integration ###
 ##########################################

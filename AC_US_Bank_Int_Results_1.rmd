@@ -64,36 +64,6 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 
 
 ```
-# Panel Estimation
-
-```{r panel_est}
-
-# Default model
-knitr::kable(panel_est_full$tidy, digits = 4, caption = "Fixed Effects")
-
-# Alternative model
-knitr::kable(panel_est_alt$tidy, digits = 4, caption = "Alternative Model: Fixed Effects")
-
-# Default model: Systemic Banks
-knitr::kable(panel_est_full_sys$tidy, digits = 4, caption = "Fixed Effects: Systemic Banks")
-
-# Default model
-knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fixed Effects: Systemic Banks")
-
-```
-
-# Mortgage Backed Securities Dataset
-
-```{r MBS}
-
-ggplot(panel_US_MBS, aes(year_qtr, MBS, color = Banks)) +
-  geom_point() +
-  ylab("Mortgage Backed Securities Held for Sale") +
-  xlab("Years") +
-  coord_flip() +
-  theme_bw()
-
-```
 
 
 # Median US Bank Integration 
@@ -154,6 +124,21 @@ barplot(expl_power_eig_med[1:30])
 ```{r systemic, fig.width=11, fig.height=6}
 
 plot_systemic
+
+```
+
+# Bank Integration By Quintiles
+
+```{r quint_bank_int}
+
+matplot(quint_bank_int, 
+        type = "l", 
+        lwd = 1,
+        lty = 1:ncol(quint_bank_int), 
+        xlab = "Years", 
+        ylab = "Bank Integration Quintiles"
+        )
+
 
 ```
 
@@ -227,3 +212,35 @@ knitr::kable(trend_T_p_val_df)
 
 
 ```
+
+
+# Panel Estimation
+
+```{r panel_est}
+
+# Default model
+knitr::kable(panel_est_full$tidy, digits = 4, caption = "Fixed Effects")
+
+# Alternative model
+knitr::kable(panel_est_alt$tidy, digits = 4, caption = "Alternative Model: Fixed Effects")
+
+# Default model: Systemic Banks
+knitr::kable(panel_est_full_sys$tidy, digits = 4, caption = "Fixed Effects: Systemic Banks")
+
+# Default model
+knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fixed Effects: Systemic Banks")
+
+```
+
+<!-- # Mortgage Backed Securities Dataset -->
+
+<!-- ```{r MBS} -->
+
+<!-- ggplot(panel_US_MBS, aes(year_qtr, MBS, color = Banks)) + -->
+<!--   geom_point() + -->
+<!--   ylab("Mortgage Backed Securities Held for Sale") + -->
+<!--   xlab("Years") + -->
+<!--   coord_flip() + -->
+<!--   theme_bw() -->
+
+<!-- ``` -->
