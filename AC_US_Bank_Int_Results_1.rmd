@@ -53,14 +53,22 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 0. integration is dependence on common factors, but we are using idiosyncratic
 # explanatory factors!
 
+# 0. CATEGORIES: Time: Half 1, Half 2; Banks: Systemic; Top quint; Bottom quint
+
 # 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
-# 9. What are the identities of the left tail outliers in the boxplots?
 # 10. Correlation between quarterly integration and quarterly returns?
 # 11. How do factor loadings evolve? (Brennan question)
 # 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
 # 13. Do clustering at the level of time also
-# 14. SRISK as explanatory factor
+# 14. SRISK as explanatory factor; Bank beta and bank volatility as factors.
 # 15. Accounting for M&A? Bankruptcies? 
+# 16. Integration by quintiles during crises---drop dotcom include Eurozone
+# 17. Trends pre 2005 and post 2005. Trends during crises.
+# 18. Check hypothesis: Integration local max pre-crisis, local min post crisis
+# 19. Monthly integration during crises?
+# 20. Outliers during crises---identities, changes in integration etc.
+# 21. Volatility of integration (standard deviation): median vs systemic
+
 
 
 ```
