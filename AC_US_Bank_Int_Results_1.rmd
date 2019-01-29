@@ -53,7 +53,8 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 0. integration is dependence on common factors, but we are using idiosyncratic
 # explanatory factors!
 
-# 0. CATEGORIES: Time: Half 1, Half 2; Banks: Systemic; Top quint; Bottom quint
+# 0. Subsample Time: Half 1, Half 2, Crises: Great Recession + Eurozone
+# 0. Subsample Banks: Systemic; Top quint; Bottom quint
 
 # 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
 # 10. Correlation between quarterly integration and quarterly returns?
@@ -68,6 +69,7 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 19. Monthly integration during crises?
 # 20. Outliers during crises---identities, changes in integration etc.
 # 21. Volatility of integration (standard deviation): median vs systemic
+# 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives
 
 
 

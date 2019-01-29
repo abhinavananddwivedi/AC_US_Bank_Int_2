@@ -170,3 +170,34 @@ panel_est_rec_alt_2_sys <- func_panel_est(formula_alt, panel_rec_NBER_2_sys)
 
 t_1 <- Sys.time()
 print(t_1 - t_0)
+
+##################################################################
+######## Using slightly modified CGR functions ###################
+##################################################################
+
+func_panel_est_CGR <- function(reg_formula, panel_data_frame)
+{
+  mdl <- "within"
+  ind <- c("Banks", "year_qtr")
+
+  panel_reg <- plm::plm(formula = reg_formula, 
+                        data = panel_data_frame, 
+                        model = mdl,
+                        effect = "twoways", 
+                        index = ind
+                        )
+  panel_reg_rob <- lmtest::coeftest(panel_reg, 
+                                    vcovHC(panel_reg, 
+                                           method = "arellano",
+                                           type = "HC0", 
+                                           cluster = "group")
+                                    )
+  
+  test_out <- summary(panel_reg)
+  test_out$coefficients <- unclass(panel_reg_rob) #Include robust coefficients and T stats
+  
+  
+  return(test_out)
+}
+
+panel_est_full_2 <- func_panel_est_CGR(formula_full, panel_US_bank_int)
