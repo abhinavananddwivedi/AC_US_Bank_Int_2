@@ -44,6 +44,35 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
                   )
                 )
 
+##################################################################
+#### Special subsamples: Bank-wise and Time-wise #################
+##################################################################
+
+temp_year_repeat <- rep(year_min:year_max, each = 4)
+temp_qtr_repeat <- rep(c("Q1","Q2","Q3","Q4"), num_years)
+year_qtr_full <- paste0(temp_year_repeat, temp_qtr_repeat)
+
+year_qtr_len <- length(year_qtr_full)
+
+### Sample period division into 2 halves ###
+
+year_qtr_H1 <- year_qtr_full[1:(floor(year_qtr_len/2))]
+year_qtr_H2 <- year_qtr_full[(floor(year_qtr_len/2) + 1): year_qtr_len]
+
+### Bank sample division into highest and lowest integrated ###
+
+func_top_bot_decile <- function(vec)
+{
+  temp_top <- quantile(vec, 0.90, na.rm = T)
+  temp_bot <- quantile(vec, 0.10, na.rm = T)
+  
+  temp_temp <- data.frame("top" = temp_top, "bot" = temp_bot)
+  
+  return(tibble::as_tibble(temp_temp))
+}
+
+
+
 
 ##################################################################
 ############## Panel Estimation Begins ###########################

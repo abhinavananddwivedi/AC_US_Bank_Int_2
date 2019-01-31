@@ -50,9 +50,6 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 
 # Further Tests to Do:
 
-# 0. integration is dependence on common factors, but we are using idiosyncratic
-# explanatory factors!
-
 # 0. Subsample Time: Half 1, Half 2, Crises: Great Recession + Eurozone
 # 0. Subsample Banks: Systemic; Top quint; Bottom quint
 
