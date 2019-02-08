@@ -57,7 +57,6 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 10. Correlation between quarterly integration and quarterly returns?
 # 11. How do factor loadings evolve? (Brennan question)
 # 12. How does CHANGE in integration behave? Distribution? Time Series? Crises?
-# 13. Do clustering at the level of time also
 # 14. SRISK as explanatory factor; Bank beta and bank volatility as factors.
 # 15. Accounting for M&A? Bankruptcies? 
 # 16. Integration by quintiles during crises---drop dotcom include Eurozone
@@ -67,6 +66,8 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 20. Outliers during crises---identities, changes in integration etc.
 # 21. Volatility of integration (standard deviation): median vs systemic
 # 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives
+# 23. Report formal p values for tests: fixed effect; fixed vs random effect
+# 24. Unit root test for integration?
 
 
 
@@ -223,7 +224,7 @@ knitr::kable(trend_T_p_val_df)
 
 # Panel Estimation
 
-```{r panel_est}
+```{r panel_est, include = F}
 
 # Default model
 knitr::kable(panel_est_full$tidy, digits = 4, caption = "Fixed Effects")
@@ -238,16 +239,3 @@ knitr::kable(panel_est_full_sys$tidy, digits = 4, caption = "Fixed Effects: Syst
 knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fixed Effects: Systemic Banks")
 
 ```
-
-<!-- # Mortgage Backed Securities Dataset -->
-
-<!-- ```{r MBS} -->
-
-<!-- ggplot(panel_US_MBS, aes(year_qtr, MBS, color = Banks)) + -->
-<!--   geom_point() + -->
-<!--   ylab("Mortgage Backed Securities Held for Sale") + -->
-<!--   xlab("Years") + -->
-<!--   coord_flip() + -->
-<!--   theme_bw() -->
-
-<!-- ``` -->

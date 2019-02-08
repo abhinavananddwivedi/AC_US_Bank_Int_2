@@ -81,46 +81,30 @@ func_top_bot_decile <- function(vec)
 formula_full <- Integration ~ size + eq_ratio + NIM + 
   T1_T2_ratio + DFR 
 
-formula_alt <- Integration ~ size + com_eq_ratio + NIM +
-  T1_T2_ratio + DFR + MBS + func_log10(fhlbq) 
-  
-
-func_panel_est <- function(formula, panel_data)
+func_panel_est <- function(formula, 
+                           panel_data, 
+                           mdl = "within"
+                           )
 {
-  # This function takes in the regression formula and dataset
-  # and returns panel estimation with pooled and fixed effects.
-  # Heteroskedasticity is taken into account and clustering is
-  # done at the group (bank) level.
-  temp_pool <- plm::plm(formula, 
-                        model = "pooling", 
-                        data = panel_data)
-  
-  temp_pool_summ <- summary(temp_pool)
-  
-  tidy_pool <- broom::tidy(lmtest::coeftest(temp_pool, 
-                          vcov=vcovHC(temp_pool, 
-                                    type="HC0", 
-                                    cluster="group")))
-  
+  # Panel estimation with fixed effects
   temp_fixed <- plm::plm(formula, 
-                         model = "within", 
-                         data = panel_data)
+                         data = panel_data,
+                         model = mdl, 
+                         type = "HC0",
+                         effect = "individual"
+                         )
+  # Robust, clustered standard errors
+  temp_vcov_err <- plm::vcovDC(temp_fixed) #Double clustering
   
-  temp_fixed_summ <- summary(temp_fixed)
+  temp_fixed_rob <- lmtest::coeftest(temp_fixed, vcov. = temp_vcov_err)
   
-  tidy_fixed <- broom::tidy(lmtest::coeftest(temp_fixed, 
-                                            vcov=vcovHC(temp_fixed, 
-                                                        type="HC0", 
-                                                        cluster="group")))
+  test_out <- summary(temp_fixed)
+  test_out$coefficients <- unclass(temp_fixed_rob) #Include robust clustered errors
   
-  return(list(tidy_fixed, temp_fixed_summ))
+  return(test_out)
 }
 
 panel_est_full <- func_panel_est(formula_full, panel_US_bank_int)
-names(panel_est_full) <- c("tidy", "summary")
-
-panel_est_alt <- func_panel_est(formula_alt, panel_US_bank_int)
-names(panel_est_alt) <- c("tidy", "summary")
 
 ###########################################
 ###### Subsample Panel Regressions ########
@@ -132,23 +116,6 @@ panel_US_sys <- panel_US_bank_int %>%
   dplyr::filter(Banks %in% name_systemic)
 
 panel_est_full_sys <- func_panel_est(formula_full, panel_US_sys)
-names(panel_est_full_sys) <- c("tidy", "summary")
-
-panel_est_alt_sys <- func_panel_est(formula_alt, panel_US_sys)
-names(panel_est_alt_sys) <- c("tidy", "summary")
-
-## For banks with MBS data ##
-
-panel_US_MBS <- panel_US_bank_int %>%
-  dplyr::filter(MBS != 0) %>%
-  dplyr::filter(!is.na(MBS))
-
-# ggplot(panel_US_MBS, aes(year_qtr, MBS, color = Banks)) +
-#   geom_point() +
-#   ylab("Mortgage Backed Securities Held for Sale") +
-#   xlab("Years") +
-#   coord_flip() +
-#   theme_bw()
 
 ## For NBER recessionary periods ##
 
@@ -171,10 +138,6 @@ panel_est_rec_full <- func_panel_est(formula_full, panel_rec_NBER)
 panel_est_rec_full_1 <- func_panel_est(formula_full, panel_rec_NBER_1)
 panel_est_rec_full_2 <- func_panel_est(formula_full, panel_rec_NBER_2)
 
-panel_est_rec_alt <- func_panel_est(formula_alt, panel_rec_NBER)
-panel_est_rec_alt_1 <- func_panel_est(formula_alt, panel_rec_NBER_2)
-panel_est_rec_alt_2 <- func_panel_est(formula_alt, panel_rec_NBER_2)
-
 ## For systemic banks only ##
 
 panel_rec_NBER_sys <- dplyr::filter(panel_rec_NBER, Banks %in% name_systemic)
@@ -185,53 +148,23 @@ panel_est_rec_full_sys <- func_panel_est(formula_full, panel_rec_NBER_sys)
 panel_est_rec_full_1_sys <- func_panel_est(formula_full, panel_rec_NBER_1_sys)
 panel_est_rec_full_2_sys <- func_panel_est(formula_full, panel_rec_NBER_2_sys)
 
-panel_est_rec_alt_sys <- func_panel_est(formula_alt, panel_rec_NBER_sys)
-panel_est_rec_alt_1_sys <- func_panel_est(formula_alt, panel_rec_NBER_1_sys)
-panel_est_rec_alt_2_sys <- func_panel_est(formula_alt, panel_rec_NBER_2_sys)
-
 ###############################
 ## Testing for fixed effects ##
 ###############################
 
 #pFtest(panel_est_full$Pool, panel_est_full$Fixed)
 
+###this works fine by the way###
+temp_twoway <- summary(plm::plm(formula_full, 
+                                panel_US_bank_int, 
+                                model = "within", 
+                                effect = "twoways", 
+                                type = "HC0"
+                                )
+                       )
+###robust errors destroy result###
+
 ##################################################################
 
 t_1 <- Sys.time()
 print(t_1 - t_0)
-
-##################################################################
-######## Using slightly modified CGR functions ###################
-##################################################################
-
-func_panel_est_alt <- function(reg_formula, 
-                               panel_data_frame, 
-                               mdl = "within"
-                               )
-{
-  panel_reg <- plm::plm(formula = reg_formula, 
-                        data = panel_data_frame, 
-                        model = mdl,
-                        effect = "twoways"
-                        )
-  
-  # vcov_err <- plm::vcovHC(panel_reg,
-  #                         method = "arellano",
-  #                         cluster = c("group")
-  #                         # type = "HC1"
-  #                         )
-  vcov_err <- plm::vcovDC(panel_reg)
-  # vcov_err <- plm::vcovSCC(panel_reg)
-  # vcov_err <- plm::vcovNW(panel_reg)
-  
-  panel_reg_rob <- lmtest::coeftest(panel_reg, 
-                                    vcov. = vcov_err
-                                    )
-  
-  test_out <- summary(panel_reg)
-  test_out$coefficients <- unclass(panel_reg_rob) #Include robust coefficients and T stats
-  
-  return(test_out)
-}
-
-panel_est_full_alt <- func_panel_est_alt(formula_full, panel_US_bank_int)
