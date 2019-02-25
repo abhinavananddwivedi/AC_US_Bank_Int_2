@@ -12,13 +12,14 @@ library(plm)
 library(knitr)
 library(broom)
 library(lmtest)
+library(modelr)
 
 ####################################################
 ####################################################
 
 # Preprocess then compute bank integration results
-
-source('Int_Banks_US_results_analysis.R', echo = F) #includes two nested scripts
+#includes two nested scripts
+source('Int_Banks_US_results_analysis.R', echo = F) 
 
 ####################################################
 ####################################################
@@ -44,20 +45,6 @@ panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
                   )
                 )
 
-##################################################################
-#### Special subsamples: Bank-wise and Time-wise #################
-##################################################################
-
-temp_year_repeat <- rep(year_min:year_max, each = 4)
-temp_qtr_repeat <- rep(c("Q1","Q2","Q3","Q4"), num_years)
-year_qtr_full <- paste0(temp_year_repeat, temp_qtr_repeat)
-
-year_qtr_len <- length(year_qtr_full)
-
-### Sample period division into 2 halves ###
-
-year_qtr_H1 <- year_qtr_full[1:(floor(year_qtr_len/2))]
-year_qtr_H2 <- year_qtr_full[(floor(year_qtr_len/2) + 1): year_qtr_len]
 
 ### Bank sample division into highest and lowest integrated ###
 

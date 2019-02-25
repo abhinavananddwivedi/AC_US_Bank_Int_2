@@ -238,6 +238,11 @@ message("Principal component computation over.")
 ##### Principal Component Regressions and Integration Computation #####
 #######################################################################
 
+func_med <- function(vec)
+{
+  return(median(vec, na.rm = T))
+}
+
 US_bank_integration_qtr <- rep(list(NULL), qtr_max)
 list_reg_in_sample <- rep(list(NULL), qtr_max)
 list_reg_out_of_sample <- rep(list(NULL), qtr_max)

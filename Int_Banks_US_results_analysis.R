@@ -13,7 +13,6 @@ library(zoo)
 source('Int_Banks_US.R', echo = F)
 #includes another nested script file for preprocessing raw data
 
-
 func_neg_to_zero <- function(vec)
 {
   # This function converts -ve values to 0
@@ -64,71 +63,170 @@ int_summ_stat_bank <- int_US_bank_long %>%
                    )
 readr::write_csv(int_summ_stat_bank, "US_Bank_Intgration_Summary_Bankwise.csv")
 
-#######################################
-### Histograms for Bank Integration ###
-#######################################
+##################################################################
+#### Special subsamples: Bank-wise and Time-wise #################
+##################################################################
 
-# By Banks
-# hist_banks <- rep(list(NULL), ncol(int_US_bank_wide))
-# 
-# for (i in 1:(ncol(int_US_bank_wide)-1))
-# {
-#   hist_banks[[i]] <- hist(int_US_bank_wide[, i+1])
-# }
-# names(hist_banks) <- names(int_US_bank_wide[-1])
-# 
-# # By Quarters
-# hist_qtr <- rep(list(NULL), nrow(int_US_bank_wide))
-# 
-# for (j in 1:(nrow(int_US_bank_wide)))
-# {
-#   temp_temp <- int_US_bank_wide[j, -1]
-#   hist_qtr[[j]] <- hist(as.numeric(temp_temp))
-# }
+######################
+### Time subsample ###
+######################
 
-# Animate quarterly histograms---no evidence of special distribution
-# for (i in 1:(qtr_max-1))
-# {
-#   plot(hist_qtr[[i]])
-# }
+temp_year_repeat <- rep(year_min:year_max, each = 4)
+temp_qtr_repeat <- rep(c("Q1","Q2","Q3","Q4"), num_years)
+year_qtr_full <- paste0(temp_year_repeat, temp_qtr_repeat)
+year_qtr_len <- length(year_qtr_full) #length 
 
-##############################################
-### Median US Bank Integration Time Series ###
-##############################################
+num_bank <- int_US_bank_long %>% 
+  dplyr::select(Banks) %>% 
+  dplyr::distinct(.) %>%
+  dplyr::count(.)
 
-func_med <- function(vec)
+temp_qtr_num_repeat <- rep(qtr_grid[-1], num_bank$n)
+
+int_US_bank_long_2 <- int_US_bank_long %>%
+  dplyr::mutate("Qtr_num" = temp_qtr_num_repeat)
+# Use the nest technique 
+nest_bank_int_US_full <- int_US_bank_long_2 %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+
+### Sample period division into 2 halves ###
+qtr_num_H1 <- 1:(floor(year_qtr_len/2)) #Quarter numbers 1 to 50
+qtr_num_H2 <- (floor(year_qtr_len/2) + 1):year_qtr_len #Quarter numbers 51 to 100
+year_qtr_H1 <- year_qtr_full[qtr_num_H1]
+year_qtr_H2 <- year_qtr_full[qtr_num_H2]
+
+# Separate the data for the first and the second half #
+int_US_bank_long_H1 <- int_US_bank_long_2 %>%
+  dplyr::filter(Date %in% year_qtr_H1) 
+int_US_bank_long_H2 <- int_US_bank_long_2 %>%
+  dplyr::filter(Date %in% year_qtr_H2)
+# Nested dataframe
+nest_bank_int_US_H1 <- int_US_bank_long_H1 %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+nest_bank_int_US_H2 <- int_US_bank_long_H2 %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+
+################################################
+### Linear trend with robust standard errors ###
+################################################
+
+func_trend_HC <- function(df)
 {
-  # This function returns medians after ignoring NAs
-  return(median(vec, na.rm = T))
+  # This function computes the linear trend and reports
+  # heteroskedasticity and autocorrelation consistent errors
+  temp_lm <- lm(Integration ~ Qtr_num, data = df)
+  temp_summ <- summary(temp_lm)
+  temp_summ$coefficients <- unclass(lmtest::coeftest(temp_lm,
+                                                     vcov. = vcovHC)
+                                    )
+  
+  return(temp_summ)
 }
 
-## Data in Wide Format ##
-## Median Integration Levels Each Quarter ##
+# Linear Trends for the full set of banks #
 
-temp_int_med_bank <- integration_matrix_qtrly_out %>%
-  dplyr::select(-Date) %>%
-  apply(., 2, func_neg_to_zero) %>%
-  apply(., 1, func_med)
+# Compute linear trends and HC errors
+nest_bank_int_US_full <- nest_bank_int_US_full %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC))
 
-qtrs <- qtr_grid[-1]
+# Display main statistics
+nest_bank_int_US_full <- nest_bank_int_US_full %>%
+  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
+  tidyr::unnest(Model_Summary)
 
-trend_linear_int <- summary(lm(temp_int_med_bank ~ qtrs))
+# Filter banks with significant trends
+trend_bank_sig_full <- nest_bank_int_US_full %>%
+  dplyr::select(Banks, p.value) %>%
+  dplyr::filter(p.value <= 0.10)
 
-date_med <- integration_matrix_qtrly_out$Date
-year_end <- paste0(years, "Q4")
+# Linear Trends pre 2005 #
 
-plot_data <- data.frame(date = as.factor(date_med), 
-                        med_bank_int = as.numeric(temp_int_med_bank)
-                        )
+nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing))
 
-plot_med_bank_int <- ggplot(data = plot_data, 
-                            mapping = aes(x = as.yearqtr(date), 
-                                          y = med_bank_int)) +
+nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
+  dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC)) %>%
+  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
+  tidyr::unnest(Model_Summary)
+
+trend_bank_sig_H1 <- nest_bank_int_US_H1 %>%
+  dplyr::select(Banks, p.value) %>%
+  dplyr::filter(p.value <= 0.10)
+
+# Linear Trends post 2005 #
+
+nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing))
+
+nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
+  dplyr::filter(Missing <= 40) %>% 
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC)) %>%
+  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
+  tidyr::unnest(Model_Summary)
+
+trend_bank_sig_H2 <- nest_bank_int_US_H2 %>%
+  dplyr::select(Banks, p.value) %>%
+  dplyr::filter(p.value <= 0.10)
+
+## Linear trend for the median bank ##
+
+int_median_US_bank <- int_US_bank_long_2 %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+  
+trend_median_US_bank <- func_trend_HC(int_median_US_bank)
+
+# Linear trend for for the median bank: pre and post 2005 #
+
+# Pre 2005
+int_median_US_bank_H1 <- int_US_bank_long_2 %>%
+  dplyr::filter(Qtr_num <= 50) %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+
+trend_median_US_bank_H1 <- func_trend_HC(int_median_US_bank_H1)
+
+# Post 2005
+int_median_US_bank_H2 <- int_US_bank_long_2 %>%
+  dplyr::filter(Qtr_num > 50) %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+
+trend_median_US_bank_H2 <- func_trend_HC(int_median_US_bank_H2)
+
+## Plotting median bank's integration trend ##
+
+# Full
+plot_trend_median <- ggplot(int_median_US_bank,
+                            aes(Qtr_num, Integration)) +
   geom_line() +
-  scale_x_yearqtr(format="%YQ%q", n=25) +
-  theme_bw() +
-  labs(x = "Years", y = "Median Integration Level") +
-  theme(axis.text.x=element_text(angle=60, hjust=1))
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
+
+# First Half
+plot_trend_median_H1 <- ggplot(int_median_US_bank_H1,
+                            aes(Qtr_num, Integration)) +
+  geom_line() +
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
+
+# Second Half
+plot_trend_median_H2 <- ggplot(int_median_US_bank_H2,
+                            aes(Qtr_num, Integration)) +
+  geom_line() +
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
 
 ################################################################
 ########## Quintile Based Integration Time Series ##############
@@ -261,46 +359,7 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 #box_expl_eig <- boxplot(t(var_share_df[1:30, ]))
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
 
-#####################################################################
-### Fitting a linear time trend to each bank's integration series ###
-#####################################################################
 
-int_LHS <- integration_matrix_qtrly_out[, -1] 
-int_LHS_missing <- apply(int_LHS, 2, func_missing)
-
-tol_LHS <- 0.80
-
-int_LHS <- int_LHS[, which(int_LHS_missing < tol_LHS*nrow(int_LHS))] %>%
-  as.matrix(.)
-
-qtr_RHS <- qtr_grid[-1]
-
-func_lm <- function(vec)
-{
-  temp_lm <- lm(vec ~ qtr_RHS)
-  return(summary(temp_lm))
-}
-
-trend_linear_int_banks <- apply(int_LHS, 2, func_lm)
-
-## Extracting T stats and p values for bank time trends
-
-trend_int_bank_coeff <- lapply(trend_linear_int_banks, `[[`, "coefficients")
-
-func_subset <- function(matrix)
-{
-  return(matrix[-1, c(3,4)])
-}
-
-trend_T_p_val <- lapply(trend_int_bank_coeff, func_subset)
-
-trend_T_p_val_df <- t(dplyr::bind_rows(trend_T_p_val)) %>% dplyr::as_tibble()
-names(trend_T_p_val_df) <- c("T_stat", "p_val")
-
-trend_T_p_val_df <- tibble::add_column(trend_T_p_val_df, 
-                                       "Banks" = names(trend_T_p_val)) %>%
-  dplyr::select(Banks, everything())
-  
 #######################
 ### GSIBs and DSIBs ###
 #######################
