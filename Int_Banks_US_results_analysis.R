@@ -8,6 +8,8 @@ time_start <- Sys.time()
 library(tidyverse)
 library(moments)
 library(zoo)
+library(lmtest)
+library(sandwich)
 
 # Read, tidy and preprocess the datasets from CRSP and Compustat 
 source('Int_Banks_US.R', echo = F)
@@ -37,7 +39,8 @@ int_US_bank_wide <- int_US_bank_long %>%
 ## By Quarter
 int_summ_stat_qrtrly <- int_US_bank_long %>%
   dplyr::group_by(Date) %>%
-  dplyr::summarise(., 'minimum' = min(Integration, na.rm = T), 
+  dplyr::summarise(., 
+                   'minimum' = min(Integration, na.rm = T), 
                    'maximum' = max(Integration, na.rm = T), 
                    'avg' = mean(Integration, na.rm = T), 
                    'med' = median(Integration, na.rm = T), 
@@ -113,14 +116,19 @@ nest_bank_int_US_H2 <- int_US_bank_long_H2 %>%
 ### Linear trend with robust standard errors ###
 ################################################
 
-func_trend_HC <- function(df)
+func_trend_NW <- function(df)
 {
   # This function computes the linear trend and reports
   # heteroskedasticity and autocorrelation consistent errors
+  # according to Newey West
   temp_lm <- lm(Integration ~ Qtr_num, data = df)
   temp_summ <- summary(temp_lm)
+  temp_vcov_err <- sandwich::NeweyWest(temp_lm, 
+                                       lag = 2, 
+                                       prewhite = F,
+                                       adjust = T)
   temp_summ$coefficients <- unclass(lmtest::coeftest(temp_lm,
-                                                     vcov. = vcovHC)
+                                                     vcov. = temp_vcov_err)
                                     )
   
   return(temp_summ)
@@ -131,7 +139,7 @@ func_trend_HC <- function(df)
 # Compute linear trends and HC errors
 nest_bank_int_US_full <- nest_bank_int_US_full %>%
   dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
-  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC))
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_NW))
 
 # Display main statistics
 nest_bank_int_US_full <- nest_bank_int_US_full %>%
@@ -150,7 +158,7 @@ nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
 
 nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
   dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
-  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC)) %>%
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_NW)) %>%
   dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
   tidyr::unnest(Model_Summary)
 
@@ -165,7 +173,7 @@ nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
 
 nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
   dplyr::filter(Missing <= 40) %>% 
-  dplyr::mutate("Trend" = purrr::map(data, func_trend_HC)) %>%
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_NW)) %>%
   dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
   tidyr::unnest(Model_Summary)
 
@@ -179,7 +187,7 @@ int_median_US_bank <- int_US_bank_long_2 %>%
   dplyr::group_by(Qtr_num) %>%
   dplyr::summarise('Integration' = median(Integration, na.rm = T))
   
-trend_median_US_bank <- func_trend_HC(int_median_US_bank)
+trend_median_US_bank <- func_trend_NW(int_median_US_bank)
 
 # Linear trend for for the median bank: pre and post 2005 #
 
@@ -189,7 +197,7 @@ int_median_US_bank_H1 <- int_US_bank_long_2 %>%
   dplyr::group_by(Qtr_num) %>%
   dplyr::summarise('Integration' = median(Integration, na.rm = T))
 
-trend_median_US_bank_H1 <- func_trend_HC(int_median_US_bank_H1)
+trend_median_US_bank_H1 <- func_trend_NW(int_median_US_bank_H1)
 
 # Post 2005
 int_median_US_bank_H2 <- int_US_bank_long_2 %>%
@@ -197,13 +205,13 @@ int_median_US_bank_H2 <- int_US_bank_long_2 %>%
   dplyr::group_by(Qtr_num) %>%
   dplyr::summarise('Integration' = median(Integration, na.rm = T))
 
-trend_median_US_bank_H2 <- func_trend_HC(int_median_US_bank_H2)
+trend_median_US_bank_H2 <- func_trend_NW(int_median_US_bank_H2)
 
 ## Plotting median bank's integration trend ##
 
 # Full
 plot_trend_median <- ggplot(int_median_US_bank,
-                            aes(Qtr_num, Integration)) +
+                                aes(Qtr_num, Integration)) +
   geom_line() +
   geom_smooth(method = "lm", 
               linetype = "dashed", 
@@ -212,7 +220,7 @@ plot_trend_median <- ggplot(int_median_US_bank,
 
 # First Half
 plot_trend_median_H1 <- ggplot(int_median_US_bank_H1,
-                            aes(Qtr_num, Integration)) +
+                                   aes(Qtr_num, Integration)) +
   geom_line() +
   geom_smooth(method = "lm", 
               linetype = "dashed", 
@@ -221,75 +229,110 @@ plot_trend_median_H1 <- ggplot(int_median_US_bank_H1,
 
 # Second Half
 plot_trend_median_H2 <- ggplot(int_median_US_bank_H2,
-                            aes(Qtr_num, Integration)) +
+                                   aes(Qtr_num, Integration)) +
   geom_line() +
   geom_smooth(method = "lm", 
               linetype = "dashed", 
               color = "black") +
   theme_bw()
 
-################################################################
-########## Quintile Based Integration Time Series ##############
-################################################################
-
-func_quint <- function(vec)
-{
-  # This function returns 20th, 40th, 60th
-  # and 80th percentiles of a given vector
-  # after ignoring missing values
-  
-  temp_temp <- quantile(vec, c(0.20, 0.40,
-                               0.60, 0.80),
-                        na.rm = T)
-
-  return(temp_temp)
-}
-
-quint_bank_int <- apply(int_US_bank_wide[, -1], 1, func_quint) 
-quint_bank_int <- t(quint_bank_int) #Transpose
-colnames(quint_bank_int) <- c("Perc_20", "Perc_40", "Perc_60", "Perc_80")
-
-matplot(quint_bank_int, 
-        type = "l", 
-        lwd = 1,
-        lty = 1:ncol(quint_bank_int), 
-        xlab = "Years", 
-        ylab = "Bank Integration Quintiles"
-        )
-
- 
-# legend(75, 0.3, 
-#       legend = colnames(quint_bank_int), 
-#       col = 1:ncol(quint_bank_int), 
-#       lty = 1:ncol(quint_bank_int), 
-#       lwd = 0.5,
-#       cex = 0.5
-#       )
 
 
-##########################################
-### Top 25 Banks by Median Integration ###
-##########################################
+#######################
+### Bank subsamples ###
+#######################
 
-col_missing <- apply(integration_matrix_qtrly_out[, -1], 2, func_missing)
-col_admissible <- which(col_missing <= 50)
+####################################
+### Systemically important banks ###
+####################################
 
-col_med_admissible <- apply(integration_matrix_qtrly_out[, col_admissible[-1]], 
-                            2, func_med) 
-names(col_med_admissible) <- name_bank_US$comnam[col_admissible[-1]]
+name_GSIB <- name_cusip$comnam[c(28, 33, 36, 73, 183, 184, 304, 305, 347)]
+name_DSIB <- name_cusip$comnam[c(14, 87, 114, 173, 187, 188, 195, 223, 245, 
+                                 246, 247, 277, 278, 311, 335, 361)]
 
-med_admissible_banks <- tibble::as_tibble(col_med_admissible) %>% 
-  tibble::rownames_to_column() 
+name_systemic <- c(name_GSIB, name_DSIB)
 
-med_top_25_admissible <- med_admissible_banks %>%
-  dplyr::filter(rank(desc(value)) <= 25) %>%
-  dplyr::arrange(desc(value))
+# Systemic bank trends full sample
+int_US_systemic_trend <- nest_bank_int_US_full %>%
+  dplyr::filter(Banks %in% name_systemic)
 
-barplot_top_25 <- ggplot(med_top_25_admissible, aes(rowname, value)) +
-  geom_bar(stat = "identity", show.legend = T) + 
-  labs(x = "Banks", y = "Median Integration") +
-  theme_bw() +
-  theme(axis.text.x=element_text(angle=60, hjust=1))
+# Systemic bank trends: first and second half
+int_US_systemic_trend_H1 <- nest_bank_int_US_H1 %>%
+  dplyr::filter(Banks %in% name_systemic)
+int_US_systemic_trend_H2 <- nest_bank_int_US_H2 %>%
+  dplyr::filter(Banks %in% name_systemic)
+
+# Median systemic bank
+int_median_US_bank_systemic <- int_US_bank_long_2 %>%
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+
+trend_median_US_bank_systemic <- func_trend_NW(int_median_US_bank_systemic)
+
+# Linear trend for for the median systemic bank: pre and post 2005 #
+
+# Pre 2005
+int_median_US_bank_systemic_H1 <- int_US_bank_long_2 %>%
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(Qtr_num <= 50) %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+
+trend_median_US_bank_systemic_H1 <- func_trend_NW(int_median_US_bank_systemic_H1)
+
+# Post 2005
+int_median_US_bank_systemic_H2 <- int_US_bank_long_2 %>%
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(Qtr_num > 50) %>%
+  dplyr::group_by(Qtr_num) %>%
+  dplyr::summarise('Integration' = median(Integration, na.rm = T))
+
+trend_median_US_bank_systemic_H2 <- func_trend_NW(int_median_US_bank_systemic_H2)
+
+## Plotting trends of median systemic bank ##
+
+# Full
+plot_trend_median_sys <- ggplot(int_median_US_bank_systemic,
+                                aes(Qtr_num, Integration)) +
+  geom_line() +
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
+
+# First Half
+plot_trend_median_sys_H1 <- ggplot(int_median_US_bank_systemic_H1,
+                                   aes(Qtr_num, Integration)) +
+  geom_line() +
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
+
+# Second Half
+plot_trend_median_sys_H2 <- ggplot(int_median_US_bank_systemic_H2,
+                                   aes(Qtr_num, Integration)) +
+  geom_line() +
+  geom_smooth(method = "lm", 
+              linetype = "dashed", 
+              color = "black") +
+  theme_bw()
+
+
+### Top and bottom 50 banks based on median integration ###
+## Arrange banks from top to bottom ##
+
+summ_stat_med_bank <- int_summ_stat_bank %>%
+  dplyr::select(Banks, med) %>%
+  dplyr::rename("Median_Integration" = med) %>%
+  dplyr::mutate("Rank" = rank(desc(Median_Integration))) %>%
+  dplyr::arrange(Rank)
+
+summ_stat_med_bank_top_50 <- summ_stat_med_bank %>%
+  dplyr::filter(Rank <= 50) #top 50 most integrated banks
+summ_stat_med_bank_bot_50 <- summ_stat_med_bank %>%
+  dplyr::filter(Rank >= num_bank$n - 50)
 
 ###################################
 ###### Integration Boxplots #######
@@ -360,40 +403,6 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
 
 
-#######################
-### GSIBs and DSIBs ###
-#######################
-
-name_GSIB <- name_cusip$comnam[c(28, 33, 36, 73, 183, 184, 304, 305, 347)]
-name_DSIB <- name_cusip$comnam[c(14, 87, 114, 173, 187, 188, 195, 223, 245, 
-                                 246, 247, 277, 278, 311, 335, 361)]
-
-name_systemic <- c(name_GSIB, name_DSIB)
-
-int_US_systemic_wide <- int_US_bank_long %>% 
-  dplyr::filter(Banks %in% name_systemic)  %>% 
-  tidyr::spread(., key = Banks, value = "Integration")
-
-readr::write_csv(int_US_systemic_wide, "Systemic_bank_int.csv")
-
-int_US_sys_med <- apply(int_US_systemic_wide[, -1], 1, func_med)
-
-plot_data_aug <- plot_data %>%
-  tibble::add_column(med_bank_int_sys = int_US_sys_med) 
-
-plot_data_aug_long <- plot_data_aug %>% 
-  tidyr::gather(c(med_bank_int, med_bank_int_sys), 
-                key = "median", value = "Integration")
-
-plot_systemic <- ggplot(data = plot_data_aug_long, 
-                        mapping = aes(x = as.yearqtr(date), 
-                                      y = Integration, 
-                                      color = median)) +
-  geom_line() +
-  scale_x_yearqtr(format="%YQ%q", n=25) +
-  theme_bw() +
-  labs(x = "Years", y = "Median Integration Level") +
-  theme(axis.text.x=element_text(angle=60, hjust=1))
 
 ###################################
 ### Relation to NBER recessions ###
@@ -403,10 +412,10 @@ plot_systemic <- ggplot(data = plot_data_aug_long,
 # 2001Q1--2001Q4 and 2007Q4--2009Q2, i.e.,
 # quarter numbers 32:35 and 59:65
 
-dummy_recession <- rep(0, length(qtrs))
-dummy_recession[c(32:35, 59:65)] <- 1
+#dummy_recession <- rep(0, length(qtrs))
+#dummy_recession[c(32:35, 59:65)] <- 1
 
-int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
+#int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
 
 #################################################
 ### Bank Integration Variation with SIC Codes ###
@@ -517,15 +526,15 @@ func_diff <- function(vec)
 }
 
 # Store the matrix whose columns are differenced integration columns
-int_diff_bank_wide <- apply(int_US_bank_wide[, -1], 2, func_diff)
+#int_diff_bank_wide <- apply(int_US_bank_wide[, -1], 2, func_diff)
 
-int_diff_sys <- apply(int_US_systemic_wide[, -1], 2, func_diff)
+#int_diff_sys <- apply(int_US_systemic_wide[, -1], 2, func_diff)
 
-int_US_sys_gsib <- int_US_bank_long %>% 
-  dplyr::filter(Banks %in% name_GSIB)  %>% 
-  tidyr::spread(., key = Banks, value = "Integration")
-
-int_diff_sys_gsib <- apply(int_US_sys_gsib[, -1], 2, func_diff)
+# int_US_sys_gsib <- int_US_bank_long %>% 
+#   dplyr::filter(Banks %in% name_GSIB)  %>% 
+#   tidyr::spread(., key = Banks, value = "Integration")
+# 
+# int_diff_sys_gsib <- apply(int_US_sys_gsib[, -1], 2, func_diff)
 
 # matplot(int_diff_sys_gsib, 
 #         type = "l", 
