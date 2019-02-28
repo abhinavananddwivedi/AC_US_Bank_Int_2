@@ -134,11 +134,18 @@ func_trend_NW <- function(df)
   return(temp_summ)
 }
 
+func_missing_col_int <- function(data_frame)
+{ # This function counts the number of missing values of
+  # the column corresponding to integration in some data
+  # frame. It uses the previously defined function "func_missing(vec)"
+  return(func_missing(data_frame$Integration))
+}
+
 # Linear Trends for the full set of banks #
 
 # Compute linear trends and NW errors
 nest_bank_int_US_full <- nest_bank_int_US_full %>%
-  dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing_col_int)) %>%
   dplyr::mutate("Trend" = purrr::map(data, func_trend_NW))
 
 # Display trend results
@@ -156,7 +163,7 @@ trend_bank_sig_full <- nest_bank_int_US_full_results %>%
 # Linear Trends pre 2005 #
 
 nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
-  dplyr::mutate("Missing" = purrr::map(data, func_missing))
+  dplyr::mutate("Missing" = purrr::map(data, func_missing_col_int))
 
 nest_bank_int_US_H1_results <- nest_bank_int_US_H1 %>%
   dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
@@ -173,7 +180,7 @@ trend_bank_sig_H1 <- nest_bank_int_US_H1_results %>%
 # Linear Trends post 2005 #
 
 nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
-  dplyr::mutate("Missing" = purrr::map(data, func_missing))
+  dplyr::mutate("Missing" = purrr::map(data, func_missing_col_int))
 
 nest_bank_int_US_H2_results <- nest_bank_int_US_H2 %>%
   dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
@@ -337,8 +344,12 @@ summ_stat_med_bank <- int_summ_stat_bank %>%
 
 summ_stat_med_bank_top_50 <- summ_stat_med_bank %>%
   dplyr::filter(Rank <= 50) #top 50 most integrated banks
+name_bank_top_50 <- summ_stat_med_bank_top_50 %>%
+  dplyr::select(Banks)
 summ_stat_med_bank_bot_50 <- summ_stat_med_bank %>%
   dplyr::filter(Rank >= num_bank$n - 50)
+name_bank_bot_50 <- summ_stat_med_bank_bot_50 %>%
+  dplyr::select(Banks)
 
 ###################################
 ###### Integration Boxplots #######
@@ -453,7 +464,7 @@ func_trend_NW_crisis <- function(df)
 
 # Compute linear trends and NW errors
 nest_bank_int_US_full_crisis_results <- nest_bank_int_US_full_crisis %>%
-  dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing_col_int)) %>%
   dplyr::filter(Missing <= 80) %>%
   dplyr::mutate("Trend" = purrr::map(data, func_trend_NW_crisis)) %>%
   dplyr::mutate("Model_Summary" = map(Trend, broom::tidy)) %>%

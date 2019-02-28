@@ -26,40 +26,44 @@ source('Int_Banks_US_results_analysis.R', echo = F)
 
 # Postprocessing data 
 
-int_US_bank_long <- int_US_bank_long %>%
-  dplyr::rename(., "year_qtr" = Date)
-
 data_Cstat_expl <- data_Cstat_expl %>%
-  dplyr::rename(., "year_qtr" = datacqtr, "Banks" = conm)
+  dplyr::rename(., "Date" = datacqtr, "Banks" = conm)
 
 # Merge the two dataframes together to create the panel
-panel_US_bank_int <- dplyr::full_join(int_US_bank_long,
+panel_US_bank_int <- dplyr::inner_join(int_US_bank_long_3,
                                       data_Cstat_expl,
-                                      by = c("Banks", "year_qtr")
+                                      by = c("Banks", "Date")
                                       ) %>%
-  dplyr::select(c(Banks, year_qtr, Integration, 
+  dplyr::select(c(Banks, Date, Integration, 
                   size, eq_ratio, NIM, T1_T2_ratio, DFR, 
-                  STFR, com_eq_ratio, fhlbq, MBS, 
-                  DE_ratio_1, T1_ratio,
+                  GR, EZ, Qtr_num,
                   everything()
                   )
                 )
 
-
-### Bank sample division into highest and lowest integrated ###
-
-func_top_bot_decile <- function(vec)
-{
-  temp_top <- quantile(vec, 0.90, na.rm = T)
-  temp_bot <- quantile(vec, 0.10, na.rm = T)
-  
-  temp_temp <- data.frame("top" = temp_top, "bot" = temp_bot)
-  
-  return(tibble::as_tibble(temp_temp))
-}
-
-
-
+# Nested panel full
+nest_panel_full <- panel_US_bank_int %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+# Nest panel first half
+nest_panel_H1 <- panel_US_bank_int %>%
+  dplyr::filter(Date %in% year_qtr_H1) %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+# Nest panel second half
+nest_panel_H2 <- panel_US_bank_int %>%
+  dplyr::filter(Date %in% year_qtr_H2) %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+# Nest systemic banks 
+nest_panel_systemic <- nest_panel_full %>% 
+  dplyr::filter(Banks %in% name_systemic)
+# Nest top 50 most integrated banks
+nest_panel_top_50 <- nest_panel_full %>%
+  dplyr::filter(Banks %in% name_bank_top_50)
+# Nest top 50 least integrated banks
+nest_panel_top_50 <- nest_panel_full %>%
+  dplyr::filter(Banks %in% name_bank_bot_50)
 
 ##################################################################
 ############## Panel Estimation Begins ###########################
@@ -80,13 +84,17 @@ func_panel_est <- function(formula,
                          type = "HC0",
                          effect = "individual"
                          )
+  
   # Robust, clustered standard errors
   temp_vcov_err <- plm::vcovDC(temp_fixed) #Double clustering
   
-  temp_fixed_rob <- lmtest::coeftest(temp_fixed, vcov. = temp_vcov_err)
+  temp_fixed_rob <- lmtest::coeftest(temp_fixed, 
+                                     vcov. = temp_vcov_err)
   
   test_out <- summary(temp_fixed)
-  test_out$coefficients <- unclass(temp_fixed_rob) #Include robust clustered errors
+  
+  # Include robust clustered errors
+  test_out$coefficients <- unclass(temp_fixed_rob) 
   
   return(test_out)
 }
@@ -103,37 +111,6 @@ panel_US_sys <- panel_US_bank_int %>%
   dplyr::filter(Banks %in% name_systemic)
 
 panel_est_full_sys <- func_panel_est(formula_full, panel_US_sys)
-
-## For NBER recessionary periods ##
-
-rec_NBER_1 <- paste0("2001Q", 1:4) #Dot com bust
-rec_NBER_2 <- c("2007Q4", paste0("2008Q", 1:4), "2009Q1", "2009Q2") #The Great
-rec_NBER <- c(rec_NBER_1, rec_NBER_2)
-
-panel_rec_NBER <- panel_US_bank_int %>% 
-  dplyr::filter(year_qtr %in% rec_NBER)
-
-panel_rec_NBER_1 <- panel_US_bank_int %>% 
-  dplyr::filter(year_qtr %in% rec_NBER_1)
-
-panel_rec_NBER_2 <- panel_US_bank_int %>% 
-  dplyr::filter(year_qtr %in% rec_NBER_2)
-
-## Recessionary Explanatory Variables ##
-
-panel_est_rec_full <- func_panel_est(formula_full, panel_rec_NBER)
-panel_est_rec_full_1 <- func_panel_est(formula_full, panel_rec_NBER_1)
-panel_est_rec_full_2 <- func_panel_est(formula_full, panel_rec_NBER_2)
-
-## For systemic banks only ##
-
-panel_rec_NBER_sys <- dplyr::filter(panel_rec_NBER, Banks %in% name_systemic)
-panel_rec_NBER_1_sys <- dplyr::filter(panel_rec_NBER_1, Banks %in% name_systemic)
-panel_rec_NBER_2_sys <- dplyr::filter(panel_rec_NBER_2, Banks %in% name_systemic)
-
-panel_est_rec_full_sys <- func_panel_est(formula_full, panel_rec_NBER_sys)
-panel_est_rec_full_1_sys <- func_panel_est(formula_full, panel_rec_NBER_1_sys)
-panel_est_rec_full_2_sys <- func_panel_est(formula_full, panel_rec_NBER_2_sys)
 
 ###############################
 ## Testing for fixed effects ##
