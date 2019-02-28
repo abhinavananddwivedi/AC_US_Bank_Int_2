@@ -136,18 +136,20 @@ func_trend_NW <- function(df)
 
 # Linear Trends for the full set of banks #
 
-# Compute linear trends and HC errors
+# Compute linear trends and NW errors
 nest_bank_int_US_full <- nest_bank_int_US_full %>%
   dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
   dplyr::mutate("Trend" = purrr::map(data, func_trend_NW))
 
-# Display main statistics
-nest_bank_int_US_full <- nest_bank_int_US_full %>%
-  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
-  tidyr::unnest(Model_Summary)
+# Display trend results
+nest_bank_int_US_full_results <- nest_bank_int_US_full %>%
+  dplyr::mutate("Model_Summary" = map(Trend, broom::tidy)) %>%
+  tidyr::unnest(Model_Summary) %>%
+  dplyr::select(-term) %>%
+  dplyr::slice(., seq(2, nrow(nest_bank_int_US_full), by = 2)) 
 
 # Filter banks with significant trends
-trend_bank_sig_full <- nest_bank_int_US_full %>%
+trend_bank_sig_full <- nest_bank_int_US_full_results %>%
   dplyr::select(Banks, p.value) %>%
   dplyr::filter(p.value <= 0.10)
 
@@ -156,13 +158,15 @@ trend_bank_sig_full <- nest_bank_int_US_full %>%
 nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
   dplyr::mutate("Missing" = purrr::map(data, func_missing))
 
-nest_bank_int_US_H1 <- nest_bank_int_US_H1 %>%
+nest_bank_int_US_H1_results <- nest_bank_int_US_H1 %>%
   dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
   dplyr::mutate("Trend" = purrr::map(data, func_trend_NW)) %>%
-  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
-  tidyr::unnest(Model_Summary)
+  dplyr::mutate("Model_Summary" = map(Trend, broom::tidy)) %>%
+  tidyr::unnest(Model_Summary) %>%
+  dplyr::select(-term) %>%
+  dplyr::slice(., seq(2, nrow(nest_bank_int_US_full), by = 2)) 
 
-trend_bank_sig_H1 <- nest_bank_int_US_H1 %>%
+trend_bank_sig_H1 <- nest_bank_int_US_H1_results %>%
   dplyr::select(Banks, p.value) %>%
   dplyr::filter(p.value <= 0.10)
 
@@ -171,13 +175,15 @@ trend_bank_sig_H1 <- nest_bank_int_US_H1 %>%
 nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
   dplyr::mutate("Missing" = purrr::map(data, func_missing))
 
-nest_bank_int_US_H2 <- nest_bank_int_US_H2 %>%
-  dplyr::filter(Missing <= 40) %>% 
+nest_bank_int_US_H2_results <- nest_bank_int_US_H2 %>%
+  dplyr::filter(Missing <= 40) %>% #ignore if more than 40(/50) missing obs
   dplyr::mutate("Trend" = purrr::map(data, func_trend_NW)) %>%
-  dplyr::mutate("Model_Summary" = map(Trend, broom::glance)) %>%
-  tidyr::unnest(Model_Summary)
+  dplyr::mutate("Model_Summary" = map(Trend, broom::tidy)) %>%
+  tidyr::unnest(Model_Summary) %>%
+  dplyr::select(-term) %>%
+  dplyr::slice(., seq(2, nrow(nest_bank_int_US_full), by = 2)) 
 
-trend_bank_sig_H2 <- nest_bank_int_US_H2 %>%
+trend_bank_sig_H2 <- nest_bank_int_US_H2_results %>%
   dplyr::select(Banks, p.value) %>%
   dplyr::filter(p.value <= 0.10)
 
@@ -253,13 +259,13 @@ name_DSIB <- name_cusip$comnam[c(14, 87, 114, 173, 187, 188, 195, 223, 245,
 name_systemic <- c(name_GSIB, name_DSIB)
 
 # Systemic bank trends full sample
-int_US_systemic_trend <- nest_bank_int_US_full %>%
+int_US_systemic_trend <- nest_bank_int_US_full_results %>%
   dplyr::filter(Banks %in% name_systemic)
 
 # Systemic bank trends: first and second half
-int_US_systemic_trend_H1 <- nest_bank_int_US_H1 %>%
+int_US_systemic_trend_H1 <- nest_bank_int_US_H1_results %>%
   dplyr::filter(Banks %in% name_systemic)
-int_US_systemic_trend_H2 <- nest_bank_int_US_H2 %>%
+int_US_systemic_trend_H2 <- nest_bank_int_US_H2_results %>%
   dplyr::filter(Banks %in% name_systemic)
 
 # Median systemic bank
@@ -353,10 +359,10 @@ boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
 
 # Quarterly Integration Boxplots
 
-boxplot_int_qtrly <- ggplot(data = int_US_bank_long,
+boxplot_int_qtrly <- ggplot(data = int_US_bank_long_2,
                              mapping = aes(x = Date, y = Integration)) +
   geom_boxplot(na.rm = T) +
-#  scale_x_yearqtr(format="%YQ%q", n=25) +
+  # scale_x_continuous(breaks = seq(qtr_min, qtr_max, by = 8)) +
   theme_bw() + 
   theme(axis.text.x=element_text(angle=60, hjust=1)) 
 
@@ -402,155 +408,89 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 #box_expl_eig <- boxplot(t(var_share_df[1:30, ]))
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
 
-
-
 ###################################
-### Relation to NBER recessions ###
+### Relation to Crises ############
 ###################################
 
-# NBER claims recessionary periods from 
-# 2001Q1--2001Q4 and 2007Q4--2009Q2, i.e.,
-# quarter numbers 32:35 and 59:65
+# The Great Recession: Quarters 59:65
 
-#dummy_recession <- rep(0, length(qtrs))
-#dummy_recession[c(32:35, 59:65)] <- 1
-
-#int_dummy_recession <- summary(lm(temp_int_med_bank ~ qtrs + dummy_recession))
-
-#################################################
-### Bank Integration Variation with SIC Codes ###
-#################################################
-
-name_bank_SIC_1 <- name_cusip_sic %>%
-  dplyr::filter(., siccd %in% ind_comm_banks) %>%
-  dplyr::select(comnam) %>%
-  dplyr::distinct(.)
-
-# Apply row median function to banks in group SIC commercial banks
-# This will be the median commercial bank's integration
-bank_int_SIC_1_med <- int_US_bank_long %>%
-  dplyr::filter(Banks %in% name_bank_SIC_1$comnam) %>%
-  tidyr::spread(., key = "Banks", value = "Integration") %>%
-  dplyr::select(-Date) %>%
-  apply(., 1, func_med)
-
-name_bank_SIC_2 <- name_cusip_sic %>%
-  dplyr::filter(., siccd %in% ind_credit_union) %>%
-  dplyr::select(comnam) %>%
-  dplyr::distinct(.)
-
-bank_int_SIC_2_med <- int_US_bank_long %>%
-  dplyr::filter(Banks %in% name_bank_SIC_2$comnam) %>%
-  tidyr::spread(., key = "Banks", value = "Integration") %>%
-  dplyr::select(-Date) %>%
-  apply(., 1, func_med)
-
-name_bank_SIC_3 <- name_cusip_sic %>%
-  dplyr::filter(., siccd %in% ind_saving_inst) %>%
-  dplyr::select(comnam) %>%
-  dplyr::distinct(.)
-
-bank_int_SIC_3_med <- int_US_bank_long %>%
-  dplyr::filter(Banks %in% name_bank_SIC_3$comnam) %>%
-  tidyr::spread(., key = "Banks", value = "Integration") %>%
-  dplyr::select(-Date) %>%
-  apply(., 1, func_med)
-
-name_bank_SIC_4 <- name_cusip_sic %>%
-  dplyr::filter(., siccd %in% ind_bank_hold) %>%
-  dplyr::select(comnam) %>%
-  dplyr::distinct(.)
-
-bank_int_SIC_4_med <- int_US_bank_long %>%
-  dplyr::filter(Banks %in% name_bank_SIC_4$comnam) %>%
-  tidyr::spread(., key = "Banks", value = "Integration") %>%
-  dplyr::select(-Date) %>%
-  apply(., 1, func_med)
-
-bank_int_SIC_med <- data.frame(SIC_1 = bank_int_SIC_1_med,
-                               SIC_2 = bank_int_SIC_2_med,
-                               SIC_3 = bank_int_SIC_3_med,
-                               SIC_4 = bank_int_SIC_4_med)
-
-func_summ <- function(vec)
-{
-  # This function computes summary stats of a vector
-  temp_summ <- data.frame(minimum = min(vec, na.rm = T), 
-                          maximum = max(vec, na.rm = T),
-                          avg = mean(vec, na.rm = T),
-                          med = median(vec, na.rm =T),
-                          std = sd(vec, na.rm = T),
-                          iqr = IQR(vec, na.rm = T),
-                          skew = moments::skewness(vec, na.rm = T),
-                          kurt = moments::kurtosis(vec, na.rm = T)
-                          )
+dummy_GR <- rep(0, qtr_max) 
+dummy_GR[59:65] <- 1
   
+# The Eurozone crisis: Q2 2010--Q2 2012: Quarters 70--78
+
+dummy_EZ <- rep(0, qtr_max) 
+dummy_EZ[70:78] <- 1
+
+temp_GR_rep <- rep(dummy_GR[-1], num_bank$n)
+temp_EZ_rep <- rep(dummy_EZ[-1], num_bank$n)
+
+int_US_bank_long_3 <- int_US_bank_long_2 %>%
+  tibble::add_column("GR" = temp_GR_rep) %>%
+  tibble::add_column("EZ" = temp_EZ_rep)
+
+nest_bank_int_US_full_crisis <- int_US_bank_long_3 %>%
+  dplyr::group_by(Banks) %>%
+  tidyr::nest(.)
+
+func_trend_NW_crisis <- function(df)
+{
+  # This function computes the linear trend and reports
+  # heteroskedasticity and autocorrelation consistent errors
+  # according to Newey West during crises
+  temp_lm <- lm(Integration ~ Qtr_num + GR + EZ, data = df)
+  temp_summ <- summary(temp_lm)
+  temp_vcov_err <- sandwich::NeweyWest(temp_lm,
+                                       lag = 2,
+                                       prewhite = F,
+                                       adjust = T)
+  temp_summ$coefficients <- unclass(lmtest::coeftest(temp_lm,
+                                                     vcov. = temp_vcov_err)
+  )
+
   return(temp_summ)
 }
 
-# Summary stats of median bank integration for each SIC class
-bank_SIC_summ_stat <- apply(bank_int_SIC_med, 2, func_summ)
+# Compute linear trends and NW errors
+nest_bank_int_US_full_crisis_results <- nest_bank_int_US_full_crisis %>%
+  dplyr::mutate("Missing" = purrr::map(data, func_missing)) %>%
+  dplyr::filter(Missing <= 80) %>%
+  dplyr::mutate("Trend" = purrr::map(data, func_trend_NW_crisis)) %>%
+  dplyr::mutate("Model_Summary" = map(Trend, broom::tidy)) %>%
+  tidyr::unnest(Model_Summary) %>%
+  dplyr::filter(term != "(Intercept)")
 
-# Boxplot of above
-box_int_SIC_Categ <- boxplot(bank_int_SIC_med)
+## The Great Recession ##
+# Isolate the coefficients for GR
+trend_bank_full_GR <- nest_bank_int_US_full_crisis_results %>%
+  dplyr::filter(term == "GR")
+# Isolate systemic banks
+trend_bank_sys_GR <- trend_bank_full_GR %>%
+  dplyr::filter(Banks %in% name_systemic)
 
-# Plots of median bank integration by SIC code
+# Banks with significant trends during GR
+trend_bank_sig_full_GR <- trend_bank_full_GR %>%
+  dplyr::filter(p.value <= 0.10)
 
-# matplot(bank_int_SIC_med, 
-#         type = "l", 
-#         lty = 1, 
-#         lwd = 1, 
-#         col = 1:4, 
-#         xlab = "Quarters", 
-#         ylab = "Median bank Intgeration"
-#         )
-# 
-# legend(65, 0.4, 
-#        legend = c("Comm", "Cred_Uni", "Saving", "Holding"), 
-#        col = 1:4, 
-#        lty = 1, 
-#        cex=0.6
-#        )
+## The Eurozone Crisis ##
+# Isolate the coefficients for GR
+trend_bank_full_EZ <- nest_bank_int_US_full_crisis_results %>%
+  dplyr::filter(term == "EZ")
+# Isolate systemic banks
+trend_bank_sys_EZ <- trend_bank_full_EZ %>%
+  dplyr::filter(Banks %in% name_systemic)
 
-#################################################
-### Changes in Bank Integration Levels ##########
-#################################################
+# Banks with significant trends during GR
+trend_bank_sig_full_EZ <- trend_bank_full_EZ %>%
+  dplyr::filter(p.value <= 0.10)
 
-func_diff <- function(vec)
-{
-  #This function accepts a vector and returns
-  #its first differenced vector with first term NA
-  
-  temp_diff <- diff(vec)
-  return(c(NA, temp_diff))
-}
+### Linear trend of the median bank during crisis ###
 
-# Store the matrix whose columns are differenced integration columns
-#int_diff_bank_wide <- apply(int_US_bank_wide[, -1], 2, func_diff)
+int_median_US_bank_crisis <- int_median_US_bank %>%
+  tibble::add_column("GR" = dummy_GR[-1]) %>%
+  tibble::add_column("EZ" = dummy_EZ[-1])
 
-#int_diff_sys <- apply(int_US_systemic_wide[, -1], 2, func_diff)
-
-# int_US_sys_gsib <- int_US_bank_long %>% 
-#   dplyr::filter(Banks %in% name_GSIB)  %>% 
-#   tidyr::spread(., key = Banks, value = "Integration")
-# 
-# int_diff_sys_gsib <- apply(int_US_sys_gsib[, -1], 2, func_diff)
-
-# matplot(int_diff_sys_gsib, 
-#         type = "l", 
-#         lty = 1, 
-#         col = 1:ncol(int_diff_sys_gsib),
-#         xlab = "Quarters",
-#         ylab = "GSIBs Differenced Integration"
-#         )
-# 
-# legend(60, -0.4, 
-#        legend = name_GSIB, 
-#        col = 1:length(name_GSIB), 
-#        lty = 1, 
-#        cex = 0.25
-#        )
-
+trend_median_US_bank_crisis <- func_trend_NW_crisis(int_median_US_bank_crisis)
 
 
 ###
