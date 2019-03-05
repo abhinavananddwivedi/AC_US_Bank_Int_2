@@ -41,29 +41,6 @@ panel_US_bank_int <- dplyr::inner_join(int_US_bank_long_3,
                   )
                 )
 
-# Nested panel full
-nest_panel_full <- panel_US_bank_int %>%
-  dplyr::group_by(Banks) %>%
-  tidyr::nest(.)
-# Nest panel first half
-nest_panel_H1 <- panel_US_bank_int %>%
-  dplyr::filter(Date %in% year_qtr_H1) %>%
-  dplyr::group_by(Banks) %>%
-  tidyr::nest(.)
-# Nest panel second half
-nest_panel_H2 <- panel_US_bank_int %>%
-  dplyr::filter(Date %in% year_qtr_H2) %>%
-  dplyr::group_by(Banks) %>%
-  tidyr::nest(.)
-# Nest systemic banks 
-nest_panel_systemic <- nest_panel_full %>% 
-  dplyr::filter(Banks %in% name_systemic)
-# Nest top 50 most integrated banks
-nest_panel_top_50 <- nest_panel_full %>%
-  dplyr::filter(Banks %in% name_bank_top_50)
-# Nest top 50 least integrated banks
-nest_panel_top_50 <- nest_panel_full %>%
-  dplyr::filter(Banks %in% name_bank_bot_50)
 
 ##################################################################
 ############## Panel Estimation Begins ###########################
@@ -99,18 +76,24 @@ func_panel_est <- function(formula,
   return(test_out)
 }
 
+### Panel estimation: Full ###
 panel_est_full <- func_panel_est(formula_full, panel_US_bank_int)
 
-###########################################
-###### Subsample Panel Regressions ########
-###########################################
+### Panel estimation: Systemic Banks ###
+panel_est_sys <- func_panel_est(formula_full, 
+                                dplyr::filter(panel_US_bank_int, 
+                                              Banks %in% name_systemic))
 
-## For systemic banks ##
+### Panel estimation: Pre 2005 ###
+panel_est_H1 <- func_panel_est(formula_full,
+                               dplyr::filter(panel_US_bank_int,
+                                             Date %in% year_qtr_H1))
 
-panel_US_sys <- panel_US_bank_int %>%
-  dplyr::filter(Banks %in% name_systemic)
+### Panel estimation: Post 2005 ###
+panel_est_H2 <- func_panel_est(formula_full,
+                               dplyr::filter(panel_US_bank_int,
+                                             Date %in% year_qtr_H2))
 
-panel_est_full_sys <- func_panel_est(formula_full, panel_US_sys)
 
 ###############################
 ## Testing for fixed effects ##
@@ -126,7 +109,7 @@ temp_twoway <- summary(plm::plm(formula_full,
                                 type = "HC0"
                                 )
                        )
-###robust errors destroy result###
+###robust errors destroy some result###
 
 ##################################################################
 

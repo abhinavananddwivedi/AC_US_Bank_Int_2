@@ -87,7 +87,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018/12/31}
+    \date{2019/03/05}
 
 \linespread{1.25}
 \usepackage{amsmath}
@@ -95,464 +95,141 @@
 \begin{document}
 \maketitle
 
+\section{Explantory Power of
+Eigenvectors}\label{explantory-power-of-eigenvectors}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/expl_power_eig_vec-1} \end{center}
+
 \section{Median US Bank Integration}\label{median-us-bank-integration}
+
+\subsection{Trends}\label{trends}
+
+\subsubsection{Tables}\label{tables}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Pre 2005 trend}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.4635295 & 0.0145597 & 31.836396 & 0\tabularnewline
+Qtr\_num & 0.0021438 & 0.0002506 & 8.553111 & 0\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Post 2005 trend}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.5097026 & 0.0110443 & 46.1506284 &
+0.0000000\tabularnewline
+Qtr\_num & -0.0000520 & 0.0003542 & -0.1468808 &
+0.8838543\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Systemic banks trend}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.5102046 & 0.0521200 & 9.789035 &
+0.0000000\tabularnewline
+Qtr\_num & 0.0016673 & 0.0006166 & 2.703940 & 0.0094509\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Systemic banks trend pre 2005}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.5362147 & 0.0256320 & 20.91975 & 0e+00\tabularnewline
+Qtr\_num & 0.0022427 & 0.0004026 & 5.57005 & 2e-07\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Systemic banks trend post 2005}\tabularnewline
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.5336732 & 0.0393933 & 13.547308 &
+0.0000000\tabularnewline
+Qtr\_num & 0.0026014 & 0.0015051 & 1.728382 & 0.0904851\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\toprule
+term & estimate & std.error & statistic & p.value\tabularnewline
+\midrule
+\endhead
+(Intercept) & 0.4357173 & 0.101771 & 4.281352 & 0.0000884\tabularnewline
+Qtr\_num & 0.0034857 & 0.001244 & 2.801916 & 0.0073036\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsubsection{Plots}\label{plots}
 
 \begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-1} \end{center}
 
-\subsection{Linear Time Trends}\label{linear-time-trends}
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-2} \end{center}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-3} \end{center}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-4} \end{center}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-5} \end{center}
+
+\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/med_US_bank_int-6} \end{center}
 
 \section{Empirical Distribution of US Bank
 Integration}\label{empirical-distribution-of-us-bank-integration}
 
 \begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/emp_distr_US_bank_int-1} \end{center}
 
-\section{Most Integrated Banks}\label{most-integrated-banks}
+\section{Crises}\label{crises}
 
-\begin{longtable}[]{@{}lr@{}}
+\begin{longtable}[]{@{}lrrrr@{}}
 \toprule
-Bank & Median\_Integration\tabularnewline
+term & estimate & std.error & statistic & p.value\tabularnewline
 \midrule
 \endhead
-BANK OF NEW YORK MELLON CORP & 0.9342853\tabularnewline
-FIFTH THIRD BANCORP & 0.9149052\tabularnewline
-FIRST FINANCIAL CORP IN & 0.9147155\tabularnewline
-BERKSHIRE HILLS BANCORP INC & 0.9035986\tabularnewline
-CAMDEN NATIONAL CORP & 0.8497972\tabularnewline
-ENTERPRISE FINANCIAL SVCS CORP & 0.7915368\tabularnewline
-META FINANCIAL GROUP INC & 0.7761193\tabularnewline
-BRYN MAWR BANK CORP & 0.7684859\tabularnewline
-CONNECTONE BANCORP INC NEW & 0.7612680\tabularnewline
-J P MORGAN CHASE \& CO & 0.7563842\tabularnewline
-BANK OF MARIN & 0.7563703\tabularnewline
-CUSTOMERS BANCORP INC & 0.7453668\tabularnewline
-COMMUNITY BANK SYSTEM INC & 0.7373918\tabularnewline
-AMERISERV FINANCIAL INC & 0.7370163\tabularnewline
-GUARANTY BANCSHARES INC & 0.7346873\tabularnewline
-BANKWELL FINANCIAL GROUP INC & 0.7303000\tabularnewline
-BANK OF COMMERCE HOLDINGS & 0.7282580\tabularnewline
-LAKELAND BANCORP INC & 0.7193299\tabularnewline
-BEAR STATE FINANCIAL INC & 0.7177329\tabularnewline
-NORTHWEST BANCORP INC PA & 0.7150237\tabularnewline
-BANKUNITED INC & 0.7138438\tabularnewline
-FIRST MIDWEST FINANCIAL INC & 0.7124135\tabularnewline
-BOSTON PRIVATE BANCORP INC & 0.7107307\tabularnewline
-CATHAY BANCORP INC & 0.7095135\tabularnewline
-BROOKLINE BANCORP INC & 0.7038179\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/most_int-1} \end{center}
-
-\section{Explantory Power of
-Eigenvectors}\label{explantory-power-of-eigenvectors}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/expl_power_eig_vec-1} \end{center}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/expl_power_eig_vec-2} \end{center}
-
-\section{Systemic Banks' Integration}\label{systemic-banks-integration}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/systemic-1} \end{center}
-
-\section{Bank Integration By
-Quintiles}\label{bank-integration-by-quintiles}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/quint_bank_int-1} \end{center}
-
-\section{Effect of NBER Recessions on Bank
-Integration}\label{effect-of-nber-recessions-on-bank-integration}
-
-\section{Integration Variation with SIC
-category}\label{integration-variation-with-sic-category}
-
-\begin{verbatim}
-## $SIC_1
-##     minimum   maximum      avg       med       std       iqr      skew
-## 1 0.3971835 0.8362843 0.584798 0.5714926 0.0922168 0.1276282 0.3894072
-##       kurt
-## 1 2.659068
-## 
-## $SIC_2
-##   minimum   maximum       avg       med       std       iqr      skew
-## 1       0 0.9610692 0.5848668 0.6330858 0.2226694 0.3003526 -0.802515
-##       kurt
-## 1 3.029697
-## 
-## $SIC_3
-##     minimum   maximum       avg       med       std       iqr      skew
-## 1 0.3163659 0.8240858 0.5476616 0.5307884 0.1193832 0.2110806 0.2909012
-##       kurt
-## 1 2.119126
-## 
-## $SIC_4
-##     minimum   maximum       avg       med       std       iqr      skew
-## 1 0.3683127 0.8415198 0.5941108 0.5744666 0.1111273 0.1830553 0.2360741
-##       kurt
-## 1 2.176285
-\end{verbatim}
-
-\begin{verbatim}
-## $stats
-##           [,1]       [,2]      [,3]      [,4]
-## [1,] 0.3971835 0.05341229 0.3163659 0.3683127
-## [2,] 0.5135116 0.46086525 0.4472890 0.5092080
-## [3,] 0.5714926 0.63308578 0.5307884 0.5744666
-## [4,] 0.6411399 0.76679269 0.6583696 0.6922633
-## [5,] 0.8186373 0.96106915 0.8240858 0.8415198
-## 
-## $n
-## [1] 99 98 99 99
-## 
-## $conf
-##           [,1]      [,2]      [,3]      [,4]
-## [1,] 0.5512258 0.5842585 0.4972696 0.5453981
-## [2,] 0.5917595 0.6819131 0.5643071 0.6035350
-## 
-## $out
-## [1] 0.8362843 0.0000000 0.0000000
-## 
-## $group
-## [1] 1 2 2
-## 
-## $names
-## [1] "SIC_1" "SIC_2" "SIC_3" "SIC_4"
-\end{verbatim}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/SIC_Categ-1} \end{center}
-
-\section{Differencing the Intgration
-Series}\label{differencing-the-intgration-series}
-
-\begin{center}\includegraphics{AC_US_Bank_Int_Results_1_files/figure-latex/Diff-1} \end{center}
-
-\section{Linear Time Trends for Bank
-Integration}\label{linear-time-trends-for-bank-integration}
-
-\begin{longtable}[]{@{}lrr@{}}
-\toprule
-Banks & T\_stat & p\_val\tabularnewline
-\midrule
-\endhead
-1ST SOURCE CORP & 3.6503120 & 0.0004514\tabularnewline
-ARROW FINANCIAL CORP & 1.7696440 & 0.0802505\tabularnewline
-ASSOCIATED BANC CORP & 7.1435390 & 0.0000000\tabularnewline
-BANK NEW YORK INC & 0.3030300 & 0.7630103\tabularnewline
-COMERICA INC & 3.0979962 & 0.0025488\tabularnewline
-COMMERCE BANCSHARES INC & 8.6661210 & 0.0000000\tabularnewline
-CULLEN FROST BANKERS INC & 6.8634047 & 0.0000000\tabularnewline
-F N B CORP PA & 6.0601741 & 0.0000000\tabularnewline
-FIFTH THIRD BANCORP & 5.2331903 & 0.0000010\tabularnewline
-FIRST CITIZENS BANCSHARES INC NC & 4.0673153 & 0.0001010\tabularnewline
-FIRST EMPIRE STATE CORP & -0.0153343 & 0.9879342\tabularnewline
-FIRST MIDWEST BANCORP DE & 10.2782346 & 0.0000000\tabularnewline
-FIRST TENNESSEE NATIONAL CORP & 1.9701636 & 0.0555989\tabularnewline
-HANCOCK HOLDING CO & 4.7987010 & 0.0000064\tabularnewline
-HUNTINGTON BANCSHARES INC & 4.7016637 & 0.0000086\tabularnewline
-NATIONSBANK CORP & -0.8757723 & 0.3915509\tabularnewline
-NORTHERN TRUST CORP & 1.4467397 & 0.1511937\tabularnewline
-NORWEST CORP & 1.8278316 & 0.0825331\tabularnewline
-P N C BANK CORP & -1.2605035 & 0.2191261\tabularnewline
-PEOPLES BANK BRIDGEPORT & -3.2292573 & 0.0021527\tabularnewline
-SILICON VALLEY BANCSHARES & -0.5548199 & 0.5817653\tabularnewline
-SUNTRUST BANKS INC & 2.9711659 & 0.0037402\tabularnewline
-T C F FINANCIAL CORP & 2.2113293 & 0.0293616\tabularnewline
-TRUSTMARK CORP & 6.5942859 & 0.0000000\tabularnewline
-UNITED BANKSHARES INC & 6.7615432 & 0.0000000\tabularnewline
-WEBSTER FINANCIAL CORP & 6.0643539 & 0.0000000\tabularnewline
-WESTAMERICA BANCORPORATION & 9.6293740 & 0.0000000\tabularnewline
-ZIONS BANCORPORATION & 8.9385832 & 0.0000000\tabularnewline
-BANCORPSOUTH INC & 5.2899693 & 0.0000008\tabularnewline
-C V B FINANCIAL CORP & 7.2250238 & 0.0000000\tabularnewline
-COMMUNITY BANK SYSTEM INC & 7.3426362 & 0.0000000\tabularnewline
-FIRST FINANCIAL BANCORP OHIO & 7.3564996 & 0.0000000\tabularnewline
-FULTON FINANCIAL CORP PA & 5.0029106 & 0.0000026\tabularnewline
-INDEPENDENT BANK CORP MA & 4.5553163 & 0.0000166\tabularnewline
-N B T BANCORP INC & 9.3295509 & 0.0000000\tabularnewline
-S \& T BANCORP INC & 5.6228556 & 0.0000002\tabularnewline
-TRUSTCO BANK CORP NY & 3.6770108 & 0.0003928\tabularnewline
-USBANCORP INC PA & -0.2096571 & 0.8355093\tabularnewline
-WESBANCO INC & 8.5121491 & 0.0000000\tabularnewline
-CHEMICAL FINANCIAL CORP & 2.5620520 & 0.0121269\tabularnewline
-COLUMBIA BANKING SYSTEM INC & 2.7346023 & 0.0074785\tabularnewline
-FIRST MERCHANTS CORP & 4.8648045 & 0.0000055\tabularnewline
-OLD NATIONAL BANCORP & 9.2404958 & 0.0000000\tabularnewline
-VALLEY NATIONAL BANCORP & 6.2641600 & 0.0000000\tabularnewline
-WSFS FINANCIAL CORP & 4.2507135 & 0.0000529\tabularnewline
-ASTORIA FINANCIAL CORP & 4.5277271 & 0.0000176\tabularnewline
-FIRST COMMONWEALTH FINANCIAL COR & 6.7919302 & 0.0000000\tabularnewline
-QUEENS COUNTY BANCORP INC & -2.4229966 & 0.0229680\tabularnewline
-KEYCORP NEW & 3.7181666 & 0.0003428\tabularnewline
-SUFFOLK BANCORP & 1.8918637 & 0.0622689\tabularnewline
-GREAT SOUTHERN BANCORP INC & 2.1968046 & 0.0312095\tabularnewline
-REGIONS FINANCIAL CORP & 3.5417790 & 0.0010704\tabularnewline
-U M B FINANCIAL CORP & 6.7372892 & 0.0000000\tabularnewline
-CENTURY BANCORP INC & -0.3905533 & 0.6971655\tabularnewline
-PARK NATIONAL CORP & 7.8748794 & 0.0000000\tabularnewline
-WASHINGTON FEDERAL INC & 6.2864370 & 0.0000000\tabularnewline
-CATHAY BANCORP INC & -1.4549052 & 0.1586510\tabularnewline
-FIRST DEFIANCE FINANCIAL CORP & 1.3860898 & 0.1695235\tabularnewline
-BANCFIRST CORP & 8.1417736 & 0.0000000\tabularnewline
-FLUSHING FINANCIAL CORP & 5.4135596 & 0.0000006\tabularnewline
-MERCHANTS BANCSHARES INC & 1.6397184 & 0.1053084\tabularnewline
-FIRST FEDERAL BANCSHARES ARK INC & 0.0219106 & 0.9825920\tabularnewline
-PREMIER FINANCIAL BANCORP INC & -1.1683976 & 0.2461603\tabularnewline
-PROVIDENT FINANCIAL HOLDINGS INC & -0.0962783 & 0.9235404\tabularnewline
-WASHINGTON TRUST BANCORP INC & 5.1731227 & 0.0000017\tabularnewline
-A B C BANCORP & 0.9784187 & 0.3356919\tabularnewline
-CITY HOLDING CO & 4.2360329 & 0.0000604\tabularnewline
-COMMUNITY TRUST BANCORP INC & 5.2837689 & 0.0000010\tabularnewline
-FIRST FINANCIAL BANKSHARES INC & 6.6210528 & 0.0000000\tabularnewline
-SANDY SPRING BANCORP INC & 4.3810547 & 0.0000347\tabularnewline
-TRICO BANCSHARES & 4.4469239 & 0.0000281\tabularnewline
-ORIENTAL FINANCIAL GROUP INC & 2.8000339 & 0.0068041\tabularnewline
-STATE STREET CORP & 0.3784539 & 0.7060836\tabularnewline
-WINTRUST FINANCIAL CORPORATION & 9.2410362 & 0.0000000\tabularnewline
-B B \& T CORP & 1.3740134 & 0.1734764\tabularnewline
-MIDSOUTH BANCORP INC & 4.5564406 & 0.0000267\tabularnewline
-BANK OF THE OZARKS INC & 5.2517574 & 0.0000013\tabularnewline
-BAR HARBOR BANKSHARES & 4.0667542 & 0.0001191\tabularnewline
-BRYN MAWR BANK CORP & 4.3488812 & 0.0000462\tabularnewline
-FARMERS CAPITAL BANK CORP & 0.4852962 & 0.6288266\tabularnewline
-FIRST FINANCIAL CORP IN & 4.5666556 & 0.0000180\tabularnewline
-SOUTHERN MISSOURI BANCORP INC & 0.2411213 & 0.8108681\tabularnewline
-SOUTHWEST BANCORP INC OKLA & 2.1129456 & 0.0379328\tabularnewline
-UNITY BANCORP INC & -1.3414045 & 0.1844573\tabularnewline
-CAMDEN NATIONAL CORP & 3.1019825 & 0.0027092\tabularnewline
-CAPITAL CITY BANK GROUP & -0.4445197 & 0.6578979\tabularnewline
-FIDELITY NATIONAL CORP GA & -2.3328027 & 0.0308050\tabularnewline
-PEOPLES BANCORP INC & 3.1034650 & 0.0026859\tabularnewline
-REPUBLIC FIRST BANCORP INC & 0.7737627 & 0.4414714\tabularnewline
-S Y BANCORP INC & 7.0241439 & 0.0000000\tabularnewline
-BROOKLINE BANCORP INC & 5.6582112 & 0.0000003\tabularnewline
-HERITAGE FINANCIAL CORP WA & 5.5062564 & 0.0000005\tabularnewline
-INTERNATIONAL BANCSHARES CORP & 7.2940316 & 0.0000000\tabularnewline
-NORTHWEST BANCORP INC PA & 2.1479073 & 0.0371418\tabularnewline
-PEOPLES HOLDING CO & 2.9565879 & 0.0068784\tabularnewline
-UNION BANKSHARES CORP & 3.6853160 & 0.0007468\tabularnewline
-DIME COMMUNITY BANCSHARES & 3.5671762 & 0.0006287\tabularnewline
-GERMAN AMERICAN BANCORP & 0.2160493 & 0.8307025\tabularnewline
-M \& T BANK CORP & 4.5572458 & 0.0000194\tabularnewline
-SOUTHSIDE BANCSHARES INC & 3.5090030 & 0.0007907\tabularnewline
-UNITED COMMUNITY FINL CORP OHIO & -0.0858375 & 0.9318339\tabularnewline
-CARDINAL FINANCIAL CORP & 2.5510508 & 0.0129610\tabularnewline
-GLACIER BANCORP INC NEW & 6.7266475 & 0.0000000\tabularnewline
-BOSTON PRIVATE FINL HLDGS INC & 5.0454300 & 0.0000033\tabularnewline
-HERITAGE COMMERCE CORP & 2.0599196 & 0.0433534\tabularnewline
-WELLS FARGO \& CO NEW & 1.5423137 & 0.1272632\tabularnewline
-CAPITOL FEDERAL FINANCIAL & 0.1325972 & 0.8951165\tabularnewline
-EAST WEST BANCORP INC & 6.6858929 & 0.0000000\tabularnewline
-OLD SECOND BANCORP INC & -0.7022212 & 0.4850484\tabularnewline
-UMPQUA HOLDINGS CORP & 7.0198243 & 0.0000000\tabularnewline
-AMERICAN NATIONAL BANKSHARES INC & 1.1742067 & 0.2446631\tabularnewline
-BANK OF AMERICA CORP & 1.9741486 & 0.0522016\tabularnewline
-PRIVATEBANCORP INC & 2.9645469 & 0.0041768\tabularnewline
-PROSPERITY BANCSHARES INC & 6.4022874 & 0.0000000\tabularnewline
-TOMPKINS TRUSTCO INC & 5.7184225 & 0.0000045\tabularnewline
-MERCANTILE BANK CORP & 3.0864691 & 0.0029012\tabularnewline
-OCEANFIRST FINANCIAL CORP & 4.0769250 & 0.0001176\tabularnewline
-C \& F FINANCIAL CORP & 0.3284450 & 0.7438455\tabularnewline
-FIRST BANCORP NC & 1.7473398 & 0.0849640\tabularnewline
-FIRST UNITED CORP & 1.2092520 & 0.2308159\tabularnewline
-LAKELAND BANCORP INC & 2.8657776 & 0.0055309\tabularnewline
-P N C FINANCIAL SERVICES GRP INC & 2.6286077 & 0.0105597\tabularnewline
-BERKSHIRE HILLS BANCORP INC & 7.2575065 & 0.0000000\tabularnewline
-IBERIABANK CORP & 7.3059230 & 0.0000000\tabularnewline
-MACATAWA BANK CORP & 0.2642657 & 0.7923987\tabularnewline
-MUTUALFIRST FINL INC & 0.6685887 & 0.5060549\tabularnewline
-PACIFIC MERCANTILE BANCORP & -0.8970677 & 0.3728479\tabularnewline
-LAKELAND FINANCIAL CORP & 6.1099755 & 0.0000001\tabularnewline
-NEW YORK COMMUNITY BANCORP INC & 1.6485354 & 0.1039955\tabularnewline
-COBIZ INC & 0.9662244 & 0.3439826\tabularnewline
-FIRST COMMUNITY BANCSHARES INC & 2.6335524 & 0.0105482\tabularnewline
-NARA BANCORP INC & 2.0867605 & 0.0433281\tabularnewline
-AMERISERV FINANCIAL INC & -1.3218161 & 0.1910091\tabularnewline
-CENTER BANCORP INC & -0.0496322 & 0.9606173\tabularnewline
-PEOPLES BANCORP NC INC NEW & -0.9669379 & 0.3378078\tabularnewline
-N A S B FINANCIAL INC & 0.5083842 & 0.6134198\tabularnewline
-CHARTER FINANCIAL CORP & -0.3123392 & 0.7571823\tabularnewline
-FIRST COMMUNITY BANCORP & 3.1658288 & 0.0043167\tabularnewline
-HORIZON BANCORP IND & 1.9546610 & 0.0567165\tabularnewline
-M B FINANCIAL INC NEW & 6.5002738 & 0.0000000\tabularnewline
-NORTHRIM BANCORP INC & 1.8661832 & 0.0667473\tabularnewline
-SIERRA BANCORP & 1.0396218 & 0.3025530\tabularnewline
-WESTFIELD FINANCIAL INC & 0.8316176 & 0.4092873\tabularnewline
-NATIONAL BANKSHARES INC & 2.2888994 & 0.0257452\tabularnewline
-PEAPACK GLADSTONE FINANCIAL CORP & -3.3507564 & 0.0027696\tabularnewline
-BANK OF HAWAII CORP & 4.6419510 & 0.0000193\tabularnewline
-FIRST LONG ISLAND CORP & 3.5170446 & 0.0008932\tabularnewline
-MAINSOURCE FINANCIAL GROUP INC & 1.7723459 & 0.0814140\tabularnewline
-PINNACLE FINANCIAL PARTNERS INC & 5.8431304 & 0.0000002\tabularnewline
-WEST BANCORPORATION INC & 2.4850789 & 0.0157581\tabularnewline
-1ST CONSTITUTION BANCORP & -0.4094105 & 0.6847332\tabularnewline
-EASTERN VIRGINIA BANKSHARES INC & -1.0350203 & 0.3051889\tabularnewline
-FIRST PACTRUST BANCORP INC & 3.4383135 & 0.0015643\tabularnewline
-MIDDLEBURG FINANCIAL CORP & 1.8703910 & 0.0666592\tabularnewline
-C N B FINANCIAL CORP PA & 4.1361545 & 0.0001267\tabularnewline
-CENTERSTATE BANKS OF FLORIDA INC & 1.7210735 & 0.1014811\tabularnewline
-FIRST CITIZENS BANC CORP & -1.2871057 & 0.2046388\tabularnewline
-PENNS WOODS BANCORP INC & 2.7242373 & 0.0086227\tabularnewline
-PROVIDENT FINANCIAL SVCS INC & 5.6568388 & 0.0000005\tabularnewline
-Q C R HOLDINGS INC & -0.0683010 & 0.9458030\tabularnewline
-EAGLE BANCORP INC & 6.4059675 & 0.0000000\tabularnewline
-CODORUS VALLEY BANCORP INC & 0.8902714 & 0.3783916\tabularnewline
-FIDELITY SOUTHERN CORP NEW & 2.8120621 & 0.0067741\tabularnewline
-HEARTLAND FINANCIAL USA INC & 1.7079880 & 0.0931771\tabularnewline
-M B T FINANCIAL CORP & -2.2678619 & 0.0272868\tabularnewline
-NORWOOD FINANCIAL CORP & -0.5291476 & 0.6001410\tabularnewline
-B N C BANCORP & 3.1933297 & 0.0025679\tabularnewline
-COLONY BANKCORP INC & -0.2585133 & 0.7972442\tabularnewline
-TEXAS CAPITAL BANCSHARES INC & 3.5535729 & 0.0007891\tabularnewline
-UNIVEST CORP OF PENNSYLVANIA & 0.6187256 & 0.5386514\tabularnewline
-BANK MUTUAL CORP NEW & -0.7823228 & 0.4374421\tabularnewline
-CATHAY GENERAL BANCORP & 2.9523137 & 0.0046603\tabularnewline
-HINGHAM INSTITUTION FOR SVGS MA & 0.1635670 & 0.8714417\tabularnewline
-FIRST HORIZON NATIONAL CORP & 5.5082722 & 0.0000011\tabularnewline
-S C B T FINANCIAL CORP & -0.8405003 & 0.4063334\tabularnewline
-SIGNATURE BANK NEW YORK N Y & 2.8709573 & 0.0058694\tabularnewline
-BANK OF COMMERCE HOLDINGS & 1.5792587 & 0.1223543\tabularnewline
-JPMORGAN CHASE \& CO & 3.4795961 & 0.0010248\tabularnewline
-REGIONS FINANCIAL CORP NEW & 3.1276763 & 0.0028848\tabularnewline
-ACCESS NATIONAL CORP & 1.2107381 & 0.2316879\tabularnewline
-BANCORP INC & 2.4725085 & 0.0168622\tabularnewline
-CITIZENS \& NORTHERN CORP & 1.3822248 & 0.1730465\tabularnewline
-AMES NATL CORP & 0.9476870 & 0.3481362\tabularnewline
-B OF I HOLDING INC & 4.0030335 & 0.0002114\tabularnewline
-ENTERPRISE FINANCIAL SVCS CORP & 1.0087363 & 0.3180566\tabularnewline
-KEARNY FINANCIAL CORP & -1.9295558 & 0.0611532\tabularnewline
-OLD LINE BANCSHARES & 0.3987947 & 0.6930696\tabularnewline
-RENASANT CORP & 2.6817743 & 0.0099528\tabularnewline
-SUMMIT FINANCIAL GROUP INC & 0.0619958 & 0.9508603\tabularnewline
-BANKFINACIAL CORP & -1.2809265 & 0.2063740\tabularnewline
-META FINANCIAL GROUP INC & 1.3279086 & 0.1909049\tabularnewline
-PARKE BANCORP INC & -0.0679440 & 0.9461247\tabularnewline
-PROVIDENT NEW YORK BANCORP & 0.0505854 & 0.9599804\tabularnewline
-ROCKVILLE FINANCIAL INC & -0.8114219 & 0.4266753\tabularnewline
-S V B FINANCIAL GROUP & 4.3188474 & 0.0000783\tabularnewline
-WESTERN ALLIANCE BANCORPORATION & 4.7242448 & 0.0000205\tabularnewline
-CENTRAL VALLEY COMM BANCORP & 2.4008589 & 0.0219738\tabularnewline
-HERITAGE OAKS BANCORP & 2.6467605 & 0.0113913\tabularnewline
-INVESTORS BANCORP INC & 0.9247265 & 0.3620295\tabularnewline
-AMERIS BANCORP & -1.6974473 & 0.0963689\tabularnewline
-B C B BANCORP INC & -0.4496253 & 0.6556762\tabularnewline
-GERMAN AMERICAN BANCORP INC & 6.4120814 & 0.0000001\tabularnewline
-YADKIN VALLEY FINANCIAL CORP & -0.6562001 & 0.5176901\tabularnewline
-ENTERPRISE BANCORP INC & 2.9619623 & 0.0054623\tabularnewline
-SOUTHERN NATIONAL BANCORP VA INC & 1.0111031 & 0.3187150\tabularnewline
-E S S A BANCORP INC & -0.0110247 & 0.9912572\tabularnewline
-PEOPLES UNITED FINANCIAL INC & 3.9983607 & 0.0002598\tabularnewline
-TFS FINANCIAL CORP & 2.9741055 & 0.0049055\tabularnewline
-BANK OF MARIN BANCORP & 1.3082645 & 0.1982518\tabularnewline
-BANK OF NEW YORK MELLON CORP & -0.1777139 & 0.8598446\tabularnewline
-BENEFICIAL MUTUAL BANCORP INC & -1.3694740 & 0.1817357\tabularnewline
-COBIZ FINANCIAL INC & 0.4703771 & 0.6406404\tabularnewline
-FIRST BUSINESS FINL SVCS INC & 2.9976999 & 0.0059184\tabularnewline
-SOUTHERN FIRST BANCSHARES INC & -0.2978960 & 0.7677082\tabularnewline
-TOMPKINS FINANCIAL CORP & 2.4043324 & 0.0209239\tabularnewline
-FIRST FINANCIAL NORTHWEST INC & -0.1148622 & 0.9091437\tabularnewline
-HAWTHORN BANCSHARES INC & 1.8868187 & 0.0685811\tabularnewline
-TOWNEBANK & 2.6255520 & 0.0122939\tabularnewline
-NORTHFIELD BANCORP INC & 1.3287060 & 0.2005445\tabularnewline
-MERIDIAN INTERSTATE BANCORP INC & 0.9187435 & 0.3677649\tabularnewline
-MIDWESTONE FINANCIAL GRP INC NEW & 3.3526739 & 0.0018562\tabularnewline
-BRIDGE BANCORP INC & 3.0105062 & 0.0047447\tabularnewline
-FIRST BANCORP INC ME & -1.9208368 & 0.0626996\tabularnewline
-PACWEST BANCORP DE & 1.4165896 & 0.1651986\tabularnewline
-WATERSTONE FINANCIAL INC & -2.3814158 & 0.0278600\tabularnewline
-CITIZENS HOLDING CO & 1.5344308 & 0.1374833\tabularnewline
-CENTERSTATE BANKS INC & 2.0600220 & 0.0478758\tabularnewline
-ORRSTOWN FINANCIAL SERVICES INC & -1.6487083 & 0.1089923\tabularnewline
-NORTHWEST BANCSHARES INC & 2.3299405 & 0.0267268\tabularnewline
-ORITANI FINANCIAL CORP NEW & 0.9112545 & 0.3699402\tabularnewline
-A C N B CORP & 2.5788579 & 0.0159239\tabularnewline
-CAPITOL FEDERAL FINANCIAL INC & 3.6228406 & 0.0012399\tabularnewline
-FIRST REPUBLIC BANK S F NEW & 2.2690667 & 0.0317962\tabularnewline
-PARK STERLING BANK NEW & 1.5205191 & 0.1409286\tabularnewline
-S I FINANCIAL GROUP INC MD & 3.0638729 & 0.0050373\tabularnewline
-BANKUNITED INC & 4.3731884 & 0.0001892\tabularnewline
-STATE BANK FINANCIAL CORP & 4.1155540 & 0.0003933\tabularnewline
-FARMERS NATIONAL BANC CORP & 1.2980043 & 0.2071524\tabularnewline
-L C N B CORP & 1.1255402 & 0.2719686\tabularnewline
-NATIONAL BANK HOLDINGS CORP & 4.8078049 & 0.0001223\tabularnewline
-FIRST BANCSHARES INC MS & 0.2803760 & 0.7823860\tabularnewline
+(Intercept) & 0.4635592 & 0.0147994 & 31.322849 &
+0.0000000\tabularnewline
+Qtr\_num & 0.0018850 & 0.0002677 & 7.042690 & 0.0000000\tabularnewline
+GR & 0.1078591 & 0.0171983 & 6.271495 & 0.0000000\tabularnewline
+EZ & 0.0609390 & 0.0339866 & 1.793030 & 0.0761505\tabularnewline
 \bottomrule
 \end{longtable}
 
 \section{Panel Estimation}\label{panel-estimation}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Fixed Effects}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2557 & 0.0286 & 8.9430 & 0.0000\tabularnewline
-eq\_ratio & 1.3052 & 0.3954 & 3.3014 & 0.0010\tabularnewline
-NIM & -4.0331 & 0.8988 & -4.4874 & 0.0000\tabularnewline
-T1\_T2\_ratio & -0.5026 & 0.1723 & -2.9169 & 0.0035\tabularnewline
-DFR & 0.1435 & 0.0867 & 1.6553 & 0.0979\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Alternative Model: Fixed Effects}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2912 & 0.0417 & 6.9755 & 0.0000\tabularnewline
-com\_eq\_ratio & 0.4883 & 0.3803 & 1.2841 & 0.1992\tabularnewline
-NIM & -4.5903 & 1.2128 & -3.7850 & 0.0002\tabularnewline
-T1\_T2\_ratio & -0.3259 & 0.2444 & -1.3333 & 0.1825\tabularnewline
-DFR & 0.3017 & 0.1046 & 2.8847 & 0.0039\tabularnewline
-MBS & 0.0265 & 0.0016 & 16.6910 & 0.0000\tabularnewline
-func\_log10(fhlbq) & 0.0092 & 0.0106 & 0.8732 & 0.3826\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Fixed Effects: Systemic Banks}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.2558 & 0.0531 & 4.8198 & 0.0000\tabularnewline
-eq\_ratio & 1.1537 & 1.0732 & 1.0750 & 0.2827\tabularnewline
-NIM & 0.8788 & 2.3539 & 0.3734 & 0.7090\tabularnewline
-T1\_T2\_ratio & 0.0793 & 0.6307 & 0.1257 & 0.9000\tabularnewline
-DFR & -0.1594 & 0.1302 & -1.2249 & 0.2210\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}lrrrr@{}}
-\caption{Alternative Model:Fixed Effects: Systemic Banks}\tabularnewline
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-term & estimate & std.error & statistic & p.value\tabularnewline
-\midrule
-\endhead
-size & 0.3134 & 0.1706 & 1.8372 & 0.0697\tabularnewline
-com\_eq\_ratio & -1.7806 & 1.4460 & -1.2314 & 0.2216\tabularnewline
-NIM & -0.2118 & 4.7845 & -0.0443 & 0.9648\tabularnewline
-T1\_T2\_ratio & 2.3842 & 0.6233 & 3.8254 & 0.0002\tabularnewline
-DFR & 0.0890 & 0.4956 & 0.1796 & 0.8579\tabularnewline
-func\_log10(fhlbq) & -0.0341 & 0.0115 & -2.9666 & 0.0039\tabularnewline
-\bottomrule
-\end{longtable}
 
 
 \end{document}

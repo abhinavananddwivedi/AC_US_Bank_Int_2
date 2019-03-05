@@ -33,6 +33,10 @@ library(rmarkdown)
 library(knitr)
 library(moments) 
 library(broom)
+library(lmtest)
+library(modelr)
+library(plm)
+library(sandwich)
 
 knitr::opts_chunk$set(echo = F, 
                       warning = T, 
@@ -50,61 +54,18 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 
 # Further Tests to Do:
 
-
 # 1. Check if time fixed effects exist. If not we can justify.
-# 2. Panel estimates for: H1, H2, top 50, bot 50
 # 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
 # 10. Correlation between quarterly integration and quarterly returns?
 # 11. How do factor loadings evolve? (Brennan question)
-# 14. SRISK as explanatory factor; Bank beta and bank volatility as factors.
 # 15. Accounting for M&A? Bankruptcies? 
-# 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives
+# 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives, bank beta, SRISK
 # 23. Report formal p values for tests: fixed effect; fixed vs random effect
 # 24. Unit root test for integration?
+# 25. Check: Are all systemic banks in top 50 most integrated?
 
 
 
-```
-
-
-# Median US Bank Integration 
-
-```{r med_US_bank_int, fig.height= 6, fig.width=11}
-
-plot_med_bank_int
-
-```
-
-## Linear Time Trends
-
-```{r linear_trend, include=FALSE}
-
-knitr::kable(broom::tidy(int_dummy_recession))
-
-```
-
-# Empirical Distribution of US Bank Integration
-
-```{r emp_distr_US_bank_int}
-
-boxplot_int_yearly
-
-```
-
-
-
-# Most Integrated Banks
-
-```{r most_int}
-
-med_top_25 <- med_top_25_admissible %>%
-  dplyr::rename(., "Bank" = rowname) %>%
-  dplyr::rename(., "Median_Integration" = value)
-
-knitr::kable(med_top_25)
-
-
-barplot_top_25
 
 ```
 
@@ -114,121 +75,102 @@ barplot_top_25
 
 boxplot(t(var_share_df[1:30, ]))
 
-barplot(expl_power_eig_med[1:30])
+#barplot(expl_power_eig_med[1:30])
+
+```
+
+# Median US Bank Integration 
+
+## Trends
+
+### Tables
+
+```{r med_US_bank_int_trend}
+
+# Full sample period, full set of banks
+knitr::kable(broom::tidy(trend_median_US_bank))
+
+# Pre 2005, full set of banks
+knitr::kable(broom::tidy(trend_median_US_bank_H1),
+             caption = "Pre 2005 trend")
+
+# Post 2005, full set of banks
+knitr::kable(broom::tidy(trend_median_US_bank_H2),
+             caption = "Post 2005 trend")
+
+# Full sample period, median systemic bank
+knitr::kable(broom::tidy(trend_median_US_bank_systemic),
+             caption = "Systemic banks trend")
+
+# Pre 2005, median systemic bank
+knitr::kable(broom::tidy(trend_median_US_bank_systemic_H1),
+             caption = "Systemic banks trend pre 2005")
+
+# Post 2005, median systemic bank
+knitr::kable(broom::tidy(trend_median_US_bank_systemic_H2),
+             caption = "Systemic banks trend post 2005")
+
+```
+
+### Plots
+
+```{r med_US_bank_int, fig.height= 6, fig.width=11}
+
+# Full sample period, full bank set
+plot_trend_median
+
+# Pre 2005, full bank set
+plot_trend_median_H1
+
+# post 2005, full bank set
+plot_trend_median_H2
+
+# Full sample period, systemic bank
+plot_trend_median_sys
+
+# Pre 2005, systemic bank
+plot_trend_median_sys_H1
+
+# Post 2005, systemic bank
+plot_trend_median_sys_H2
 
 ```
 
 
+# Empirical Distribution of US Bank Integration
 
-# Systemic Banks' Integration
+```{r emp_distr_US_bank_int}
 
-```{r systemic, fig.width=11, fig.height=6}
-
-plot_systemic
-
-```
-
-# Bank Integration By Quintiles
-
-```{r quint_bank_int}
-
-matplot(quint_bank_int, 
-        type = "l", 
-        lwd = 1,
-        lty = 1:ncol(quint_bank_int), 
-        xlab = "Years", 
-        ylab = "Bank Integration Quintiles"
-        )
-
+boxplot_int_yearly
 
 ```
 
-# Effect of NBER Recessions on Bank Integration
+# Crises
 
-```{r dummy_recession}
+```{r crises}
 
-#knitr::kable(int_dummy_recession)
-
-```
-
-# Integration Variation with SIC category
-
-```{r SIC_Categ}
-
-# Summary stats of median bank integration for each SIC class
-bank_SIC_summ_stat
-
-# Boxplot of above
-box_int_SIC_Categ
-
-# Median bank integration plot
-
-matplot(bank_int_SIC_med, 
-        type = "l", 
-        lty = 1, 
-        lwd = 1, 
-        col = 1:4, 
-        xlab = "Quarters", 
-        ylab = "Median bank Intgeration"
-        )
-
-legend(65, 0.4, 
-       legend = c("Comm", "Cred_Uni", "Saving", "Holding"), 
-       col = 1:4, 
-       lty = 1, 
-       cex=0.6
-       )
-
+knitr::kable(broom::tidy(trend_median_US_bank_crisis))
 
 ```
-
-# Differencing the Intgration Series
-
-```{r Diff}
-
-# GSIBs 
-matplot(int_diff_sys_gsib, 
-        type = "l", 
-        lty = 1, 
-        col = 1:ncol(int_diff_sys_gsib),
-        xlab = "Quarters",
-        ylab = "GSIBs Differenced Integration"
-        )
-
-legend(60, -0.4, 
-       legend = name_GSIB, 
-       col = 1:length(name_GSIB), 
-       lty = 1, 
-       cex = 0.25
-       )
-
-
-```
-
-# Linear Time Trends for Bank Integration 
-
-```{r time_trend_banks}
-
-knitr::kable(trend_T_p_val_df)
-
-
-```
-
 
 # Panel Estimation
 
-```{r panel_est, include = F}
+```{r panel_est, eval=F}
 
-# Default model
-knitr::kable(panel_est_full$tidy, digits = 4, caption = "Fixed Effects")
+# Full model
+knitr::kable(broom::tidy(panel_est_full$coefficients), 
+             caption = "All banks")
 
-# Alternative model
-knitr::kable(panel_est_alt$tidy, digits = 4, caption = "Alternative Model: Fixed Effects")
+# Systemic banks
+knitr::kable(broom::tidy(panel_est_sys$coefficients), 
+             caption = "Systemic banks")
 
-# Default model: Systemic Banks
-knitr::kable(panel_est_full_sys$tidy, digits = 4, caption = "Fixed Effects: Systemic Banks")
+# Pre 2005
+knitr::kable(broom::tidy(panel_est_H1$coefficients), 
+             caption = "Pre 2005")
 
-# Default model
-knitr::kable(panel_est_alt_sys$tidy, digits = 4, caption = "Alternative Model:Fixed Effects: Systemic Banks")
+# Post 2005
+knitr::kable(broom::tidy(panel_est_H2$coefficients), 
+             caption = "Post 2005")
 
 ```
