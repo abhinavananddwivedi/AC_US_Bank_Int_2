@@ -155,7 +155,7 @@ knitr::kable(broom::tidy(trend_median_US_bank_crisis))
 
 # Panel Estimation
 
-```{r panel_est, eval=F}
+```{r panel_est}
 
 # Full model
 knitr::kable(broom::tidy(panel_est_full$coefficients), 

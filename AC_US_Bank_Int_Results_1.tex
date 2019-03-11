@@ -87,7 +87,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2019/03/05}
+    \date{2019/03/11}
 
 \linespread{1.25}
 \usepackage{amsmath}
@@ -230,6 +230,110 @@ EZ & 0.0609390 & 0.0339866 & 1.793030 & 0.0761505\tabularnewline
 \end{longtable}
 
 \section{Panel Estimation}\label{panel-estimation}
+
+\begin{verbatim}
+## Warning: 'tidy.matrix' is deprecated.
+## See help("Deprecated")
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{All banks}\tabularnewline
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endhead
+size & 0.2557349 & 0.0316994 & 8.067509 & 0.0000000\tabularnewline
+eq\_ratio & 1.3052292 & 0.4185600 & 3.118380 & 0.0018264\tabularnewline
+NIM & -4.0330645 & 1.0107562 & -3.990146 & 0.0000668\tabularnewline
+T1\_T2\_ratio & -0.5025923 & 0.1869985 & -2.687680 &
+0.0072132\tabularnewline
+DFR & 0.1434831 & 0.0997256 & 1.438779 & 0.1502608\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+## Warning: 'tidy.matrix' is deprecated.
+## See help("Deprecated")
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Systemic banks}\tabularnewline
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endhead
+size & 0.2557511 & 0.0550826 & 4.6430441 & 0.0000040\tabularnewline
+eq\_ratio & 1.1536893 & 1.1014671 & 1.0474115 & 0.2952162\tabularnewline
+NIM & 0.8788301 & 2.4900259 & 0.3529402 & 0.7242233\tabularnewline
+T1\_T2\_ratio & 0.0793057 & 0.7773880 & 0.1020156 &
+0.9187690\tabularnewline
+DFR & -0.1594380 & 0.1366189 & -1.1670270 & 0.2435362\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+## Warning: 'tidy.matrix' is deprecated.
+## See help("Deprecated")
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Pre 2005}\tabularnewline
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endhead
+size & 0.1352383 & 0.0788520 & 1.7150909 & 0.0865085\tabularnewline
+eq\_ratio & 1.2059775 & 0.5988475 & 2.0138307 & 0.0441826\tabularnewline
+NIM & -0.7660755 & 2.5247465 & -0.3034267 & 0.7616014\tabularnewline
+T1\_T2\_ratio & -0.4537240 & 0.2579943 & -1.7586593 &
+0.0788130\tabularnewline
+DFR & 0.0882699 & 0.1959743 & 0.4504158 & 0.6524673\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+## Warning: 'tidy.matrix' is deprecated.
+## See help("Deprecated")
+\end{verbatim}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Post 2005}\tabularnewline
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+.rownames & Estimate & Std..Error & t.value &
+Pr\ldots{}t..\tabularnewline
+\midrule
+\endhead
+size & 0.3122428 & 0.0435768 & 7.1653374 & 0.0000000\tabularnewline
+eq\_ratio & 0.2006210 & 0.4207202 & 0.4768514 & 0.6334898\tabularnewline
+NIM & -2.2348132 & 1.2001509 & -1.8621102 & 0.0626493\tabularnewline
+T1\_T2\_ratio & -0.2351839 & 0.2828225 & -0.8315601 &
+0.4056991\tabularnewline
+DFR & 0.0045859 & 0.1069430 & 0.0428818 & 0.9657976\tabularnewline
+\bottomrule
+\end{longtable}
 
 
 \end{document}
