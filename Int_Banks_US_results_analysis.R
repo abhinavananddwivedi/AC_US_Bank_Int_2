@@ -231,6 +231,16 @@ plot_trend_median <- ggplot(int_median_US_bank,
               color = "black") +
   theme_bw()
 
+# x_breaks <- seq(qtr_grid[4], qtr_grid[100], by = 8)
+# x_labels <- paste0(seq(1993, 2017, by = 2), "Q4")
+
+# plot_trend_median + 
+#   geom_point() + 
+#   scale_x_continuous(breaks = x_breaks,
+#                      labels = x_labels) +
+#   labs(x = "Years") +
+#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
+
 # First Half
 plot_trend_median_H1 <- ggplot(int_median_US_bank_H1,
                                    aes(Qtr_num, Integration)) +
@@ -249,6 +259,21 @@ plot_trend_median_H2 <- ggplot(int_median_US_bank_H2,
               color = "black") +
   theme_bw()
 
+# int_median_US_bank_H1H2 <- int_median_US_bank %>%
+#   mutate("Period" = c(rep("H1", 49), rep("H2", 50)))
+# 
+# ggplot(int_median_US_bank_H1H2, aes(Qtr_num, Integration)) +
+#   geom_point() +
+#   geom_line() +
+#   geom_smooth(aes(group = Period), 
+#               method = "lm", 
+#               linetype = "dashed", 
+#               color = "black") +
+#   theme_bw() +
+#   scale_x_continuous(breaks = x_breaks, 
+#                      labels = x_labels) +
+#   labs(x = "Years", size = 14) +
+#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
 
 
 #######################
