@@ -308,6 +308,25 @@ int_median_US_bank_systemic <- int_US_bank_long_2 %>%
 
 trend_median_US_bank_systemic <- func_trend_NW(int_median_US_bank_systemic)
 
+
+# temp_temp <- int_median_US_bank %>%
+#   tibble::add_column("Integration_sys" = int_median_US_bank_systemic$Integration)
+# temp_temp_long <- temp_temp %>%
+#   dplyr::rename("Median_Bank" = Integration, 
+#                 "Median_Systemic_Bank" = Integration_sys) %>%
+#   tidyr::gather(c(Median_Bank, Median_Systemic_Bank), 
+#                 key = "Bank", 
+#                 value = "Integration")
+# ggplot(temp_temp_long, aes(Qtr_num, 
+#                            Integration)) +
+#   geom_point(aes(shape = Bank)) +
+#   geom_line(aes(linetype = Bank)) +
+#   theme_bw() +
+#   scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+#   labs(y = "Median Integration", x = NULL, size = 16) +
+#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 14))
+
+
 # Linear trend for for the median systemic bank: pre and post 2005 #
 
 # Pre 2005
@@ -448,10 +467,10 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 ### Relation to Crises ############
 ###################################
 
-# The Great Recession: Quarters 59:65
+# The Great Recession: Q4 2007--Q2 2009, Quarters 60:66
 
 dummy_GR <- rep(0, qtr_max) 
-dummy_GR[59:65] <- 1
+dummy_GR[60:66] <- 1
   
 # The Eurozone crisis: Q2 2010--Q2 2012: Quarters 70--78
 
@@ -527,6 +546,16 @@ int_median_US_bank_crisis <- int_median_US_bank %>%
   tibble::add_column("EZ" = dummy_EZ[-1])
 
 trend_median_US_bank_crisis <- func_trend_NW_crisis(int_median_US_bank_crisis)
+
+
+# ### Linear trend of the median systemic bank during crisis ###
+# int_median_US_bank_sys_crisis <- int_median_US_bank_systemic %>%
+#   tibble::add_column("GR" = dummy_GR[-1]) %>%
+#   tibble::add_column("EZ" = dummy_EZ[-1])
+# 
+# trend_median_US_bank_sys_crisis <- func_trend_NW_crisis(int_median_US_bank_sys_crisis)
+
+
 
 
 ###

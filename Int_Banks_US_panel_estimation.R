@@ -41,6 +41,62 @@ panel_US_bank_int <- dplyr::inner_join(int_US_bank_long_3,
                   )
                 )
 
+### Correlation matrix ###
+
+temp_cor_matrix <- panel_US_bank_int %>% 
+  dplyr::select(Integration, 
+                size, 
+                eq_ratio, 
+                NIM, 
+                T1_T2_ratio, 
+                DFR) %>% 
+  cor(., use = "pairwise.complete.obs")
+
+#knitr::kable(temp_temp, format = 'latex', digits = 3)
+
+func_summ_stat <- function(vec)
+{
+  temp <- data.frame('min' = min(vec, na.rm = T),
+                     'max' = max(vec, na.rm = T),
+                     'mean' = mean(vec, na.rm = T),
+                     'med' = median(vec, na.rm = T),
+                     'std' = sd(vec, na.rm = T),
+                     'iqr' = IQR(vec, na.rm = T),
+                     'skew' = moments::skewness(vec, na.rm = T),
+                     'kurt' = moments::kurtosis(vec, na.rm = T)
+                     )
+  return(temp)
+}
+
+summ_integration <- panel_US_bank_int %>%
+  dplyr::select(Integration) %>%
+  purrr::map(., func_summ_stat)
+summ_size <- panel_US_bank_int %>%
+  dplyr::select(size) %>%
+  purrr::map(., func_summ_stat)
+summ_eq_ratio <- panel_US_bank_int %>%
+  dplyr::select(eq_ratio) %>%
+  purrr::map(., func_summ_stat)
+summ_NIM <- panel_US_bank_int %>%
+  dplyr::select(NIM) %>%
+  purrr::map(., func_summ_stat)
+summ_T1_T2_ratio <- panel_US_bank_int %>%
+  dplyr::select(T1_T2_ratio) %>%
+  purrr::map(., func_summ_stat)
+summ_DFR <- panel_US_bank_int %>%
+  dplyr::select(DFR) %>%
+  purrr::map(., func_summ_stat)
+
+
+# knitr::kable(rbind(summ_integration$Integration,
+#                    summ_size$size,
+#                    summ_eq_ratio$eq_ratio,
+#                    summ_NIM$NIM,
+#                    summ_T1_T2_ratio$T1_T2_ratio,
+#                    summ_DFR$DFR),
+#              format = 'latex',
+#              digits = 3)
+
 
 ##################################################################
 ############## Panel Estimation Begins ###########################
