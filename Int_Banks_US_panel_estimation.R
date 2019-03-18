@@ -150,6 +150,13 @@ panel_est_H2 <- func_panel_est(formula_full,
                                dplyr::filter(panel_US_bank_int,
                                              Date %in% year_qtr_H2))
 
+### Pooled panel estimates ###
+
+panel_est_pooled <- plm::plm(formula = formula_full,
+                             data = panel_US_bank_int,
+                             model = "pooling",
+                             type = "HC0") %>% summary(.)
+
 
 ###############################
 ## Testing for fixed effects ##

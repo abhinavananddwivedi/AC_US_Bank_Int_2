@@ -62,7 +62,8 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives, bank beta, SRISK
 # 23. Report formal p values for tests: fixed effect; fixed vs random effect
 # 24. Unit root test for integration?
-# 25. Check: Are all systemic banks in top 50 most integrated?
+# 25. PC explanatory proportion quarterly plot
+# 26. Include pooled regression results in the table
 
 
 
