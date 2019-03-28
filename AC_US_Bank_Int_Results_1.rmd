@@ -63,9 +63,6 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 # 23. Report formal p values for tests: fixed effect; fixed vs random effect
 # 24. Unit root test for integration?
 # 25. PC explanatory proportion quarterly plot
-# 26. Include pooled regression results in the table
-
-
 
 
 ```
