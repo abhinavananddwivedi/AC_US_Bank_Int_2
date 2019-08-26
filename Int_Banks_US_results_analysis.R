@@ -229,17 +229,19 @@ plot_trend_median <- ggplot(int_median_US_bank,
   geom_smooth(method = "lm", 
               linetype = "dashed", 
               color = "black") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = 20))
 
-# x_breaks <- seq(qtr_grid[4], qtr_grid[100], by = 8)
-# x_labels <- paste0(seq(1993, 2017, by = 2), "Q4")
+x_breaks <- seq(qtr_grid[4], qtr_grid[100], by = 8)
+x_labels <- paste0(seq(1993, 2017, by = 2), "Q4")
 
-# plot_trend_median + 
-#   geom_point() + 
-#   scale_x_continuous(breaks = x_breaks,
-#                      labels = x_labels) +
-#   labs(x = "Years") +
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
+## High quality plot used in the paper ##
+plot_trend_median_HQ <- plot_trend_median +
+  geom_point() +
+  scale_x_continuous(breaks = x_breaks,
+                     labels = x_labels) +
+  labs(x = "") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 # First Half
 plot_trend_median_H1 <- ggplot(int_median_US_bank_H1,
@@ -259,21 +261,22 @@ plot_trend_median_H2 <- ggplot(int_median_US_bank_H2,
               color = "black") +
   theme_bw()
 
-# int_median_US_bank_H1H2 <- int_median_US_bank %>%
-#   mutate("Period" = c(rep("H1", 49), rep("H2", 50)))
-# 
-# ggplot(int_median_US_bank_H1H2, aes(Qtr_num, Integration)) +
-#   geom_point() +
-#   geom_line() +
-#   geom_smooth(aes(group = Period), 
-#               method = "lm", 
-#               linetype = "dashed", 
-#               color = "black") +
-#   theme_bw() +
-#   scale_x_continuous(breaks = x_breaks, 
-#                      labels = x_labels) +
-#   labs(x = "Years", size = 14) +
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
+## Plot showing pre- versus post-2005 ##
+int_median_US_bank_H1H2 <- int_median_US_bank %>%
+  mutate("Period" = c(rep("H1", 49), rep("H2", 50)))
+
+ggplot(int_median_US_bank_H1H2, aes(Qtr_num, Integration)) +
+  geom_point() +
+  geom_line() +
+  geom_smooth(aes(group = Period),
+              method = "lm",
+              linetype = "dashed",
+              color = "black") +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks,
+                     labels = x_labels) +
+  labs(x = "Years", size = 14) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
 
 
 #######################
@@ -308,23 +311,25 @@ int_median_US_bank_systemic <- int_US_bank_long_2 %>%
 
 trend_median_US_bank_systemic <- func_trend_NW(int_median_US_bank_systemic)
 
+## Plot used in paper: Median systemic vs median US bank integration ##
+temp_temp <- int_median_US_bank %>%
+  tibble::add_column("Integration_sys" = int_median_US_bank_systemic$Integration)
+temp_temp_long <- temp_temp %>%
+  dplyr::rename("Median_Bank" = Integration,
+                "Median_Systemic_Bank" = Integration_sys) %>%
+  tidyr::gather(c(Median_Bank, Median_Systemic_Bank),
+                key = "Bank",
+                value = "Integration")
 
-# temp_temp <- int_median_US_bank %>%
-#   tibble::add_column("Integration_sys" = int_median_US_bank_systemic$Integration)
-# temp_temp_long <- temp_temp %>%
-#   dplyr::rename("Median_Bank" = Integration, 
-#                 "Median_Systemic_Bank" = Integration_sys) %>%
-#   tidyr::gather(c(Median_Bank, Median_Systemic_Bank), 
-#                 key = "Bank", 
-#                 value = "Integration")
-# ggplot(temp_temp_long, aes(Qtr_num, 
-#                            Integration)) +
-#   geom_point(aes(shape = Bank)) +
-#   geom_line(aes(linetype = Bank)) +
-#   theme_bw() +
-#   scale_x_continuous(breaks = x_breaks, labels = x_labels) +
-#   labs(y = "Median Integration", x = NULL, size = 16) +
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 14))
+plot_med_US_med_sys <- ggplot(temp_temp_long, aes(Qtr_num,
+                                                  Integration)) +
+  geom_point(aes(shape = Bank)) +
+  geom_line(aes(linetype = Bank)) +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+  labs(y = "Median Integration", x = NULL) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme(text = element_text(size = 20))
 
 
 # Linear trend for for the median systemic bank: pre and post 2005 #
@@ -410,7 +415,9 @@ boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
     geom_boxplot(na.rm = T) +
     theme_bw() + 
-    theme(axis.text.x=element_text(angle=60, hjust=1)) 
+    labs(x = NULL) +
+    theme(axis.text.x=element_text(angle=60, hjust=1)) +
+    theme(text = element_text(size = 20))
 
 # Quarterly Integration Boxplots
 
@@ -420,6 +427,27 @@ boxplot_int_qtrly <- ggplot(data = int_US_bank_long_2,
   # scale_x_continuous(breaks = seq(qtr_min, qtr_max, by = 8)) +
   theme_bw() + 
   theme(axis.text.x=element_text(angle=60, hjust=1)) 
+
+# Quarterly integration post 2005 boxplots
+
+
+# qtr_breaks <- seq(qtr_grid[52], qtr_grid[100], by = 4)
+# qtr_labels <- paste0(seq(2006, 2017, by = 1), "Q4")
+# scale_x_continuous(breaks = x_breaks, labels = x_labels) 
+
+temp_date <- as.factor(unique(int_US_bank_long_2$Date))
+temp_date_post_05 <- temp_date[-c(1:49)]
+
+
+temp_plot_post_05 <- ggplot(filter(int_US_bank_long_2, 
+                                   Date %in% temp_date_post_05),
+                            aes(x = Date, y = Integration)) +
+  geom_boxplot(na.rm = T) +
+  labs(x = NULL) +
+  theme_bw() + 
+  theme(axis.text.x=element_text(angle=60, hjust=1)) +
+  theme(text = element_text(size = 20))
+
 
 ###
 
@@ -555,8 +583,23 @@ trend_median_US_bank_crisis <- func_trend_NW_crisis(int_median_US_bank_crisis)
 # 
 # trend_median_US_bank_sys_crisis <- func_trend_NW_crisis(int_median_US_bank_sys_crisis)
 
+### Spread between median US and median US systemic bank
 
+int_spread_med <- int_median_US_bank %>%
+  dplyr::mutate("Integration_Med_Sys" = int_median_US_bank_systemic$Integration) %>%
+  dplyr::mutate("Spread" = Integration_Med_Sys - Integration)
 
+plot_spread <- ggplot(int_spread_med, aes(Qtr_num, Spread)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotdash") +
+  labs(x = NULL) +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  theme(text = element_text(size = 20))
+  
+  
 
 ###
 
