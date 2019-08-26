@@ -431,12 +431,18 @@ boxplot_int_qtrly <- ggplot(data = int_US_bank_long_2,
 # Quarterly integration post 2005 boxplots
 
 
-# qtr_breaks <- seq(qtr_grid[52], qtr_grid[100], by = 4)
-# qtr_labels <- paste0(seq(2006, 2017, by = 1), "Q4")
-# scale_x_continuous(breaks = x_breaks, labels = x_labels) 
-
 temp_date <- as.factor(unique(int_US_bank_long_2$Date))
 temp_date_post_05 <- temp_date[-c(1:49)]
+
+df_rect_crises <- data.frame(x_l = c(60, 70),
+                           x_r = c(66, 78),
+                           y_l = c(0, 0),
+                           y_r = c(1, 1))
+# 
+# df_rect_crises <- data.frame(x_l = c("2007Q4", "2010Q2"),
+#                              x_r = c("2009Q2", "2012Q2"),
+#                              y_l = c(0, 0),
+#                              y_r = c(1, 1))
 
 
 temp_plot_post_05 <- ggplot(filter(int_US_bank_long_2, 
@@ -448,6 +454,17 @@ temp_plot_post_05 <- ggplot(filter(int_US_bank_long_2,
   theme(axis.text.x=element_text(angle=60, hjust=1)) +
   theme(text = element_text(size = 20))
 
+###
+# temp_temp <- int_US_bank_long_2 %>%
+#   mutate('Qtr_num_2' = as.factor(Qtr_num))
+# 
+# geom_rect(data = df_rect_crises, 
+#           mapping = aes(xmin = x_l, 
+#                         xmax = x_r, 
+#                         ymin = y_l, 
+#                         ymax = y_r),
+#           color = "grey",
+#           alpha = 0.2) +
 
 ###
 
@@ -490,6 +507,14 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 
 #box_expl_eig <- boxplot(t(var_share_df[1:30, ]))
 #bar_expl_eig_med <- barplot(expl_power_eig_med[1:30])
+
+# boxplot(t(var_share_df[1:30, ]), 
+#         xlab = "Number of principal components",
+#         ylab = "Proportion of variance explained",
+#         cex.lab=1.5, 
+#         cex.axis=1.5, 
+#         cex.main=1.5, 
+#         cex.sub=1.5)
 
 ###################################
 ### Relation to Crises ############
@@ -599,7 +624,104 @@ plot_spread <- ggplot(int_spread_med, aes(Qtr_num, Spread)) +
   theme(axis.text.x = element_text(angle=60, hjust=1)) +
   theme(text = element_text(size = 20))
   
+##########################################################################
+############### Policy Implications ######################################
+##########################################################################
   
+int_US_bank_crises <- int_US_bank_long_3 %>%
+  dplyr::mutate("Crisis_Ind" = temp_GR_rep + temp_EZ_rep) %>%
+  dplyr::filter(Crisis_Ind == 1) %>%
+  dplyr::select(Integration)
+
+int_US_bank_no_crises <- int_US_bank_long_3 %>% 
+  dplyr::mutate("Crisis_Ind" = temp_GR_rep + temp_EZ_rep) %>%
+  dplyr::filter(Crisis_Ind == 0) %>%
+  dplyr::select(Integration)
+
+## Test for equality of (pooled) variances for crises vs non-crises
+## Note that we are winsorizing both samples before applying the test
+
+# sample x: from the crisis episodes
+temp_x <- int_US_bank_crises %>%
+  dplyr::select(Integration) %>%
+  dplyr::filter(!(is.na(.))) %>%
+  robustHD::winsorize(.)
+
+# sample y: from non crisis episodes
+temp_y <- int_US_bank_no_crises %>%
+  dplyr::select(Integration) %>%
+  dplyr::filter(!(is.na(.))) %>%
+  robustHD::winsorize(.)
+
+var_test_policy <- var.test(temp_x, temp_y, alternative = "less")
+
+## Test of equality of (pooled) means for crises vs non-crises
+# T test (parametric)
+mean_test_policy <- t.test(temp_x, temp_y, alternative = "greater")
+# (Mann-Whitney) Wilcoxon test (nonparametric)
+mean_test_policy_wilcox <- wilcox.test(temp_x, temp_y, alternative = "greater")
+# KS test: checking if cdf of crisis integration dominates noncrisis
+dist_test_ks <- ks.test(temp_x, temp_y, alternative = "less")
+
+###########################################################
+### Systemic vs ordinary banks in crises and non-crises ###
+###########################################################
+
+df_rect_crises <- data.frame(x_1 = c(60, 70),
+                             x_2 = c(66, 78),
+                             y_1 = c(0.3, 0.3),
+                             y_2 = c(1, 1))
+
+
+plot_med_US_med_sys_bar_rec <- ggplot() +
+  geom_rect(data = df_rect_crises,
+            mapping = aes(xmin = x_1, 
+                          xmax = x_2, 
+                          ymin = y_1, 
+                          ymax = y_2),
+            color = "grey",
+            alpha = 0.1) +
+  geom_line(data = temp_temp_long,
+            mapping = aes(x = Qtr_num, 
+                          y = Integration,
+                          linetype = Bank)) +
+  labs(x = NULL) +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  theme(text = element_text(size = 20))
+
+
+##############################################################
+## Plotting medians along with recession bars ################
+##############################################################
+
+temp <- int_spread_med %>%
+  dplyr::mutate("Crisis_Ind" = dummy_GR[-1] + dummy_EZ[-1])
+
+df_geom_rect <- data.frame(x_l = c(60, 70),
+                           x_r = c(66, 78),
+                           y_l = c(-.25, -.25),
+                           y_r = c(.25, .25))
+
+plot_spread_policy <- ggplot() + 
+  geom_line(data = temp, 
+            mapping = aes(x = Qtr_num, y = Spread)) +
+  geom_rect(data = df_geom_rect, 
+            mapping = aes(xmin = x_l, 
+                          xmax = x_r, 
+                          ymin = y_l, 
+                          ymax = y_r),
+            color = "grey",
+            alpha = 0.2) +
+  geom_hline(yintercept = 0, linetype = "dotdash") +
+  labs(x = NULL) +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  theme(text = element_text(size = 20))
+
+##############################################################
 
 ###
 
