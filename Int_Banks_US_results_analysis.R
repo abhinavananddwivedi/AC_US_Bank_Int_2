@@ -516,6 +516,28 @@ expl_power_eig_med <- apply(var_share_df, 1, func_med)
 #         cex.main=1.5, 
 #         cex.sub=1.5)
 
+var_share_t <- t(var_share_df) %>%
+  tibble::as_tibble() %>%
+  dplyr::select(V1:V30)
+
+colnames(var_share_t) <- paste0("PC", 1:30)
+
+var_share_long <- var_share_t %>%
+  tibble::add_column("Qtr_num" = 1:100) %>%
+  tidyr::gather(., PC1:PC30, key = "PC", value = "Proportion")
+
+plot_pc <- ggplot() +
+  geom_line(data = filter(var_share_long, PC %in% paste0("PC", 1:5)),
+            mapping = aes(x = Qtr_num, 
+                          y = Proportion, 
+                          linetype = PC)) +
+  xlab(NULL) +
+  ylab("Proportion of variance explained") +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, labels = x_labels) +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  theme(text = element_text(size = 20))
+
 ###################################
 ### Relation to Crises ############
 ###################################
