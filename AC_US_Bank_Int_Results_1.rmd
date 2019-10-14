@@ -54,17 +54,19 @@ source('Int_Banks_US_panel_estimation.R', echo = F)
 
 # Further Tests to Do:
 
-# 1. Check if time fixed effects exist. If not we can justify.
-# 8. WHY does PCA capture integration? Improve Puk and Roll's answer.
-# 10. Correlation between quarterly integration and quarterly returns?
-# 11. How do factor loadings evolve? (Brennan question)
-# 22. Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives, bank beta, SRISK
-# 23. Report formal p values for tests: fixed effect; fixed vs random effect
-# 24. Unit root test for integration?
-# 25. PC explanatory proportion quarterly plot
-# 26. One general comment Is that you can do a little bit more to motivate the importance of your question. For example, can you find anecdotes from the business press that indicate that this is an important issue?
-#29. fit distributions for yearly/quarterly cross-sectional integration
-#30. test: volatility of systemic bank's integration is much higher
+# Check if time fixed effects exist. If not we can justify.
+# WHY does PCA capture integration? Improve Puk and Roll's answer.
+# Correlation between quarterly integration and quarterly returns?
+# How do factor loadings evolve? (Brennan question)
+# Expl variables: number of branches, fed funds rate, factor loading signs, non-deposit financing, time fixed effects, use of derivatives, bank beta, SRISK
+# Unit root test for integration?
+# Fit distributions for yearly/quarterly cross-sectional integration
+
+
+# Claim: Post Dodd-Frank (Q3 2010) capital quality of systemic improves...
+# ... but the trend of increasing exposure to common factors doesn't
+
+
 
 ```
 

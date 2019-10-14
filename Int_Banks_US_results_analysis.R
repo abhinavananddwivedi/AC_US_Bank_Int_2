@@ -315,9 +315,9 @@ trend_median_US_bank_systemic <- func_trend_NW(int_median_US_bank_systemic)
 temp_temp <- int_median_US_bank %>%
   tibble::add_column("Integration_sys" = int_median_US_bank_systemic$Integration)
 temp_temp_long <- temp_temp %>%
-  dplyr::rename("Median_Bank" = Integration,
-                "Median_Systemic_Bank" = Integration_sys) %>%
-  tidyr::gather(c(Median_Bank, Median_Systemic_Bank),
+  dplyr::rename("Median Bank" = Integration,
+                "Median Systemic Bank" = Integration_sys) %>%
+  tidyr::gather(c(`Median Bank`, `Median Systemic Bank`),
                 key = "Bank",
                 value = "Integration")
 
@@ -413,7 +413,7 @@ data_boxplot <- int_US_bank_long %>%
 
 boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
-    geom_boxplot(na.rm = T) +
+    geom_boxplot(na.rm = T, outlier.shape = NA) +
     theme_bw() + 
     labs(x = NULL) +
     theme(axis.text.x=element_text(angle=60, hjust=1)) +
@@ -537,6 +537,7 @@ plot_pc <- ggplot() +
   scale_x_continuous(breaks = x_breaks, labels = x_labels) +
   theme(axis.text.x = element_text(angle=60, hjust=1)) +
   theme(text = element_text(size = 20))
+
 
 ###################################
 ### Relation to Crises ############
@@ -713,6 +714,99 @@ plot_med_US_med_sys_bar_rec <- ggplot() +
   theme(axis.text.x = element_text(angle=60, hjust=1)) +
   theme(text = element_text(size = 20))
 
+### Descriptive statistics based on crises vs normal periods ###
+
+# int_US_bank_long_crises <- int_US_bank_long_3 %>%
+#   dplyr::filter(GR == 1 | EZ == 1)
+
+int_stat_crises <- int_US_bank_long_3 %>%
+  dplyr::filter(GR == 1 | EZ == 1) %>%
+  dplyr::summarise(avg = mean(Integration, na.rm = T),
+                   med = median(Integration, na.rm = T),
+                   std = sd(Integration, na.rm = T),
+                   iqr = IQR(Integration, na.rm = T)
+                   )
+
+int_stat_no_crises <- int_US_bank_long_3 %>%
+  dplyr::filter(GR == 0 & EZ == 0) %>%
+  dplyr::summarise(avg = mean(Integration, na.rm = T),
+                   med = median(Integration, na.rm = T),
+                   std = sd(Integration, na.rm = T),
+                   iqr = IQR(Integration, na.rm = T)
+                   )
+# 
+# ind_crisis <- dummy_GR + dummy_EZ
+# PC_crises <- var_share_t[ind_crisis, c(1,2)]
+# PC_no_crises <- var_share_t[-c(ind_crisis), c(1,2)]
+
+########################################################
+###### policy implications based on PC during crises ###
+########################################################
+
+ind_crises <- c(seq(60, 66, 1), seq(70, 78, 1))
+
+# PC_crises_long <- var_share_long %>%
+#   dplyr::filter(PC %in% c('PC1', 'PC2')) %>%
+#   dplyr::filter(Qtr_num %in% ind_crises)
+# 
+# 
+# PC_no_crises_long <- var_share_long %>%
+#   dplyr::filter(PC %in% c('PC1', 'PC2')) %>%
+#   dplyr::filter(!(Qtr_num %in% ind_crises))
+
+# Difference between PC1 and PC2's proportion of variance
+PC_diff_long <- var_share_t %>%
+  dplyr::select(c(PC1, PC2)) %>%
+  dplyr::mutate(PC_diff = PC2 - PC1) %>%
+  tibble::add_column("Qtr_num" = 1:100) %>%
+  dplyr::select(-c(PC1, PC2)) %>%
+  tidyr::gather(., PC_diff, 
+                key = "PC", 
+                value = "Proportion")
+
+PC_diff_crises <- PC_diff_long %>%
+  dplyr::filter(Qtr_num %in% ind_crises)
+
+test_PC_x <- PC_diff_crises$Proportion #crises
+test_PC_y <- PC_diff_long %>%
+  dplyr::filter(!(Qtr_num %in% ind_crises)) %>%
+  dplyr::select(Proportion)
+
+## Test of equality of means for crises vs non-crises
+# T test (parametric)
+mean_test_policy_PC <- t.test(test_PC_x, 
+                              test_PC_y$Proportion, 
+                              alternative = "less")
+# (Mann-Whitney) Wilcoxon test (nonparametric)
+mean_test_policy_wilcox_PC <- wilcox.test(test_PC_x, 
+                                          test_PC_y$Proportion, 
+                                          alternative = "less")
+# KS test: checking if cdf of crisis integration dominates noncrisis
+dist_test_ks_PC <- ks.test(test_PC_x, 
+                        test_PC_y$Proportion, 
+                        alternative = "greater")
+
+### PC1 is abnormally high during crises ###
+
+var_PC1_long <- var_share_t %>%
+  dplyr::select(PC1) %>%
+  tibble::add_column("Qtr_num" = 1:100) %>%
+  tidyr::gather(., PC1, 
+                key = "PC", 
+                value = "Proportion")
+
+var_PC1_long_crises <- var_PC1_long %>%
+  dplyr::filter(Qtr_num %in% ind_crises) %>%
+  dplyr::select(Proportion)
+
+test_PC1_x <- var_PC1_long_crises$Proportion
+test_PC1_y <- var_PC1_long %>%
+  dplyr::filter(!(Qtr_num %in% ind_crises)) %>%
+  dplyr::select(Proportion)
+
+mean_test_policy_PC1 <- t.test(test_PC1_x, 
+                              test_PC1_y$Proportion, 
+                              alternative = "greater")
 
 ##############################################################
 ## Plotting medians along with recession bars ################
@@ -744,6 +838,8 @@ plot_spread_policy <- ggplot() +
   theme(text = element_text(size = 20))
 
 ##############################################################
+
+
 
 ###
 
