@@ -162,10 +162,10 @@ panel_est_pooled <- plm::plm(formula = formula_full,
 ### Testing Dodd-Frank's effects #############################
 ##############################################################
 
-# Attach dodd frank dummy: qtrs 70--100
+# Attach dodd frank dummy: qtrs 71--100
 panel_US_dodd_frank <- panel_US_bank_int %>% 
-  dplyr::mutate(dodd_frank = case_when(Qtr_num >= 70 ~ 1, 
-                                       Qtr_num < 70 ~ 0)) %>%
+  dplyr::mutate(dodd_frank = case_when(Qtr_num >= 71 ~ 1, 
+                                       Qtr_num < 71 ~ 0)) %>%
   dplyr::select(Banks, Date, Qtr_num, 
                 Integration, T1_T2_ratio, dodd_frank)
 
@@ -176,40 +176,43 @@ panel_sys_med_T1T2_df <- panel_US_dodd_frank %>%
   dplyr::group_by(Qtr_num) %>%
   dplyr::summarise(med_T1T2 = median(T1_T2_ratio, na.rm = T))
 
-# Plotting
+# Plotting median sytemic bank's T1 T2 ratios
 plot_sys_med_T1T2_df <- ggplot(panel_sys_med_T1T2_df, 
                                aes(Qtr_num, med_T1T2)) +
   geom_point() +
   geom_line() +
-  geom_vline(xintercept = 70, linetype = 'dotdash') +
+  geom_vline(xintercept = 71, linetype = 'twodash') +
+  geom_vline(xintercept = 63, linetype = 'dashed') +
   theme_bw() +
-  scale_x_continuous(breaks = x_breaks,
+  scale_x_continuous(breaks = x_breaks, #x_breaks and x_labesl from ...analysis.R
                      labels = x_labels) +
-  labs(x = "Years", size = 14) +
-  labs(y = "Median systemic bank's combined tier 1 and 2 capital ratio", size = 12) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12))
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 16)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  labs(x = NULL) +
+  labs(y = "Median systemic bank's combined tier 1 and 2 capital ratio") +
+  theme(axis.title.y = element_text(size = 18))
 
-  
+# 
 
 ## Integration levels pre and post Dodd-Frank ##
 
 # Post Dodd Frank
-stat_sys_int_post_df <- T1_T2_sys_post_df %>%
-  dplyr::select(Banks, Integration) %>%
-  dplyr::group_by(Banks) %>%
-  dplyr::summarise(mean_int_post_df = mean(Integration, na.rm = T),
-                   median_int_post_df = median(Integration, na.rm = T),
-                   sd_int_post_df = sd(Integration, na.rm = T),
-                   iqr_int_post_df = IQR(Integration, na.rm = T))
-   
-## Pre Dodd Frank
-stat_sys_int_pre_df <- T1_T2_sys_pre_df %>%
-  dplyr::select(Banks, Integration) %>%
-  dplyr::group_by(Banks) %>%
-  dplyr::summarise(mean_int_pre_df = mean(Integration, na.rm = T),
-                   median_int_pre_df = median(Integration, na.rm = T),
-                   sd_int_pre_df = sd(Integration, na.rm = T),
-                   iqr_int_pre_df = IQR(Integration, na.rm = T))
+# stat_sys_int_post_df <- T1_T2_sys_post_df %>%
+#   dplyr::select(Banks, Integration) %>%
+#   dplyr::group_by(Banks) %>%
+#   dplyr::summarise(mean_int_post_df = mean(Integration, na.rm = T),
+#                    median_int_post_df = median(Integration, na.rm = T),
+#                    sd_int_post_df = sd(Integration, na.rm = T),
+#                    iqr_int_post_df = IQR(Integration, na.rm = T))
+#    
+# ## Pre Dodd Frank
+# stat_sys_int_pre_df <- T1_T2_sys_pre_df %>%
+#   dplyr::select(Banks, Integration) %>%
+#   dplyr::group_by(Banks) %>%
+#   dplyr::summarise(mean_int_pre_df = mean(Integration, na.rm = T),
+#                    median_int_pre_df = median(Integration, na.rm = T),
+#                    sd_int_pre_df = sd(Integration, na.rm = T),
+#                    iqr_int_pre_df = IQR(Integration, na.rm = T))
 
 #############################################################################
 
