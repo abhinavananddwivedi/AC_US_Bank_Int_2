@@ -166,55 +166,143 @@ panel_est_pooled <- plm::plm(formula = formula_full,
 panel_US_dodd_frank <- panel_US_bank_int %>% 
   dplyr::mutate(dodd_frank = case_when(Qtr_num >= 71 ~ 1, 
                                        Qtr_num < 71 ~ 0)) %>%
-  dplyr::select(Banks, Date, Qtr_num, 
-                Integration, T1_T2_ratio, dodd_frank)
+  dplyr::select(Banks, Qtr_num, Integration, 
+                T1_T2_ratio, com_eq_ratio, dodd_frank)
 
-# Median systemic bank's T1T2
-panel_sys_med_T1T2_df <- panel_US_dodd_frank %>%
-  dplyr::select(Banks, Qtr_num, T1_T2_ratio) %>%
+# Median systemic bank time series
+panel_sys_med_dodd_frank <- panel_US_dodd_frank %>%
   dplyr::filter(Banks %in% name_systemic) %>%
   dplyr::group_by(Qtr_num) %>%
-  dplyr::summarise(med_T1T2 = median(T1_T2_ratio, na.rm = T))
+  dplyr::summarise(med_T1T2 = median(T1_T2_ratio, na.rm = T),
+                   med_com_eq = median(com_eq_ratio, na.rm = T),
+                   med_integ = median(Integration, na.rm = T))
 
-# Plotting median sytemic bank's T1 T2 ratios
-plot_sys_med_T1T2_df <- ggplot(panel_sys_med_T1T2_df, 
+## Plotting median sytemic bank's T1 T2 ratios ##
+plot_sys_med_T1T2_df <- ggplot(panel_sys_med_dodd_frank, 
                                aes(Qtr_num, med_T1T2)) +
   geom_point() +
   geom_line() +
   geom_vline(xintercept = 71, linetype = 'twodash') +
   geom_vline(xintercept = 63, linetype = 'dashed') +
+  labs(y = "Median systemic bank's combined tier 1 and 2 capital ratio") +
   theme_bw() +
   scale_x_continuous(breaks = x_breaks, #x_breaks and x_labesl from ...analysis.R
                      labels = x_labels) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 16)) +
   theme(axis.text.y = element_text(size = 18)) +
   labs(x = NULL) +
-  labs(y = "Median systemic bank's combined tier 1 and 2 capital ratio") +
   theme(axis.title.y = element_text(size = 18))
+#################################################
 
-# 
+## Plotting median sytemic bank's common equity ratio ##
+plot_sys_med_com_eq_df <- ggplot(panel_sys_med_dodd_frank, 
+                               aes(Qtr_num, med_com_eq)) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = 71, linetype = 'twodash') +
+  geom_vline(xintercept = 65, linetype = 'dashed') +
+  labs(y = "Median systemic bank's common equity ratio") +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, #x_breaks and x_labesl from ...analysis.R
+                     labels = x_labels) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 16)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  labs(x = NULL) +
+  theme(axis.title.y = element_text(size = 18))
+########################################################
 
-## Integration levels pre and post Dodd-Frank ##
+## Plotting median sytemic bank's integration ##
+plot_sys_med_int_df <- ggplot(panel_sys_med_dodd_frank, 
+                                 aes(Qtr_num, med_integ)) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = 71, linetype = 'twodash') +
+  # geom_vline(xintercept = 65, linetype = 'dashed') +
+  labs(y = "Median systemic bank's integration") +
+  theme_bw() +
+  scale_x_continuous(breaks = x_breaks, #x_breaks and x_labesl from ...analysis.R
+                     labels = x_labels) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 16)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  labs(x = NULL) +
+  theme(axis.title.y = element_text(size = 18))
+######################################################## 
 
-# Post Dodd Frank
-# stat_sys_int_post_df <- T1_T2_sys_post_df %>%
-#   dplyr::select(Banks, Integration) %>%
-#   dplyr::group_by(Banks) %>%
-#   dplyr::summarise(mean_int_post_df = mean(Integration, na.rm = T),
-#                    median_int_post_df = median(Integration, na.rm = T),
-#                    sd_int_post_df = sd(Integration, na.rm = T),
-#                    iqr_int_post_df = IQR(Integration, na.rm = T))
-#    
-# ## Pre Dodd Frank
-# stat_sys_int_pre_df <- T1_T2_sys_pre_df %>%
-#   dplyr::select(Banks, Integration) %>%
-#   dplyr::group_by(Banks) %>%
-#   dplyr::summarise(mean_int_pre_df = mean(Integration, na.rm = T),
-#                    median_int_pre_df = median(Integration, na.rm = T),
-#                    sd_int_pre_df = sd(Integration, na.rm = T),
-#                    iqr_int_pre_df = IQR(Integration, na.rm = T))
+## Systemic bank-wise summary stats of T1 T2, com eq and integ ##
+stat_sys_pre_dodd_frank <- panel_US_dodd_frank %>%
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::group_by(Banks) %>%
+  dplyr::filter(dodd_frank == 0) %>%
+  dplyr::summarise(med_T1T2 = median(T1_T2_ratio, na.rm = T),
+                   med_com_eq = median(com_eq_ratio, na.rm = T),
+                   med_integ = median(Integration, na.rm = T))
 
-#############################################################################
+stat_sys_post_dodd_frank <- panel_US_dodd_frank %>%
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::group_by(Banks) %>%
+  dplyr::filter(dodd_frank == 1) %>%
+  dplyr::summarise(med_T1T2 = median(T1_T2_ratio, na.rm = T),
+                   med_com_eq = median(com_eq_ratio, na.rm = T),
+                   med_integ = median(Integration, na.rm = T))
+
+#################################################################
+
+## Testing for differences in means and medians pre and post Dodd Frank ##
+
+# Tier 1 and 2 ratio combined
+pre_dodd_frank_T1T2 <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 0) %>%
+  dplyr::select(T1_T2_ratio) %>%
+  na.omit()
+post_dodd_frank_T1T2 <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 1) %>%
+  dplyr::select(T1_T2_ratio) %>%
+  na.omit()
+mean_test_dodd_frank_T1T2 <- t.test(pre_dodd_frank_T1T2$T1_T2_ratio,
+                                    post_dodd_frank_T1T2$T1_T2_ratio,
+                                    alternative = "less")
+median_test_dodd_frank_T1T2_wilcox <- wilcox.test(pre_dodd_frank_T1T2$T1_T2_ratio,
+                                                  post_dodd_frank_T1T2$T1_T2_ratio,
+                                                  alternative = "less")
+
+# Common equity ratio
+pre_dodd_frank_com_eq <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 0) %>%
+  dplyr::select(com_eq_ratio) %>%
+  na.omit()
+post_dodd_frank_com_eq <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 1) %>%
+  dplyr::select(com_eq_ratio) %>%
+  na.omit()
+mean_test_dodd_frank_com_eq <- t.test(pre_dodd_frank_com_eq$com_eq_ratio,
+                                    post_dodd_frank_com_eq$com_eq_ratio,
+                                    alternative = "less")
+median_test_dodd_frank_com_eq_wilcox <- wilcox.test(pre_dodd_frank_com_eq$com_eq_ratio,
+                                                  post_dodd_frank_com_eq$com_eq_ratio,
+                                                  alternative = "less")
+
+# Integration
+pre_dodd_frank_integ <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 0) %>%
+  dplyr::select(Integration) %>%
+  na.omit()
+post_dodd_frank_integ <- panel_US_dodd_frank %>% 
+  dplyr::filter(Banks %in% name_systemic) %>%
+  dplyr::filter(dodd_frank == 1) %>%
+  dplyr::select(Integration) %>%
+  na.omit()
+mean_test_dodd_frank_integ <- t.test(pre_dodd_frank_integ$Integration,
+                                      post_dodd_frank_integ$Integration,
+                                      alternative = "less")
+median_test_dodd_frank_integ_wilcox <- wilcox.test(pre_dodd_frank_integ$Integration,
+                                                    post_dodd_frank_integ$Integration,
+                                                    alternative = "less")
+
 
 ###############################
 ## Testing for fixed effects ##
