@@ -413,6 +413,7 @@ data_boxplot <- int_US_bank_long %>%
 
 boxplot_int_yearly <- ggplot(data = data_boxplot %>% dplyr::group_by(Date),
                               mapping = aes(x = Date, y = Integration)) +
+    stat_boxplot(geom ='errorbar', width = 0.3) + 
     geom_boxplot(na.rm = T, outlier.shape = NA) +
     theme_bw() + 
     labs(x = NULL) +
